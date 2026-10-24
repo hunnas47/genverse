@@ -1,10 +1,22 @@
 import Phaser from "phaser";
 
+import { VENUES } from "@/data/venues";
 import { VENUE_MAP } from "@/data/venue-map";
+import type { GameEventBridge } from "@/game/event-bridge";
 import { canOccupyPosition } from "@/game/systems/collision-system";
+import type { VenueCategory } from "@/types/venue";
 
 const MAP_TEXTURE_KEY = "genm-venue-map";
 const MOBILE_BREAKPOINT = 640;
+
+const MARKER_COLORS: Record<VenueCategory, number> = {
+  stage: 0xf7c873,
+  expo: 0xe86a4a,
+  facility: 0x7bd3c8,
+  booth: 0x8fa7ff,
+};
+
+const MARKER_DEPTH = 5000;
 
 type MovementKeys = Record<
   "up" | "down" | "left" | "right",
@@ -23,11 +35,15 @@ export class BeachScene extends Phaser.Scene {
   private character?: Phaser.GameObjects.Container;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys?: MovementKeys;
+  private interactKey?: Phaser.Input.Keyboard.Key;
+  private enterKey?: Phaser.Input.Keyboard.Key;
   private movement = new Phaser.Math.Vector2();
   private walkTime = 0;
   private reducedMotion = false;
+  private nearbyVenueId: string | null = null;
+  private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
 
-  constructor(private readonly onReady?: () => void) {
+  constructor(private readonly bridge: GameEventBridge) {
     super({ key: "BeachScene" });
   }
 
@@ -43,6 +59,7 @@ export class BeachScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor("#0b6f8e");
 
     this.createMapBackground();
+    this.createVenueMarkers();
     this.createPlayer();
     this.setupInput();
     this.setupCamera();
@@ -52,7 +69,12 @@ export class BeachScene extends Phaser.Scene {
     window.addEventListener("blur", this.handleWindowBlur);
 
     this.handleResize(this.scale.gameSize);
-    this.onReady?.();
+
+    this.bridge.emit("game:ready", {
+      worldWidth: VENUE_MAP.world.width,
+      worldHeight: VENUE_MAP.world.height,
+    });
+    this.updateNearbyVenue();
   }
 
   update(_time: number, delta: number): void {
@@ -135,6 +157,8 @@ export class BeachScene extends Phaser.Scene {
       this.character.setY(0);
       this.character.setRotation(0);
     }
+
+    this.updateNearbyVenue();
   }
 
   private createMapBackground(): void {
@@ -176,6 +200,84 @@ export class BeachScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(1000);
   }
+
+  private createVenueMarkers(): void {
+    for (const venue of VENUES) {
+      if (!venue.mapPosition) {
+        continue;
+      }
+
+      const { x, y } = venue.mapPosition;
+      const color = MARKER_COLORS[venue.category];
+
+      const ring = this.add
+        .circle(x, y, 17)
+        .setStrokeStyle(2, 0xffffff, 0.9)
+        .setFillStyle(color, 0.16)
+        .setDepth(MARKER_DEPTH)
+        .setAlpha(0.32);
+
+      this.add
+        .circle(x, y, 7)
+        .setStrokeStyle(2, 0xffffff, 0.95)
+        .setFillStyle(color, 1)
+        .setDepth(MARKER_DEPTH + 1);
+
+      this.markerRings.set(venue.id, ring);
+    }
+  }
+
+  private updateNearbyVenue(): void {
+    if (!this.player) {
+      return;
+    }
+
+    let nearestVenueId: string | null = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (const venue of VENUES) {
+      if (!venue.mapPosition) {
+        continue;
+      }
+
+      const distance = Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        venue.mapPosition.x,
+        venue.mapPosition.y,
+      );
+
+      if (
+        distance <= venue.mapPosition.interactionRadius &&
+        distance < nearestDistance
+      ) {
+        nearestVenueId = venue.id;
+        nearestDistance = distance;
+      }
+    }
+
+    if (nearestVenueId === this.nearbyVenueId) {
+      return;
+    }
+
+    this.nearbyVenueId = nearestVenueId;
+    this.updateMarkerHighlights();
+    this.bridge.emit("venue:nearby", { venueId: nearestVenueId });
+  }
+
+  private updateMarkerHighlights(): void {
+    for (const [venueId, ring] of this.markerRings) {
+      const isNearby = venueId === this.nearbyVenueId;
+      ring.setAlpha(isNearby ? 1 : 0.32);
+      ring.setScale(isNearby ? 1.35 : 1);
+    }
+  }
+
+  private handleInteractKey = (): void => {
+    if (this.nearbyVenueId) {
+      this.bridge.emit("venue:interact", { venueId: this.nearbyVenueId });
+    }
+  };
 
   private createPlayer(): void {
     const { x, y } = VENUE_MAP.spawn;
@@ -225,6 +327,22 @@ export class BeachScene extends Phaser.Scene {
       left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, true),
       right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D, true),
     };
+    this.interactKey = keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.E,
+      true,
+    );
+    this.enterKey = keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER,
+      true,
+    );
+    this.interactKey.on(
+      Phaser.Input.Keyboard.Events.DOWN,
+      this.handleInteractKey,
+    );
+    this.enterKey.on(
+      Phaser.Input.Keyboard.Events.DOWN,
+      this.handleInteractKey,
+    );
 
     keyboard.addCapture([
       Phaser.Input.Keyboard.KeyCodes.UP,
@@ -235,6 +353,8 @@ export class BeachScene extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.A,
       Phaser.Input.Keyboard.KeyCodes.S,
       Phaser.Input.Keyboard.KeyCodes.D,
+      Phaser.Input.Keyboard.KeyCodes.E,
+      Phaser.Input.Keyboard.KeyCodes.ENTER,
     ]);
   }
 
@@ -272,5 +392,15 @@ export class BeachScene extends Phaser.Scene {
   private handleShutdown(): void {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     window.removeEventListener("blur", this.handleWindowBlur);
+    this.interactKey?.off(
+      Phaser.Input.Keyboard.Events.DOWN,
+      this.handleInteractKey,
+    );
+    this.enterKey?.off(
+      Phaser.Input.Keyboard.Events.DOWN,
+      this.handleInteractKey,
+    );
+    this.markerRings.clear();
+    this.nearbyVenueId = null;
   }
 }

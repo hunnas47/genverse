@@ -96,37 +96,40 @@ The supplied venue-map image is the geographic reference for the world. It shows
 - Multiple stages and activity zones.
 - Entrance, registration, parking, and other facilities.
 
-If the map image is copied into the repository, use this suggested location:
-
-`public/images/venue-map-original.png`
-
-This is a proposed path, not a claim that the file already exists. Check the repository before referencing it.
+The supplied no-legend map is stored at `public/images/GEN-M-venue-map.jpg` and is used as the current game background.
 
 ## Venue Legend from the Supplied Map
 
-| ID | Label in supplied map | Initial interpretation |
-|---|---|---|
-| S1 | Main Stage | Main stage |
-| S2 | GEN M Literature Fest Stage | Literature stage |
-| S3 | GEN M Lab | GEN M Lab |
-| S4 | GEN M Unplugged | Unplugged programme |
-| S5 | Herverse | Herverse area |
-| S6 | Balavedi | Children's programme area; verify official naming |
-| S7 | Noor Verse | Noor Verse |
-| A1 | Lost City Expo | Expo area |
-| A2 | Herverse | Verify relationship to S5 |
-| A3 | Edu Expo | Education expo |
-| S | Photo Booth | Photo booth |
-| O | GEN M Office | Office |
-| R | Registration | Registration |
-| E | Entrance | Entrance |
-| P | Parking | Parking |
-| B | Edu Booths | Educational booths |
-| C | Unconference Spaces | Informal discussion areas |
+Official venue data was verified from `https://www.genm.in/venues` on 2026-10-24. Canonical stage IDs S1–S7 and their names are now authoritative. Map positions remain approximate and calibrated from the supplied artwork.
 
-**Data-quality warning:** The graphic appears to use both S5 and A2 for a Herverse label. Some names may differ from the official website. These are observations from the supplied graphic, not verified official facts. Compare the graphic with official venue pages and resolve canonical IDs and labels before implementation. Never silently invent a mapping.
+| ID | Official name | Official days | Status |
+|---|---|---|---|
+| S1 | Mega Muslim Students Conference | 15 Nov 2026 | Official |
+| S2 | GEN M Literature Fest Stage | 13–15 Nov 2026 | Official |
+| S3 | GEN M lab | 14–15 Nov 2026 | Official |
+| S4 | GEN M UNPLUGGED | 14 Nov 2026 | Official |
+| S5 | HERVERSE | 14–15 Nov 2026 | Official |
+| S6 | KIDZVERSE | 14–15 Nov 2026 | Official |
+| S7 | NOORVERSE | 14–15 Nov 2026 | Official; map location to be announced |
+| A1 | Lost City Expo | — | Map label, provisional |
+| A2 | Herverse area label | — | Not a separate venue; associated with S5 |
+| A3 | Edu Expo | — | Map label, provisional |
+| S | Photo Booth | — | Map label, provisional |
+| O | GEN M Office | — | Map label, provisional |
+| R | Registration | — | Map label, provisional |
+| E | Entrance | — | Map label, provisional |
+| P | Parking | — | Map label, provisional |
+| B | Edu Booths | — | Map label, provisional |
+| C | Unconference Spaces | — | Map label, provisional |
 
-The graphic identifies seven primary stages, S1–S7. Other facilities and expo areas should also be discoverable, but they may not have sessions.
+**Data-quality resolution (2026-10-24):**
+
+- Official stage names replace the earlier interpretations. For example, S1 is the Mega Muslim Students Conference, S3 is GEN M lab, S5 is HERVERSE, S6 is KIDZVERSE, and S7 is NOORVERSE.
+- The official venue list has no A2 entry. A2 is treated as an area label associated with S5 (Herverse), not a separate canonical venue.
+- The official S7 page says "Map location to be announced." S7 therefore has no marker in the current build.
+- Map-only facility and expo labels are stored as `verification: "supplied-map"` in `src/data/venues.ts` and are not presented as official venue facts.
+
+The graphic identifies seven primary stages, S1–S7. Other facilities and expo areas are discoverable on the map but may not have sessions.
 
 ## Map-Art Direction
 
@@ -707,20 +710,20 @@ The supplied map should guide geography and location placement. Custom artwork m
 
 # 19. First Implementation Task
 
-After placing this reference file in the repository root, ask your chosen coding agent to implement only the first milestone.
+Milestones 1–3 are complete. Read `AGENTS.md` and this reference, inspect the repository, and implement the current milestone only. Do not bundle later milestones.
 
 Suggested prompt:
 
-> Read `GENM_EXPLORER_PROJECT_REFERENCE.md` and any relevant repository instructions. Inspect the repository. Implement Milestone 1 only: create a responsive `/explore` page with a client-only Phaser 3 game, a simple illustrated beach placeholder, a controllable player using WASD and arrow keys, camera following, world bounds, responsive resizing, and correct cleanup to prevent duplicate game instances. Do not implement the real map, session data, backend, or all venues yet. Run available lint, type-check, and production-build commands. Fix errors introduced by your changes and report files changed, checks actually run, and remaining issues.
+> Read `GENM_EXPLORER_PROJECT_REFERENCE.md` and `AGENTS.md`. Inspect the repository. Implement the current milestone only: the typed session browser, official session fixtures and validation, day/venue filters, session cards, and session-to-map linking. Do not invent session details, speakers, or times; use only verified official data and represent unknown fields as missing/TBD. Run `npm run lint`, `npx tsc --noEmit`, and `npm run build`. Fix errors introduced by your changes and report files changed, checks actually run, and remaining issues.
 
-After Milestone 1 works, proceed to the next milestone. Do not ask the agent to build the entire application in one pass.
+Proceed one milestone at a time. Do not ask the agent to build the entire application in one pass.
 
 # 20. Decisions Still Requiring Verification
 
-These are open questions, not established facts:
+These are open questions, not established facts. Item 2 was resolved on 2026-10-24.
 
-1. Exact coordinates and dimensions of all venue locations on the supplied map.
-2. Canonical official labels and the relationship between duplicate/overlapping labels such as S5 and A2.
+1. Exact coordinates and dimensions of all venue locations on the supplied map. Current anchors are approximate and calibrated from the artwork.
+2. Canonical official labels and duplicate/overlapping labels. Resolved for S1–S7 from `https://www.genm.in/venues`; A2 is treated as an area label associated with S5 (Herverse), and map-only facility labels remain provisional.
 3. The complete official session dataset and how it can be accessed reliably.
 4. Whether an officially supported public API or export exists.
 5. Whether session speakers, descriptions, or times remain unpublished.

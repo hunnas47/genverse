@@ -38,7 +38,7 @@ export function ExploreHud() {
           />
           Venue map
           <span className="text-white/35">/</span>
-          Collisions on
+          Interactions on
         </div>
       </header>
 
@@ -47,7 +47,7 @@ export function ExploreHud() {
           <p className="text-[9px] font-semibold tracking-[0.24em] text-[#f7c873] uppercase">
             Preview controls
           </p>
-          <p className="mt-1 text-sm font-medium">Walk the beach</p>
+          <p className="mt-1 text-sm font-medium">Explore the beach</p>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[11px] text-white/60">
             <Key>W</Key>
@@ -61,10 +61,16 @@ export function ExploreHud() {
             <Key>→</Key>
           </div>
 
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/60">
+            <Key>E</Key>
+            <span>or</span>
+            <Key>Enter</Key>
+            <span>view nearby venue</span>
+          </div>
+
           <p className="mt-2.5 max-w-xs text-[10px] leading-relaxed text-white/50 sm:text-[11px]">
-            Supplied venue map with approximate walkable boundaries. Venue
-            interactions, sessions, and touch controls arrive in later
-            milestones.
+            Approach a venue marker and press E or Enter to open its panel.
+            Sessions and touch controls arrive in later milestones.
           </p>
         </section>
 

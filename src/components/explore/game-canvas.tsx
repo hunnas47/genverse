@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type Phaser from "phaser";
+
+import { VenuePanel } from "@/components/explore/venue-panel";
+import { VenuePrompt } from "@/components/explore/venue-prompt";
+import { VENUES_BY_ID } from "@/data/venues";
+import { GameEventBridge } from "@/game/event-bridge";
 
 type GameStatus = "loading" | "ready" | "error";
 
@@ -10,6 +15,8 @@ export function GameCanvas() {
   const gameRef = useRef<Phaser.Game | null>(null);
   const [status, setStatus] = useState<GameStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [nearbyVenueId, setNearbyVenueId] = useState<string | null>(null);
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -17,8 +24,25 @@ export function GameCanvas() {
       return;
     }
     const container: HTMLDivElement = host;
+    const bridge = new GameEventBridge();
 
     let cancelled = false;
+
+    const unsubscribeReady = bridge.on("game:ready", () => {
+      if (!cancelled) {
+        setStatus("ready");
+      }
+    });
+    const unsubscribeNearby = bridge.on("venue:nearby", ({ venueId }) => {
+      if (!cancelled) {
+        setNearbyVenueId(venueId);
+      }
+    });
+    const unsubscribeInteract = bridge.on("venue:interact", ({ venueId }) => {
+      if (!cancelled) {
+        setSelectedVenueId(venueId);
+      }
+    });
 
     async function boot() {
       try {
@@ -29,11 +53,7 @@ export function GameCanvas() {
 
         const game = await createGame({
           parent: container,
-          onReady: () => {
-            if (!cancelled) {
-              setStatus("ready");
-            }
-          },
+          events: bridge,
         });
 
         if (cancelled) {
@@ -59,6 +79,11 @@ export function GameCanvas() {
 
     return () => {
       cancelled = true;
+      unsubscribeReady();
+      unsubscribeNearby();
+      unsubscribeInteract();
+      bridge.clear();
+
       const game = gameRef.current;
       gameRef.current = null;
       game?.destroy(true);
@@ -66,12 +91,24 @@ export function GameCanvas() {
     };
   }, []);
 
+  const nearbyVenue = nearbyVenueId
+    ? (VENUES_BY_ID.get(nearbyVenueId) ?? null)
+    : null;
+  const selectedVenue = selectedVenueId
+    ? (VENUES_BY_ID.get(selectedVenueId) ?? null)
+    : null;
+
+  const closeVenue = useCallback(() => {
+    setSelectedVenueId(null);
+    hostRef.current?.focus();
+  }, []);
+
   return (
     <div className="absolute inset-0">
       <div
         ref={hostRef}
         role="application"
-        aria-label="GEN M beach explorer preview. Walk with W, A, S, D or the arrow keys."
+        aria-label="GEN M beach explorer. Walk with W, A, S, D or the arrow keys. Press E or Enter to view a nearby venue."
         tabIndex={0}
         className="h-full w-full touch-none select-none outline-none [&>canvas]:block [&>canvas]:h-full [&>canvas]:w-full"
       />
@@ -107,6 +144,17 @@ export function GameCanvas() {
             </div>
           )}
         </div>
+      )}
+
+      {status === "ready" && nearbyVenue && !selectedVenue && (
+        <VenuePrompt
+          venue={nearbyVenue}
+          onOpen={() => setSelectedVenueId(nearbyVenue.id)}
+        />
+      )}
+
+      {selectedVenue && (
+        <VenuePanel venue={selectedVenue} onClose={closeVenue} />
       )}
     </div>
   );

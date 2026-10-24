@@ -5,8 +5,8 @@ import type { VenueMapConfig } from "@/types/map";
  *
  * World units match the source image pixels 1:1. Obstacle footprints are
  * approximate and were calibrated against the visible artwork only; they are
- * not canonical venue records. Venue identities will be added in the
- * interaction milestone after their positions and labels are verified.
+ * not canonical venue records. Venue identities and interaction anchors live
+ * in `src/data/venues.ts`.
  *
  * The no-legend image is used as the game background. The image already
  * contains venue labels, so no additional official data is asserted here.
