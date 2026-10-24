@@ -113,7 +113,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "A3",
     description: "Expo area shown on the supplied venue map.",
     category: "expo",
-    mapPosition: { x: 1200, y: 580, interactionRadius: 145 },
+    mapPosition: { x: 1188, y: 780, interactionRadius: 110 },
     verification: "supplied-map",
   },
   {
