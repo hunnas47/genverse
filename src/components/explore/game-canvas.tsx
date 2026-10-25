@@ -119,20 +119,20 @@ export function GameCanvas({
       />
 
       {status !== "ready" && (
-        <div className="absolute inset-0 grid place-items-center bg-[#0b6f8e] px-6">
+        <div className="absolute inset-0 grid place-items-center bg-brand-deep px-6">
           {status === "error" ? (
             <div
               role="alert"
-              className="w-full max-w-sm rounded-2xl border border-white/20 bg-[#0b2f36]/90 p-5 text-center text-white shadow-2xl"
+              className="w-full max-w-sm rounded-[2rem] border border-brand-deep/15 bg-cream p-6 text-center text-brand-deep shadow-lift"
             >
-              <p className="text-sm font-semibold">The beach did not load</p>
-              <p className="mt-2 text-xs leading-relaxed text-white/65">
+              <p className="text-lg font-medium">The beach did not load</p>
+              <p className="mt-2 text-xs leading-relaxed text-brand-deep/75">
                 {errorMessage ?? "An unexpected error stopped the game."}
               </p>
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="mt-4 rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#0b2f36] transition hover:bg-white/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="mt-5 inline-flex min-h-10 items-center justify-center rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 Try again
               </button>
@@ -141,9 +141,9 @@ export function GameCanvas({
             <div className="flex flex-col items-center gap-3 text-white">
               <span
                 aria-hidden="true"
-                className="size-8 rounded-full border-2 border-white/25 border-t-white motion-safe:animate-spin"
+                className="size-8 rounded-full border-2 border-lime/25 border-t-lime motion-safe:animate-spin"
               />
-              <p className="text-xs font-medium tracking-[0.22em] uppercase">
+              <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
                 Preparing the beach
               </p>
             </div>

@@ -11,11 +11,23 @@ import {
   PROGRAMME_DAYS,
   SESSIONS,
 } from "@/lib/programme";
+import { cn } from "@/lib/utils";
+
+function filterButtonClass(active: boolean): string {
+  return cn(
+    "min-h-10 rounded-full border px-3.5 py-2 font-display text-[11px] font-bold tracking-[0.06em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep",
+    active
+      ? "border-brand-deep bg-brand-deep text-lime"
+      : "border-brand-deep/15 bg-brand-deep/5 text-brand-deep/70 hover:border-brand-deep/30 hover:bg-brand-deep/10 hover:text-brand-deep",
+  );
+}
 
 export function SessionBrowser({
+  initialDayId,
   initialVenueId,
   initialSessionId,
 }: {
+  initialDayId?: string;
   initialVenueId?: string;
   initialSessionId?: string;
 }) {
@@ -28,8 +40,12 @@ export function SessionBrowser({
     SESSIONS.some((session) => session.venueId === initialVenueId)
       ? initialVenueId
       : "all");
+  const initialDay =
+    initialDayId && PROGRAMME_DAYS.some((day) => day.id === initialDayId)
+      ? initialDayId
+      : "all";
 
-  const [dayId, setDayId] = useState("all");
+  const [dayId, setDayId] = useState(initialDay);
   const [venueId, setVenueId] = useState(initialVenue);
   const [query, setQuery] = useState("");
 
@@ -99,11 +115,11 @@ export function SessionBrowser({
     <div>
       <section
         aria-label="Session filters"
-        className="rounded-3xl border border-[#0b2f36]/10 bg-white/85 p-4 shadow-sm backdrop-blur sm:p-5"
+        className="rounded-[2rem] border border-brand-deep/10 bg-lime p-4 text-brand-deep shadow-lift sm:p-6"
       >
-        <div className="grid gap-4 lg:grid-cols-[1fr_280px]">
+        <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
           <div>
-            <p className="text-[10px] font-bold tracking-[0.18em] text-[#0b2f36]/45 uppercase">
+            <p className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/75 uppercase">
               Day
             </p>
             <div
@@ -115,11 +131,7 @@ export function SessionBrowser({
                 type="button"
                 aria-pressed={dayId === "all"}
                 onClick={() => setDayId("all")}
-                className={
-                  dayId === "all"
-                    ? "min-h-10 rounded-full border border-[#0b2f36] bg-[#0b2f36] px-3.5 py-2 text-xs font-semibold text-white transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
-                    : "min-h-10 rounded-full border border-[#0b2f36]/15 bg-white px-3.5 py-2 text-xs font-semibold text-[#0b2f36]/70 transition hover:border-[#0b2f36]/30 hover:text-[#0b2f36] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
-                }
+                className={filterButtonClass(dayId === "all")}
               >
                 All days
               </button>
@@ -130,11 +142,7 @@ export function SessionBrowser({
                   type="button"
                   aria-pressed={dayId === day.id}
                   onClick={() => setDayId(day.id)}
-                  className={
-                    dayId === day.id
-                      ? "min-h-10 rounded-full border border-[#0b2f36] bg-[#0b2f36] px-3.5 py-2 text-xs font-semibold text-white transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
-                      : "min-h-10 rounded-full border border-[#0b2f36]/15 bg-white px-3.5 py-2 text-xs font-semibold text-[#0b2f36]/70 transition hover:border-[#0b2f36]/30 hover:text-[#0b2f36] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
-                  }
+                  className={filterButtonClass(dayId === day.id)}
                 >
                   {formatDayShort(day)}
                 </button>
@@ -146,7 +154,7 @@ export function SessionBrowser({
             <div>
               <label
                 htmlFor="session-venue-filter"
-                className="text-[10px] font-bold tracking-[0.18em] text-[#0b2f36]/45 uppercase"
+                className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/75 uppercase"
               >
                 Venue
               </label>
@@ -154,7 +162,7 @@ export function SessionBrowser({
                 id="session-venue-filter"
                 value={venueId}
                 onChange={(event) => setVenueId(event.target.value)}
-                className="mt-2 min-h-10 w-full rounded-xl border border-[#0b2f36]/15 bg-white px-3 py-2 text-sm text-[#0b2f36] shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+                className="mt-2 min-h-11 w-full rounded-2xl border border-brand-deep/15 bg-cream px-3 py-2 text-sm text-brand-deep shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 <option value="all">All venues</option>
                 {venuesWithSessions.map((venue) => (
@@ -168,7 +176,7 @@ export function SessionBrowser({
             <div>
               <label
                 htmlFor="session-search"
-                className="text-[10px] font-bold tracking-[0.18em] text-[#0b2f36]/45 uppercase"
+                className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/75 uppercase"
               >
                 Search
               </label>
@@ -179,7 +187,7 @@ export function SessionBrowser({
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#0b2f36]/35"
+                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-brand-deep/70"
                 >
                   <circle cx="11" cy="11" r="7" />
                   <path d="m20 20-3.5-3.5" />
@@ -192,15 +200,15 @@ export function SessionBrowser({
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Session, speaker, or venue"
                   suppressHydrationWarning
-                  className="min-h-10 w-full rounded-xl border border-[#0b2f36]/15 bg-white py-2 pr-3 pl-10 text-sm text-[#0b2f36] shadow-sm transition placeholder:text-[#0b2f36]/35 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+                  className="min-h-11 w-full rounded-2xl border border-brand-deep/15 bg-cream py-2 pr-3 pl-10 text-sm text-brand-deep shadow-sm transition placeholder:text-brand-deep/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#0b2f36]/10 pt-3">
-          <p role="status" className="text-xs text-[#0b2f36]/55">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-brand-deep/10 pt-4">
+          <p role="status" className="text-xs text-brand-deep/75">
             Showing {resultLabel} of {SESSIONS.length} · All times Asia/Kolkata
             (IST)
           </p>
@@ -208,7 +216,7 @@ export function SessionBrowser({
             <button
               type="button"
               onClick={clearFilters}
-              className="min-h-10 rounded-full px-2 text-xs font-semibold text-[#0b2f36]/60 underline decoration-[#0b2f36]/20 underline-offset-2 transition hover:text-[#0b2f36] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+              className="min-h-10 rounded-full px-2 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep/75 uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
               Clear filters
             </button>
@@ -217,26 +225,26 @@ export function SessionBrowser({
       </section>
 
       {groups.length > 0 ? (
-        <div className="mt-6 space-y-8">
+        <div className="mt-10 space-y-10">
           {groups.map((group) => (
             <section
               key={group.day.id}
               aria-labelledby={`session-day-${group.day.id}`}
             >
-              <div className="flex items-baseline justify-between gap-3 border-b border-[#0b2f36]/10 pb-2">
+              <div className="flex items-baseline justify-between gap-3 border-b border-white/15 pb-3">
                 <h2
                   id={`session-day-${group.day.id}`}
-                  className="text-sm font-bold tracking-[0.16em] text-[#0b2f36]/60 uppercase"
+                  className="font-display text-sm font-bold tracking-[0.18em] text-lime uppercase"
                 >
                   {group.day.displayDate}
                 </h2>
-                <span className="shrink-0 text-[11px] text-[#0b2f36]/40">
+                <span className="shrink-0 text-[11px] text-white/90">
                   {group.sessions.length}{" "}
                   {group.sessions.length === 1 ? "session" : "sessions"}
                 </span>
               </div>
 
-              <div className="mt-3 space-y-3">
+              <div className="mt-4 space-y-3">
                 {group.sessions.map((session) => (
                   <SessionCard
                     key={session.id}
@@ -249,17 +257,15 @@ export function SessionBrowser({
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-3xl border border-dashed border-[#0b2f36]/20 bg-white/60 px-5 py-10 text-center">
-          <p className="text-sm font-semibold text-[#0b2f36]">
-            No sessions match these filters.
-          </p>
-          <p className="mt-1 text-xs text-[#0b2f36]/55">
+        <div className="mt-10 rounded-[2rem] border border-dashed border-white/25 bg-brand-deep/25 px-5 py-12 text-center text-white">
+          <p className="text-lg font-medium">No sessions match these filters.</p>
+          <p className="mt-2 text-sm text-white/90">
             Try a different day, venue, or search term.
           </p>
           <button
             type="button"
             onClick={clearFilters}
-            className="mt-4 min-h-10 rounded-full bg-[#0b2f36] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#0b2f36]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-lime px-5 py-2.5 font-display text-xs font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             Clear filters
           </button>

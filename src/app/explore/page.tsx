@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 
 function ExploreLoading() {
   return (
-    <div className="absolute inset-0 grid place-items-center bg-[#0b6f8e] px-6">
+    <div className="absolute inset-0 grid place-items-center bg-brand-deep px-6">
       <div className="flex flex-col items-center gap-3 text-white">
         <span
           aria-hidden="true"
-          className="size-8 rounded-full border-2 border-white/25 border-t-white motion-safe:animate-spin"
+          className="size-8 rounded-full border-2 border-lime/25 border-t-lime motion-safe:animate-spin"
         />
-        <p className="text-xs font-medium tracking-[0.22em] uppercase">
+        <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
           Preparing the beach
         </p>
       </div>
@@ -33,7 +33,7 @@ export default function ExplorePage({
   searchParams: SearchParams;
 }) {
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-[#0b6f8e]">
+    <main className="relative h-dvh w-full overflow-hidden bg-brand-deep">
       <Suspense fallback={<ExploreLoading />}>
         <ExplorePageContent searchParams={searchParams} />
       </Suspense>

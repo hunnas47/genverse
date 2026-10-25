@@ -20,7 +20,7 @@ Build an illustrated, top-down 2D beach world based on the supplied GEN M venue 
 
 Verified on 2026-10-25. Update this section when the project foundation changes.
 
-- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones through M4.
+- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones through M4 plus a genm.in-inspired design pass across the home page, programme, and explorer chrome.
 - Next.js `16.4.3` App Router, React `19.3.0`, TypeScript `strict`, ESLint 9 flat config.
 - Tailwind CSS v4 is wired through the `@tailwindcss/turbopack` loader in `next.config.ts`.
 - Phaser `4.2.1` and Shadcn UI tooling are installed. The installed Phaser major version is 4, despite older references to Phaser 3 in planning documents.
@@ -31,10 +31,13 @@ Verified on 2026-10-25. Update this section when the project foundation changes.
 - Official session and speaker fixtures are in `src/data/sessions.json` and `src/data/speakers.json`, extracted from `https://www.genm.in/sessions` and verified on 2026-10-25. `src/lib/programme.ts` validates venue, day, time, speaker, and status references at module load.
 - `/explore?venue=<id>` focuses a venue, moves the player to a nearby walkable point, and opens its panel. Venue panels list official sessions and link back to the programme.
 - Phaser and React communicate through the typed bridge in `src/game/events.ts` and `src/game/event-bridge.ts`.
-- Supplied map images live in `public/images/`. The no-legend `GEN-M-venue-map.jpg` is the current game background.
+- Supplied map images and the GEN M wordmark live in `public/images/`. The no-legend `GEN-M-venue-map.jpg` is the current game background.
+- Local fonts live in `src/app/fonts/`: Neoverse Sans (400/500), FKL Dhikk (300/400/600/700/900), and the GEN M wordmark is `public/images/genm-logo.png`. Anek Malayalam is loaded through `next/font/google` and applied to `lang="ml"` content.
+- The visual system uses deep indigo (`#2c2d6f`), brand periwinkle (`#5964ae`), lime (`#edf2b5`), cream (`#f7f3e8`), and lavender (`#dfe2f3`), with wave dividers and shared `SiteHeader`/`SiteFooter`/`ActionLink` components.
 - `GENM_EXPLORER_PROJECT_REFERENCE.md` is the primary product specification and takes precedence when it conflicts with this file.
 - **Not installed yet:** a test runner and any backend/database.
 - The home page is a branded landing page with entry points to the map and programme. Official session data is now in the repo; venue map labels remain provisional where marked `supplied-map`.
+- `/sessions?day=<id>` opens the programme with that day preselected; `?venue=<id>` and `?session=<id>` continue to deep-link the programme.
 - `next.config.ts` enables `cacheComponents`, `partialPrefetching`, and `experimental.agentFeedback`.
 - `next.config.ts` also allows the current LAN host in `allowedDevOrigins` so a phone can load dev assets; update the IP when the network changes.
 - Import alias: `@/*` maps to `src/*`.
@@ -47,6 +50,7 @@ Verified on 2026-10-25. Update this section when the project foundation changes.
 - Phaser 4 (installed) for the game world; the project reference still says Phaser 3
 - Tailwind CSS v4
 - Shadcn UI for accessible interface components
+- `next/font/local` for Neoverse Sans and FKL Dhikk; `next/font/google` for Anek Malayalam
 - Typed local data; official venue records are in TypeScript and the official programme/speaker fixtures are JSON
 - Git for version control
 
@@ -112,7 +116,7 @@ For each milestone: run `npm run lint` and `npx tsc --noEmit`; run `npm run buil
 
 ## Visual direction
 
-Use a polished illustrated beach environment, clear venue markers, readable typography, smooth movement, restrained animations, and a compact mobile interface. Respect `prefers-reduced-motion`, maintain readable contrast over the artwork, and keep touch targets comfortably sized. The map must remain usable at phone widths and in landscape.
+Use the genm.in-inspired system: Neoverse for editorial headings and body copy, FKL Dhikk for uppercase labels, buttons, and numerals, deep indigo/periwinkle/lime/cream surfaces, wave section transitions, rounded cards, and restrained motion. Keep the illustrated beach map and venue markers clear, respect `prefers-reduced-motion`, maintain readable contrast over the artwork, and keep touch targets comfortably sized. Text on brand surfaces uses high-opacity white/cream or deep indigo, and translucent cards stay dark enough to keep normal-text contrast. The map must remain usable at phone widths and in landscape.
 
 ## Milestone workflow
 
@@ -132,6 +136,7 @@ Build the playable map first, followed by movement, collisions, venue interactio
 - **M2 — Real map background:** supplied map fitted to world coordinates, calibrated collision geometry, sea/structure blocking, camera scaling. Done; venue anchors remain approximate to the artwork.
 - **M3 — Venue interactions:** canonical venue records, markers and interaction zones, proximity prompts, React venue panel, typed event bridge. Done. Official S1–S7 records are verified; map-only facilities are provisional; S7 has no marker because its official map location is to be announced.
 - **M4 — Session browser:** typed session models, local fixtures and validation, day/venue filters, session cards, session-to-map linking, official data research. Done. The official 60-session, 182-speaker programme is verified from `https://www.genm.in/sessions`; `/sessions` supports day, venue, and text filters, expandable details, and map deep links. S7 sessions show “Map location TBA” because the official location is unpublished.
+- **Design pass — genm.in-inspired UI:** local Neoverse/FKL Dhikk fonts, Anek Malayalam for Malayalam copy, shared site header/footer/action-link/wave components, restyled home, programme, and explorer HUD/panel. Done; M5 remains the next milestone.
 - **M5 — Navigation and mobile controls:** virtual joystick, tap-to-move, walkable pathfinding, minimap/directory, portrait and landscape polish.
 - **M6 — Polish and release:** artwork refinement, loading/error states, touch and keyboard accessibility, aspect-ratio testing, lifecycle checks, programme verification, deployment docs.
 

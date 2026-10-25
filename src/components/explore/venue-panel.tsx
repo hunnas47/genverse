@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight, MapPin, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
@@ -47,26 +48,26 @@ export function VenuePanel({
       aria-labelledby={titleId}
       className="pointer-events-none absolute inset-0 z-30"
     >
-      <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[min(70dvh,32rem)] overflow-y-auto overscroll-contain rounded-3xl border border-white/20 bg-[#0b2f36]/95 p-5 text-white shadow-2xl backdrop-blur-xl sm:inset-x-auto sm:top-24 sm:right-5 sm:bottom-auto sm:max-h-[calc(100dvh-12rem)] sm:w-[380px] sm:p-6">
+      <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[min(70dvh,32rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-brand-deep/15 bg-cream p-5 text-brand-deep shadow-lift sm:inset-x-auto sm:top-24 sm:right-5 sm:bottom-auto sm:max-h-[calc(100dvh-12rem)] sm:w-[400px] sm:p-6">
         <div
           aria-hidden="true"
-          className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20 sm:hidden"
+          className="mx-auto mb-4 h-1 w-10 rounded-full bg-brand-deep/20 sm:hidden"
         />
 
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-[#f7c873] px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-[#0b2f36] uppercase">
+              <span className="rounded-full bg-brand-deep px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase">
                 {VENUE_CATEGORY_LABELS[venue.category]}
               </span>
-              <span className="text-[10px] font-semibold tracking-[0.2em] text-white/45 uppercase">
+              <span className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
                 {venue.mapLabel}
               </span>
             </div>
 
             <h2
               id={titleId}
-              className="mt-3 text-xl font-semibold tracking-tight sm:text-2xl"
+              className="mt-3 text-balance text-xl leading-tight font-medium sm:text-2xl"
             >
               {venue.name}
             </h2>
@@ -77,62 +78,62 @@ export function VenuePanel({
             type="button"
             onClick={onClose}
             aria-label="Close venue details"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl text-white/70 transition hover:bg-white/20 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
-            <span aria-hidden="true">×</span>
+            <X aria-hidden="true" className="size-4" />
           </button>
         </div>
 
-        <p className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] leading-relaxed text-white/60">
+        <p className="mt-4 rounded-2xl border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/75">
           {venue.verification === "official"
             ? "Official venue information verified from the GEN M website."
             : "Label from the supplied venue map. Official details are not verified yet."}
         </p>
 
         {venue.description && (
-          <p className="mt-4 text-sm leading-relaxed text-white/75">
+          <p className="mt-4 text-sm leading-relaxed text-brand-deep/75">
             {venue.description}
           </p>
         )}
 
         {activeDays && (
           <div className="mt-4">
-            <p className="text-[9px] font-semibold tracking-[0.22em] text-[#f7c873] uppercase">
+            <p className="font-display text-[9px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
               Programme days
             </p>
-            <p className="mt-1 text-sm text-white/80">{activeDays}</p>
+            <p className="mt-1 text-sm text-brand-deep/80">{activeDays}</p>
           </div>
         )}
 
         {venue.note && (
-          <p className="mt-4 rounded-xl border border-[#f7c873]/20 bg-[#f7c873]/10 px-3 py-2 text-[11px] leading-relaxed text-[#f7c873]/85">
+          <p className="mt-4 rounded-2xl border border-brand/20 bg-brand/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/70">
             {venue.note}
           </p>
         )}
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-3.5">
+        <div className="mt-5 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[9px] font-semibold tracking-[0.22em] text-white/45 uppercase">
+            <p className="font-display text-[9px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
               Sessions
             </p>
             {sessions.length > 0 && (
-              <span className="text-[10px] font-semibold text-white/40">
+              <span className="font-display text-[10px] font-bold text-brand-deep/70">
                 {sessions.length}
               </span>
             )}
           </div>
 
           {sessions.length === 0 ? (
-            <p className="mt-1 text-xs leading-relaxed text-white/60">
+            <p className="mt-1 text-xs leading-relaxed text-brand-deep/75">
               {venue.verification === "official"
                 ? "No official sessions are listed for this venue."
                 : "This map facility does not have a published session programme."}
             </p>
           ) : (
-            <div className="mt-2 space-y-3">
+            <div className="mt-2 space-y-4">
               {sessionGroups.map((group) => (
                 <div key={group.day.id}>
-                  <p className="text-[10px] font-semibold text-[#f7c873]/80">
+                  <p className="font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
                     {group.day.displayDate}
                   </p>
                   <ul className="mt-1 space-y-1">
@@ -148,21 +149,21 @@ export function VenuePanel({
                         <li key={session.id}>
                           <Link
                             href={`/sessions?session=${session.id}`}
-                            className="group -mx-2 block rounded-lg px-2 py-1.5 transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+                            className="group -mx-2 block rounded-xl px-2 py-1.5 transition hover:bg-brand-deep/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
                           >
-                            <span className="block text-[10px] font-semibold text-white/45">
+                            <span className="block font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
                               {formatSessionTimeRange(session)}
                             </span>
                             <span
                               lang={
                                 isMalayalam(session.title) ? "ml" : undefined
                               }
-                              className="block break-words text-xs font-medium leading-snug text-white/85 group-hover:text-white"
+                              className="mt-0.5 block text-xs leading-snug font-medium text-brand-deep/85 group-hover:text-brand-deep"
                             >
                               {session.title}
                             </span>
                             {speakers.length > 0 && (
-                              <span className="mt-0.5 block truncate text-[10px] text-white/40">
+                              <span className="mt-0.5 block truncate text-[10px] text-brand-deep/70">
                                 {summary}
                                 {remaining > 0 ? ` +${remaining} more` : ""}
                               </span>
@@ -177,10 +178,10 @@ export function VenuePanel({
 
               <Link
                 href={`/sessions?venue=${venue.id}`}
-                className="inline-flex min-h-10 items-center gap-1.5 text-[11px] font-semibold text-[#f7c873] transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+                className="inline-flex min-h-10 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 View full programme
-                <span aria-hidden="true">→</span>
+                <ArrowUpRight aria-hidden="true" className="size-3.5" />
               </Link>
             </div>
           )}
@@ -191,14 +192,15 @@ export function VenuePanel({
             href={venue.officialUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold text-[#0b2f36] transition hover:bg-white/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+            className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             Official venue page
-            <span aria-hidden="true">↗</span>
+            <ArrowUpRight aria-hidden="true" className="size-3.5" />
           </a>
         )}
 
-        <p className="mt-4 text-[10px] leading-relaxed text-white/35">
+        <p className="mt-4 flex items-start gap-1.5 text-[10px] leading-relaxed text-brand-deep/70">
+          <MapPin aria-hidden="true" className="mt-0.5 size-3 shrink-0" />
           {venue.mapPosition
             ? "Map position is approximate and calibrated from the supplied artwork."
             : "This venue has no map marker yet."}

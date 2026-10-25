@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import { useState } from "react";
 
 import { VENUES_BY_ID } from "@/data/venues";
@@ -52,23 +53,23 @@ export function SessionCard({
   return (
     <article
       aria-labelledby={titleId}
-      className="rounded-2xl border border-[#0b2f36]/10 bg-white p-4 shadow-sm transition hover:border-[#0b2f36]/20 hover:shadow-md sm:p-5"
+      className="rounded-3xl border border-white/10 bg-cream p-4 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift sm:p-5"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-[#0b2f36] px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-white uppercase">
+            <span className="rounded-full bg-brand-deep px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase">
               {venue?.mapLabel ?? session.venueId}
             </span>
-            <span className="text-[11px] font-semibold text-[#0b2f36]/55">
+            <span className="text-[11px] font-semibold text-brand-deep/70">
               {venue?.name ?? "Venue to be announced"}
             </span>
             {session.status !== "scheduled" && (
               <span
                 className={
                   session.status === "cancelled"
-                    ? "rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-red-700 uppercase"
-                    : "rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-amber-800 uppercase"
+                    ? "rounded-full bg-red-100 px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.1em] text-red-700 uppercase"
+                    : "rounded-full bg-amber-100 px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.1em] text-amber-800 uppercase"
                 }
               >
                 {statusLabel}
@@ -79,7 +80,7 @@ export function SessionCard({
           <h3
             id={titleId}
             lang={isMalayalam(session.title) ? "ml" : undefined}
-            className="mt-2 break-words text-lg font-semibold leading-snug text-[#0b2f36] text-balance sm:text-xl"
+            className="mt-3 text-balance text-lg leading-snug font-medium text-brand-deep sm:text-xl"
           >
             {session.title}
           </h3>
@@ -87,17 +88,17 @@ export function SessionCard({
           {session.subtitle && (
             <p
               lang={isMalayalam(session.subtitle) ? "ml" : undefined}
-              className="mt-1 break-words text-xs font-medium text-[#0b2f36]/55"
+              className="mt-1 text-xs font-medium text-brand-deep/70"
             >
               {session.subtitle}
             </p>
           )}
 
-          <p className="mt-1.5 text-xs font-semibold text-[#0b2f36]/55">
+          <p className="mt-2 font-display text-[11px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
             {formatSessionTimeRange(session)}
           </p>
 
-          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#0b2f36]/65">
+          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-brand-deep/75">
             {speakerSummary(session)}
           </p>
         </div>
@@ -108,7 +109,7 @@ export function SessionCard({
             aria-expanded={expanded}
             aria-controls={detailsId}
             onClick={() => setExpanded((current) => !current)}
-            className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#0b2f36]/15 bg-[#0b2f36]/5 px-3.5 py-2 text-xs font-semibold text-[#0b2f36] transition hover:bg-[#0b2f36]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+            className="inline-flex min-h-10 items-center justify-center rounded-full border border-brand-deep/15 bg-brand-deep/5 px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-brand-deep/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             {expanded ? "Hide details" : "Details"}
           </button>
@@ -116,10 +117,10 @@ export function SessionCard({
           {hasMapPosition && venue ? (
             <Link
               href={`/explore?venue=${venue.id}`}
-              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-[#f7c873] px-3.5 py-2 text-xs font-bold text-[#0b2f36] transition hover:bg-[#f7c873]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-lime px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
+              <MapPin aria-hidden="true" className="size-3.5" />
               Locate on map
-              <span aria-hidden="true">↗</span>
             </Link>
           ) : (
             <span
@@ -127,7 +128,7 @@ export function SessionCard({
                 venue?.note ??
                 "The official map location for this venue has not been announced."
               }
-              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#0b2f36]/10 bg-[#0b2f36]/5 px-3.5 py-2 text-xs font-semibold text-[#0b2f36]/45"
+              className="inline-flex min-h-10 items-center justify-center rounded-full border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase"
             >
               Map location TBA
             </span>
@@ -140,33 +141,33 @@ export function SessionCard({
           id={detailsId}
           role="region"
           aria-label={`${session.title} details`}
-          className="mt-4 space-y-4 border-t border-[#0b2f36]/10 pt-4"
+          className="mt-5 space-y-5 border-t border-brand-deep/10 pt-5"
         >
           {session.description && (
             <p
               lang={isMalayalam(session.description) ? "ml" : undefined}
-              className="break-words text-sm leading-relaxed text-[#0b2f36]/70"
+              className="text-sm leading-relaxed text-brand-deep/70"
             >
               {session.description}
             </p>
           )}
 
           <div>
-            <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#0b2f36]/45 uppercase">
+            <h4 className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
               Speakers
             </h4>
             {speakers.length > 0 ? (
-              <ul className="mt-2 space-y-2">
+              <ul className="mt-2 space-y-2.5">
                 {speakers.map((speaker) => (
-                  <li key={speaker.id} className="text-sm text-[#0b2f36]/80">
+                  <li key={speaker.id} className="text-sm text-brand-deep/80">
                     <span className="font-semibold">{speaker.name}</span>
                     {speaker.sessionRole && (
-                      <span className="ml-2 rounded-full bg-[#0b2f36]/10 px-2 py-0.5 text-[10px] font-semibold text-[#0b2f36]/60">
+                      <span className="ml-2 rounded-full bg-brand-deep/10 px-2 py-0.5 text-[10px] font-semibold text-brand-deep/75">
                         {speaker.sessionRole}
                       </span>
                     )}
                     {(speaker.designation || speaker.affiliation) && (
-                      <span className="mt-0.5 block text-[11px] leading-relaxed text-[#0b2f36]/45">
+                      <span className="mt-0.5 block text-[11px] leading-relaxed text-brand-deep/70">
                         {[speaker.designation, speaker.affiliation]
                           .filter(Boolean)
                           .join(" · ")}
@@ -176,7 +177,7 @@ export function SessionCard({
                 ))}
               </ul>
             ) : (
-              <p className="mt-2 text-sm text-[#0b2f36]/55">
+              <p className="mt-2 text-sm text-brand-deep/75">
                 Speakers to be announced.
               </p>
             )}
@@ -184,26 +185,26 @@ export function SessionCard({
 
           {session.talks.length > 0 && (
             <div>
-              <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#0b2f36]/45 uppercase">
+              <h4 className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
                 Talks
               </h4>
-              <ul className="mt-2 space-y-2">
+              <ul className="mt-2 space-y-2.5">
                 {session.talks.map((talk) => {
                   const talkSpeaker = getSessionTalkSpeaker(talk);
 
                   return (
                     <li
                       key={`${session.id}-${talk.title}`}
-                      className="text-sm text-[#0b2f36]/80"
+                      className="text-sm text-brand-deep/80"
                     >
                       <p
                         lang={isMalayalam(talk.title) ? "ml" : undefined}
-                        className="break-words leading-relaxed"
+                        className="leading-relaxed"
                       >
                         {talk.title}
                       </p>
                       {talkSpeaker && (
-                        <p className="mt-0.5 text-[11px] text-[#0b2f36]/45">
+                        <p className="mt-0.5 text-[11px] text-brand-deep/70">
                           {talkSpeaker}
                         </p>
                       )}
@@ -215,14 +216,14 @@ export function SessionCard({
           )}
 
           {venue?.verification === "supplied-map" && (
-            <p className="rounded-xl border border-[#0b2f36]/10 bg-[#0b2f36]/5 px-3 py-2 text-[11px] leading-relaxed text-[#0b2f36]/55">
-              {venue.mapLabel} is a map label from the supplied venue map. Official
-              venue details are not published for this area yet.
+            <p className="rounded-2xl border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/75">
+              {venue.mapLabel} is a map label from the supplied venue map.
+              Official venue details are not published for this area yet.
             </p>
           )}
 
           {venue?.note && (
-            <p className="rounded-xl border border-[#0b2f36]/10 bg-[#0b2f36]/5 px-3 py-2 text-[11px] leading-relaxed text-[#0b2f36]/55">
+            <p className="rounded-2xl border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/75">
               {venue.note}
             </p>
           )}
@@ -232,12 +233,12 @@ export function SessionCard({
               href={session.officialUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#0b2f36] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#0b2f36]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
               Official session page
-              <span aria-hidden="true">↗</span>
+              <ArrowUpRight aria-hidden="true" className="size-3.5" />
             </a>
-            <span className="text-[10px] leading-relaxed text-[#0b2f36]/40">
+            <span className="text-[10px] leading-relaxed text-brand-deep/70">
               Times are event-local (Asia/Kolkata).
             </span>
           </div>

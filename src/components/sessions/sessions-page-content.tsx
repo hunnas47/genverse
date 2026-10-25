@@ -11,13 +11,15 @@ export function SessionsPageContent({
   searchParams: SearchParams;
 }) {
   const params = use(searchParams);
+  const day = typeof params.day === "string" ? params.day : undefined;
   const venue = typeof params.venue === "string" ? params.venue : undefined;
   const session =
     typeof params.session === "string" ? params.session : undefined;
 
   return (
     <SessionBrowser
-      key={`${venue ?? "all"}-${session ?? "none"}`}
+      key={`${day ?? "all"}-${venue ?? "all"}-${session ?? "none"}`}
+      initialDayId={day}
       initialVenueId={venue}
       initialSessionId={session}
     />

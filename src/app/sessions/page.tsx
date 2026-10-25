@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { ArrowRight, ArrowUpRight, CalendarDays } from "lucide-react";
 import { Suspense } from "react";
 
+import { ActionLink } from "@/components/site/action-link";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteHeader } from "@/components/site/site-header";
+import { WaveDivider } from "@/components/site/wave-divider";
 import { SessionsPageContent } from "@/components/sessions/sessions-page-content";
 import { VENUES } from "@/data/venues";
 import {
@@ -10,11 +14,12 @@ import {
   PROGRAMME_NOTICE,
   PROGRAMME_SOURCE,
   SESSIONS,
+  SPEAKERS,
 } from "@/lib/programme";
 import type { SearchParams } from "@/types/search";
 
 export const metadata: Metadata = {
-  title: "Programme | GEN M",
+  title: "Programme | GEN M Explorer",
   description:
     "Browse the official GEN M session programme by day, venue, and speaker, then locate each venue on the beach map.",
 };
@@ -22,9 +27,9 @@ export const metadata: Metadata = {
 function SessionsLoading() {
   return (
     <div aria-hidden="true" className="space-y-4">
-      <div className="h-44 rounded-3xl bg-white/60 motion-safe:animate-pulse" />
-      <div className="h-32 rounded-2xl bg-white/60 motion-safe:animate-pulse" />
-      <div className="h-32 rounded-2xl bg-white/60 motion-safe:animate-pulse" />
+      <div className="h-44 rounded-[2rem] bg-lime/30 motion-safe:animate-pulse" />
+      <div className="h-32 rounded-3xl bg-white/10 motion-safe:animate-pulse" />
+      <div className="h-32 rounded-3xl bg-white/10 motion-safe:animate-pulse" />
     </div>
   );
 }
@@ -37,88 +42,96 @@ export default function SessionsPage({
   const stageCount = VENUES.filter(
     (venue) => venue.category === "stage",
   ).length;
+  const mapMarkerCount = VENUES.filter((venue) => venue.mapPosition).length;
+
+  const stats = [
+    { value: SESSIONS.length, label: "sessions" },
+    { value: SPEAKERS.length, label: "speakers" },
+    { value: stageCount, label: "stages" },
+    { value: mapMarkerCount, label: "map markers" },
+  ] as const;
 
   return (
-    <main className="min-h-dvh bg-[#f5efe2] text-[#0b2f36]">
-      <header className="relative overflow-hidden bg-[#0b2f36] text-white">
+    <main className="min-h-dvh overflow-hidden bg-brand text-white">
+      <section className="relative overflow-hidden bg-brand-deep text-white">
+        <div aria-hidden="true" className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(70%_100%_at_20%_0%,rgba(89,100,174,0.6)_0%,rgba(44,45,111,0.15)_55%,rgba(44,45,111,0.95)_100%)]" />
+          <div className="grain absolute inset-0 opacity-[0.06]" />
+        </div>
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(247,200,115,0.22),transparent_45%),radial-gradient(circle_at_90%_10%,rgba(232,106,74,0.18),transparent_40%)]"
+          className="absolute -top-24 right-0 size-80 rounded-full bg-lime/10 blur-3xl"
         />
-        <div className="relative mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
-          <nav
-            aria-label="Programme navigation"
-            className="flex items-center justify-between gap-3"
-          >
-            <Link
-              href="/"
-              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
-            >
-              <span aria-hidden="true">←</span>
-              GEN M
-            </Link>
-            <Link
-              href="/explore"
-              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#f7c873] px-3.5 py-2 text-xs font-bold text-[#0b2f36] transition hover:bg-[#f7c873]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              Open the map
-              <span aria-hidden="true">↗</span>
-            </Link>
-          </nav>
 
-          <div className="mt-8 max-w-3xl sm:mt-12">
-            <p className="text-[10px] font-semibold tracking-[0.28em] text-[#f7c873] uppercase">
-              13–15 November 2026 · Kozhikode Beach
+        <SiteHeader />
+
+        <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-20">
+          <div className="max-w-3xl">
+            <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+              Official schedule
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
+            <h1 className="mt-3 text-[clamp(3.2rem,8vw,6.5rem)] leading-[0.94] font-medium tracking-[-0.02em] text-cream">
               Programme
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65 sm:text-base">
-              Browse the official sessions by day, venue, or speaker. Open a
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
+              Browse every official session by day, venue, or speaker. Open a
               session for the full speaker list, then locate its venue on the
               beach map.
             </p>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-2 text-[11px] text-white/55">
-            <span className="rounded-full bg-[#f7c873] px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-[#0b2f36] uppercase">
-              Official programme
-            </span>
-            <span>
-              {PROGRAMME_NOTICE} · Verified {formatProgrammeVerifiedDate()}
-            </span>
-            <span className="text-white/25">/</span>
-            <span>{SESSIONS.length} sessions</span>
-            <span className="text-white/25">/</span>
-            <span>{PROGRAMME_DAYS.length} days</span>
-            <span className="text-white/25">/</span>
-            <span>{stageCount} stages</span>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <ActionLink href="/explore">
+              Open the map
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </ActionLink>
+            <ActionLink
+              href={PROGRAMME_SOURCE}
+              variant="outline"
+              external
+            >
+              Official source
+              <ArrowUpRight aria-hidden="true" className="size-4" />
+            </ActionLink>
           </div>
-        </div>
-      </header>
 
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-        <Suspense fallback={<SessionsLoading />}>
-          <SessionsPageContent searchParams={searchParams} />
-        </Suspense>
-      </div>
+          <div className="mt-8 flex flex-wrap gap-2">
+            {stats.map((stat) => (
+              <span
+                key={stat.label}
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs text-white/60"
+              >
+                <span className="font-display text-sm font-bold text-lime">
+                  {stat.value}
+                </span>
+                {stat.label}
+              </span>
+            ))}
+            <span className="inline-flex items-center gap-2 rounded-full border border-lime/20 bg-lime/10 px-3 py-1.5 text-xs text-lime/80">
+              <CalendarDays aria-hidden="true" className="size-3.5" />
+              {PROGRAMME_DAYS.length} days
+            </span>
+          </div>
 
-      <footer className="border-t border-[#0b2f36]/10">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-6 text-[11px] leading-relaxed text-[#0b2f36]/45 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>
-            Session information is taken from the official GEN M programme.
-            Times are event-local (Asia/Kolkata).
+          <p className="mt-4 text-[11px] text-white/60">
+            {PROGRAMME_NOTICE} · Verified {formatProgrammeVerifiedDate()} · All
+            times Asia/Kolkata (IST)
           </p>
-          <a
-            href={PROGRAMME_SOURCE}
-            target="_blank"
-            rel="noreferrer"
-            className="shrink-0 font-semibold text-[#0b2f36]/60 underline decoration-[#0b2f36]/20 underline-offset-2 transition hover:text-[#0b2f36]"
-          >
-            Official source ↗
-          </a>
         </div>
-      </footer>
+      </section>
+
+      <WaveDivider className="bg-brand-deep text-brand" />
+
+      <section className="bg-brand pt-2 pb-16 text-white sm:pb-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <Suspense fallback={<SessionsLoading />}>
+            <SessionsPageContent searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </section>
+
+      <WaveDivider className="bg-brand text-brand-deep" />
+      <SiteFooter />
     </main>
   );
 }
