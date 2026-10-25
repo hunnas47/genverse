@@ -1,69 +1,143 @@
+import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
+
+import { VENUES } from "@/data/venues";
+import {
+  formatProgrammeVerifiedDate,
+  PROGRAMME_DAYS,
+  PROGRAMME_NOTICE,
+  PROGRAMME_SOURCE,
+  SESSIONS,
+} from "@/lib/programme";
+
+export const metadata: Metadata = {
+  title: "GEN M Explorer",
+  description:
+    "Explore the GEN M beach venue and browse the official session programme.",
+};
 
 export default function Home() {
+  const stageCount = VENUES.filter(
+    (venue) => venue.category === "stage",
+  ).length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <main className="relative min-h-dvh overflow-hidden bg-[#0b2f36] text-white">
+      <div className="absolute inset-0">
         <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/images/GEN-M-venue-map.jpg"
+          alt=""
+          fill
           priority
+          sizes="100vw"
+          className="object-cover opacity-20"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,47,54,0.55)_0%,rgba(11,47,54,0.82)_55%,#0b2f36_100%)]" />
+      </div>
+
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-5 py-6 sm:px-8 sm:py-10">
+        <header className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-semibold tracking-[0.3em] text-[#f7c873] uppercase">
+              GEN M
+            </p>
+            <p className="mt-1 text-sm font-semibold">
+              Generational Student Confluence
+            </p>
+          </div>
+          <Link
+            href="/explore"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+          >
+            Open map
+            <span aria-hidden="true">↗</span>
+          </Link>
+        </header>
+
+        <section className="flex flex-1 flex-col justify-center py-16 sm:py-24">
+          <p className="text-[10px] font-semibold tracking-[0.24em] text-[#f7c873] uppercase">
+            13–15 November 2026 · Kozhikode Beach
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+          <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+            Find your way around GEN M.
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65 sm:text-base">
+            Explore the beach venue, discover the stages and expo spaces, and
+            browse the official session programme.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/explore"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#f7c873] px-5 py-3 text-sm font-bold text-[#0b2f36] transition hover:bg-[#f7c873]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Explore the venue map
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              href="/sessions"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+            >
+              Browse sessions
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          <div className="mt-10 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+              <p className="text-[9px] font-semibold tracking-[0.2em] text-[#f7c873] uppercase">
+                Programme
+              </p>
+              <p className="mt-1 text-sm font-semibold">
+                {SESSIONS.length} sessions · {PROGRAMME_DAYS.length} days
+              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+                {PROGRAMME_NOTICE} · Verified {formatProgrammeVerifiedDate()}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+              <p className="text-[9px] font-semibold tracking-[0.2em] text-[#f7c873] uppercase">
+                Venue map
+              </p>
+              <p className="mt-1 text-sm font-semibold">
+                {stageCount} stages · expo &amp; facilities
+              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+                Walk the illustrated beach and open venue panels.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+              <p className="text-[9px] font-semibold tracking-[0.2em] text-[#f7c873] uppercase">
+                Plan your day
+              </p>
+              <p className="mt-1 text-sm font-semibold">
+                Filter by day, venue, or speaker
+              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-white/45">
+                Session times are event-local (Asia/Kolkata).
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <footer className="flex flex-col gap-2 border-t border-white/10 pt-5 text-[11px] leading-relaxed text-white/40 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            Session information is from the official GEN M website. Venue map
+            labels come from the supplied artwork.
+          </p>
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href={PROGRAMME_SOURCE}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noreferrer"
+            className="shrink-0 font-semibold text-white/55 underline decoration-white/20 underline-offset-2 transition hover:text-white"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
+            genm.in ↗
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </footer>
+      </div>
+    </main>
   );
 }

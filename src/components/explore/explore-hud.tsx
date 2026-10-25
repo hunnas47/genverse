@@ -31,21 +31,29 @@ export function ExploreHud() {
           </div>
         </div>
 
-        <div className="pointer-events-auto hidden items-center gap-2 rounded-full border border-white/15 bg-[#0b2f36]/75 px-3 py-2 text-[10px] font-semibold tracking-[0.18em] text-white/70 uppercase shadow-lg backdrop-blur-md sm:flex">
-          <span
-            aria-hidden="true"
-            className="size-1.5 rounded-full bg-[#f7c873]"
-          />
-          Venue map
-          <span className="text-white/35">/</span>
-          Interactions on
+        <div className="pointer-events-auto flex items-center gap-2">
+          <Link
+            href="/sessions"
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-[#f7c873] px-3.5 py-2 text-[10px] font-bold tracking-[0.16em] text-[#0b2f36] uppercase shadow-lg transition hover:bg-[#f7c873]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Programme
+          </Link>
+          <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-[#0b2f36]/75 px-3 py-2 text-[10px] font-semibold tracking-[0.18em] text-white/70 uppercase shadow-lg backdrop-blur-md sm:flex">
+            <span
+              aria-hidden="true"
+              className="size-1.5 rounded-full bg-[#f7c873]"
+            />
+            Venue map
+            <span className="text-white/35">/</span>
+            Interactions on
+          </div>
         </div>
       </header>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-5 sm:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
         <section className="max-w-sm rounded-2xl border border-white/15 bg-[#0b2f36]/85 p-3.5 text-white shadow-2xl backdrop-blur-md sm:p-4">
           <p className="text-[9px] font-semibold tracking-[0.24em] text-[#f7c873] uppercase">
-            Preview controls
+            Explorer controls
           </p>
           <p className="mt-1 text-sm font-medium">Explore the beach</p>
 
@@ -69,9 +77,17 @@ export function ExploreHud() {
           </div>
 
           <p className="mt-2.5 max-w-xs text-[10px] leading-relaxed text-white/50 sm:text-[11px]">
-            Approach a venue marker and press E or Enter to open its panel.
-            Sessions and touch controls arrive in later milestones.
+            Approach a venue marker and press E or Enter to open its panel and
+            see its sessions.
           </p>
+
+          <Link
+            href="/sessions"
+            className="pointer-events-auto mt-3 inline-flex min-h-10 items-center gap-1.5 text-[11px] font-semibold text-[#f7c873] transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+          >
+            Browse the full programme
+            <span aria-hidden="true">→</span>
+          </Link>
         </section>
 
         <p className="hidden max-w-48 rounded-full border border-white/10 bg-[#0b2f36]/60 px-3 py-1.5 text-right text-[10px] leading-relaxed text-white/45 backdrop-blur-sm md:block">

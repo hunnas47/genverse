@@ -1,0 +1,248 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
+import { VENUES_BY_ID } from "@/data/venues";
+import {
+  formatSessionTimeRange,
+  getSessionSpeakers,
+  getSessionTalkSpeaker,
+  isMalayalam,
+  SESSION_STATUS_LABELS,
+} from "@/lib/programme";
+import type { Session } from "@/types/session";
+
+function speakerSummary(session: Session): string {
+  const speakers = getSessionSpeakers(session);
+
+  if (speakers.length === 0) {
+    return "Speakers to be announced.";
+  }
+
+  const names = speakers
+    .slice(0, 3)
+    .map((speaker) =>
+      speaker.sessionRole
+        ? `${speaker.name} (${speaker.sessionRole})`
+        : speaker.name,
+    );
+  const remaining = speakers.length - names.length;
+
+  return remaining > 0
+    ? `${names.join(", ")} +${remaining} more`
+    : names.join(", ");
+}
+
+export function SessionCard({
+  session,
+  defaultOpen = false,
+}: {
+  session: Session;
+  defaultOpen?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(defaultOpen);
+  const venue = VENUES_BY_ID.get(session.venueId) ?? null;
+  const speakers = getSessionSpeakers(session);
+  const titleId = `session-title-${session.id}`;
+  const detailsId = `session-details-${session.id}`;
+  const hasMapPosition = Boolean(venue?.mapPosition);
+  const statusLabel = SESSION_STATUS_LABELS[session.status];
+
+  return (
+    <article
+      aria-labelledby={titleId}
+      className="rounded-2xl border border-[#0b2f36]/10 bg-white p-4 shadow-sm transition hover:border-[#0b2f36]/20 hover:shadow-md sm:p-5"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[#0b2f36] px-2.5 py-1 text-[10px] font-bold tracking-[0.12em] text-white uppercase">
+              {venue?.mapLabel ?? session.venueId}
+            </span>
+            <span className="text-[11px] font-semibold text-[#0b2f36]/55">
+              {venue?.name ?? "Venue to be announced"}
+            </span>
+            {session.status !== "scheduled" && (
+              <span
+                className={
+                  session.status === "cancelled"
+                    ? "rounded-full bg-red-100 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-red-700 uppercase"
+                    : "rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold tracking-[0.1em] text-amber-800 uppercase"
+                }
+              >
+                {statusLabel}
+              </span>
+            )}
+          </div>
+
+          <h3
+            id={titleId}
+            lang={isMalayalam(session.title) ? "ml" : undefined}
+            className="mt-2 break-words text-lg font-semibold leading-snug text-[#0b2f36] text-balance sm:text-xl"
+          >
+            {session.title}
+          </h3>
+
+          {session.subtitle && (
+            <p
+              lang={isMalayalam(session.subtitle) ? "ml" : undefined}
+              className="mt-1 break-words text-xs font-medium text-[#0b2f36]/55"
+            >
+              {session.subtitle}
+            </p>
+          )}
+
+          <p className="mt-1.5 text-xs font-semibold text-[#0b2f36]/55">
+            {formatSessionTimeRange(session)}
+          </p>
+
+          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#0b2f36]/65">
+            {speakerSummary(session)}
+          </p>
+        </div>
+
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={detailsId}
+            onClick={() => setExpanded((current) => !current)}
+            className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#0b2f36]/15 bg-[#0b2f36]/5 px-3.5 py-2 text-xs font-semibold text-[#0b2f36] transition hover:bg-[#0b2f36]/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+          >
+            {expanded ? "Hide details" : "Details"}
+          </button>
+
+          {hasMapPosition && venue ? (
+            <Link
+              href={`/explore?venue=${venue.id}`}
+              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-[#f7c873] px-3.5 py-2 text-xs font-bold text-[#0b2f36] transition hover:bg-[#f7c873]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+            >
+              Locate on map
+              <span aria-hidden="true">↗</span>
+            </Link>
+          ) : (
+            <span
+              title={
+                venue?.note ??
+                "The official map location for this venue has not been announced."
+              }
+              className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#0b2f36]/10 bg-[#0b2f36]/5 px-3.5 py-2 text-xs font-semibold text-[#0b2f36]/45"
+            >
+              Map location TBA
+            </span>
+          )}
+        </div>
+      </div>
+
+      {expanded && (
+        <div
+          id={detailsId}
+          role="region"
+          aria-label={`${session.title} details`}
+          className="mt-4 space-y-4 border-t border-[#0b2f36]/10 pt-4"
+        >
+          {session.description && (
+            <p
+              lang={isMalayalam(session.description) ? "ml" : undefined}
+              className="break-words text-sm leading-relaxed text-[#0b2f36]/70"
+            >
+              {session.description}
+            </p>
+          )}
+
+          <div>
+            <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#0b2f36]/45 uppercase">
+              Speakers
+            </h4>
+            {speakers.length > 0 ? (
+              <ul className="mt-2 space-y-2">
+                {speakers.map((speaker) => (
+                  <li key={speaker.id} className="text-sm text-[#0b2f36]/80">
+                    <span className="font-semibold">{speaker.name}</span>
+                    {speaker.sessionRole && (
+                      <span className="ml-2 rounded-full bg-[#0b2f36]/10 px-2 py-0.5 text-[10px] font-semibold text-[#0b2f36]/60">
+                        {speaker.sessionRole}
+                      </span>
+                    )}
+                    {(speaker.designation || speaker.affiliation) && (
+                      <span className="mt-0.5 block text-[11px] leading-relaxed text-[#0b2f36]/45">
+                        {[speaker.designation, speaker.affiliation]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-[#0b2f36]/55">
+                Speakers to be announced.
+              </p>
+            )}
+          </div>
+
+          {session.talks.length > 0 && (
+            <div>
+              <h4 className="text-[10px] font-bold tracking-[0.2em] text-[#0b2f36]/45 uppercase">
+                Talks
+              </h4>
+              <ul className="mt-2 space-y-2">
+                {session.talks.map((talk) => {
+                  const talkSpeaker = getSessionTalkSpeaker(talk);
+
+                  return (
+                    <li
+                      key={`${session.id}-${talk.title}`}
+                      className="text-sm text-[#0b2f36]/80"
+                    >
+                      <p
+                        lang={isMalayalam(talk.title) ? "ml" : undefined}
+                        className="break-words leading-relaxed"
+                      >
+                        {talk.title}
+                      </p>
+                      {talkSpeaker && (
+                        <p className="mt-0.5 text-[11px] text-[#0b2f36]/45">
+                          {talkSpeaker}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
+          {venue?.verification === "supplied-map" && (
+            <p className="rounded-xl border border-[#0b2f36]/10 bg-[#0b2f36]/5 px-3 py-2 text-[11px] leading-relaxed text-[#0b2f36]/55">
+              {venue.mapLabel} is a map label from the supplied venue map. Official
+              venue details are not published for this area yet.
+            </p>
+          )}
+
+          {venue?.note && (
+            <p className="rounded-xl border border-[#0b2f36]/10 bg-[#0b2f36]/5 px-3 py-2 text-[11px] leading-relaxed text-[#0b2f36]/55">
+              {venue.note}
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={session.officialUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-[#0b2f36] px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-[#0b2f36]/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b2f36]"
+            >
+              Official session page
+              <span aria-hidden="true">↗</span>
+            </a>
+            <span className="text-[10px] leading-relaxed text-[#0b2f36]/40">
+              Times are event-local (Asia/Kolkata).
+            </span>
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}

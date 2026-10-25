@@ -10,7 +10,11 @@ import { GameEventBridge } from "@/game/event-bridge";
 
 type GameStatus = "loading" | "ready" | "error";
 
-export function GameCanvas() {
+export function GameCanvas({
+  focusVenueId = null,
+}: {
+  focusVenueId?: string | null;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const [status, setStatus] = useState<GameStatus>("loading");
@@ -54,6 +58,7 @@ export function GameCanvas() {
         const game = await createGame({
           parent: container,
           events: bridge,
+          focusVenueId,
         });
 
         if (cancelled) {
@@ -89,7 +94,7 @@ export function GameCanvas() {
       game?.destroy(true);
       container.replaceChildren();
     };
-  }, []);
+  }, [focusVenueId]);
 
   const nearbyVenue = nearbyVenueId
     ? (VENUES_BY_ID.get(nearbyVenueId) ?? null)

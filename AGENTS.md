@@ -20,18 +20,21 @@ Build an illustrated, top-down 2D beach world based on the supplied GEN M venue 
 
 Verified on 2026-10-25. Update this section when the project foundation changes.
 
-- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones.
+- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones through M4.
 - Next.js `16.4.3` App Router, React `19.3.0`, TypeScript `strict`, ESLint 9 flat config.
 - Tailwind CSS v4 is wired through the `@tailwindcss/turbopack` loader in `next.config.ts`.
 - Phaser `4.2.1` and Shadcn UI tooling are installed. The installed Phaser major version is 4, despite older references to Phaser 3 in planning documents.
 - `/explore` renders a client-only Phaser scene using the supplied venue map, with a movable player, camera follow, world bounds, approximate collision geometry, venue markers, proximity prompts, and a React venue panel.
 - Official S1–S7 venue names, descriptions, active days, and source links are in `src/data/venues.ts`, verified from `https://www.genm.in/venues` on 2026-10-24. S7 has no map marker because its official venue page says the map location is to be announced.
 - Map-only expo and facility labels (`A1`, `A3`, `B`, `C`, `S`, `O`, `R`, `E`, `P`) are marked `supplied-map` and are provisional. `A2` is not a separate record because the official venue list has no A2 entry.
+- `/sessions` is a searchable official programme with day, venue, and text filters, expandable session details, official session links, and venue deep links.
+- Official session and speaker fixtures are in `src/data/sessions.json` and `src/data/speakers.json`, extracted from `https://www.genm.in/sessions` and verified on 2026-10-25. `src/lib/programme.ts` validates venue, day, time, speaker, and status references at module load.
+- `/explore?venue=<id>` focuses a venue, moves the player to a nearby walkable point, and opens its panel. Venue panels list official sessions and link back to the programme.
 - Phaser and React communicate through the typed bridge in `src/game/events.ts` and `src/game/event-bridge.ts`.
 - Supplied map images live in `public/images/`. The no-legend `GEN-M-venue-map.jpg` is the current game background.
 - `GENM_EXPLORER_PROJECT_REFERENCE.md` is the primary product specification and takes precedence when it conflicts with this file.
 - **Not installed yet:** a test runner and any backend/database.
-- **Not in the repo yet:** official session data. The venue panel links to official venue pages instead.
+- The home page is a branded landing page with entry points to the map and programme. Official session data is now in the repo; venue map labels remain provisional where marked `supplied-map`.
 - `next.config.ts` enables `cacheComponents`, `partialPrefetching`, and `experimental.agentFeedback`.
 - `next.config.ts` also allows the current LAN host in `allowedDevOrigins` so a phone can load dev assets; update the IP when the network changes.
 - Import alias: `@/*` maps to `src/*`.
@@ -44,7 +47,7 @@ Verified on 2026-10-25. Update this section when the project foundation changes.
 - Phaser 4 (installed) for the game world; the project reference still says Phaser 3
 - Tailwind CSS v4
 - Shadcn UI for accessible interface components
-- Typed local data initially; official fixtures will be JSON when they exist
+- Typed local data; official venue records are in TypeScript and the official programme/speaker fixtures are JSON
 - Git for version control
 
 Add a dependency only when the current milestone needs it. Use the installed Phaser version unless a verified compatibility issue justifies a change.
@@ -128,7 +131,7 @@ Build the playable map first, followed by movement, collisions, venue interactio
 - **M1 — Setup and playable placeholder:** client-only Phaser scene, placeholder beach, keyboard movement, camera follow, world bounds, cleanup. Done.
 - **M2 — Real map background:** supplied map fitted to world coordinates, calibrated collision geometry, sea/structure blocking, camera scaling. Done; venue anchors remain approximate to the artwork.
 - **M3 — Venue interactions:** canonical venue records, markers and interaction zones, proximity prompts, React venue panel, typed event bridge. Done. Official S1–S7 records are verified; map-only facilities are provisional; S7 has no marker because its official map location is to be announced.
-- **M4 — Session browser:** typed session models, local fixtures and validation, day/venue filters, session cards, session-to-map linking, official data research. Next.
+- **M4 — Session browser:** typed session models, local fixtures and validation, day/venue filters, session cards, session-to-map linking, official data research. Done. The official 60-session, 182-speaker programme is verified from `https://www.genm.in/sessions`; `/sessions` supports day, venue, and text filters, expandable details, and map deep links. S7 sessions show “Map location TBA” because the official location is unpublished.
 - **M5 — Navigation and mobile controls:** virtual joystick, tap-to-move, walkable pathfinding, minimap/directory, portrait and landscape polish.
 - **M6 — Polish and release:** artwork refinement, loading/error states, touch and keyboard accessibility, aspect-ratio testing, lifecycle checks, programme verification, deployment docs.
 

@@ -1,7 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 
+import {
+  formatSessionTimeRange,
+  getSessionSpeakers,
+  getSessionsForVenue,
+  groupSessionsByDay,
+  isMalayalam,
+} from "@/lib/programme";
 import { formatActiveDays, VENUE_CATEGORY_LABELS } from "@/lib/venues";
 import type { Venue } from "@/types/venue";
 
@@ -15,6 +23,8 @@ export function VenuePanel({
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = `venue-panel-title-${venue.id}`;
   const activeDays = formatActiveDays(venue.activeDays);
+  const sessions = getSessionsForVenue(venue.id);
+  const sessionGroups = groupSessionsByDay(sessions);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -101,14 +111,79 @@ export function VenuePanel({
         )}
 
         <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-3.5">
-          <p className="text-[9px] font-semibold tracking-[0.22em] text-white/45 uppercase">
-            Sessions
-          </p>
-          <p className="mt-1 text-xs leading-relaxed text-white/60">
-            {venue.officialUrl
-              ? "The session programme is not included in this preview yet. Official session details are available on the venue page."
-              : "This map facility does not have a published session programme in this preview."}
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[9px] font-semibold tracking-[0.22em] text-white/45 uppercase">
+              Sessions
+            </p>
+            {sessions.length > 0 && (
+              <span className="text-[10px] font-semibold text-white/40">
+                {sessions.length}
+              </span>
+            )}
+          </div>
+
+          {sessions.length === 0 ? (
+            <p className="mt-1 text-xs leading-relaxed text-white/60">
+              {venue.verification === "official"
+                ? "No official sessions are listed for this venue."
+                : "This map facility does not have a published session programme."}
+            </p>
+          ) : (
+            <div className="mt-2 space-y-3">
+              {sessionGroups.map((group) => (
+                <div key={group.day.id}>
+                  <p className="text-[10px] font-semibold text-[#f7c873]/80">
+                    {group.day.displayDate}
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {group.sessions.map((session) => {
+                      const speakers = getSessionSpeakers(session);
+                      const summary = speakers
+                        .slice(0, 2)
+                        .map((speaker) => speaker.name)
+                        .join(", ");
+                      const remaining = speakers.length - 2;
+
+                      return (
+                        <li key={session.id}>
+                          <Link
+                            href={`/sessions?session=${session.id}`}
+                            className="group -mx-2 block rounded-lg px-2 py-1.5 transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+                          >
+                            <span className="block text-[10px] font-semibold text-white/45">
+                              {formatSessionTimeRange(session)}
+                            </span>
+                            <span
+                              lang={
+                                isMalayalam(session.title) ? "ml" : undefined
+                              }
+                              className="block break-words text-xs font-medium leading-snug text-white/85 group-hover:text-white"
+                            >
+                              {session.title}
+                            </span>
+                            {speakers.length > 0 && (
+                              <span className="mt-0.5 block truncate text-[10px] text-white/40">
+                                {summary}
+                                {remaining > 0 ? ` +${remaining} more` : ""}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+
+              <Link
+                href={`/sessions?venue=${venue.id}`}
+                className="inline-flex min-h-10 items-center gap-1.5 text-[11px] font-semibold text-[#f7c873] transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c873]"
+              >
+                View full programme
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          )}
         </div>
 
         {venue.officialUrl && (

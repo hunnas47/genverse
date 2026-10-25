@@ -8,6 +8,58 @@ export interface WalkableCheck {
   obstacles: CollisionObstacle[];
 }
 
+export interface WalkableSearch extends WalkableCheck {
+  /** Maximum distance from the requested point to search. */
+  maxDistance?: number;
+  /** Distance between search rings. */
+  step?: number;
+}
+
+/**
+ * Finds the nearest walkable position to a requested world point.
+ *
+ * Venue anchors often sit on stage structures or other blocked artwork. This
+ * searches outward in rings so a selected venue can still be reached without
+ * hardcoding a separate spawn point for every venue.
+ */
+export function findWalkablePointNear({
+  x,
+  y,
+  radius,
+  bounds,
+  obstacles,
+  maxDistance = 320,
+  step = 20,
+}: WalkableSearch): { x: number; y: number } | null {
+  if (canOccupyPosition({ x, y, radius, bounds, obstacles })) {
+    return { x, y };
+  }
+
+  for (let distance = step; distance <= maxDistance; distance += step) {
+    const samples = Math.max(8, Math.ceil((2 * Math.PI * distance) / step));
+
+    for (let index = 0; index < samples; index += 1) {
+      const angle = (index / samples) * Math.PI * 2;
+      const candidateX = x + Math.cos(angle) * distance;
+      const candidateY = y + Math.sin(angle) * distance;
+
+      if (
+        canOccupyPosition({
+          x: candidateX,
+          y: candidateY,
+          radius,
+          bounds,
+          obstacles,
+        })
+      ) {
+        return { x: candidateX, y: candidateY };
+      }
+    }
+  }
+
+  return null;
+}
+
 /**
  * Checks whether a circular player footprint can occupy a world position.
  *

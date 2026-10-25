@@ -1,9 +1,12 @@
 import Phaser from "phaser";
 
-import { VENUES } from "@/data/venues";
+import { VENUES, VENUES_BY_ID } from "@/data/venues";
 import { VENUE_MAP } from "@/data/venue-map";
 import type { GameEventBridge } from "@/game/event-bridge";
-import { canOccupyPosition } from "@/game/systems/collision-system";
+import {
+  canOccupyPosition,
+  findWalkablePointNear,
+} from "@/game/systems/collision-system";
 import type { VenueCategory } from "@/types/venue";
 
 const MAP_TEXTURE_KEY = "genm-venue-map";
@@ -43,7 +46,10 @@ export class BeachScene extends Phaser.Scene {
   private nearbyVenueId: string | null = null;
   private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
 
-  constructor(private readonly bridge: GameEventBridge) {
+  constructor(
+    private readonly bridge: GameEventBridge,
+    private readonly focusVenueId: string | null = null,
+  ) {
     super({ key: "BeachScene" });
   }
 
@@ -75,6 +81,7 @@ export class BeachScene extends Phaser.Scene {
       worldHeight: VENUE_MAP.world.height,
     });
     this.updateNearbyVenue();
+    this.focusRequestedVenue();
   }
 
   update(_time: number, delta: number): void {
@@ -271,6 +278,43 @@ export class BeachScene extends Phaser.Scene {
       ring.setAlpha(isNearby ? 1 : 0.32);
       ring.setScale(isNearby ? 1.35 : 1);
     }
+  }
+
+  /**
+   * Moves the player to the nearest walkable point beside a deep-linked venue,
+   * centers the camera, and opens the venue panel. Venue anchors can sit on
+   * stage artwork, so the search avoids hardcoding a spawn point per venue.
+   */
+  private focusRequestedVenue(): void {
+    if (!this.focusVenueId || !this.player) {
+      return;
+    }
+
+    const venue = VENUES_BY_ID.get(this.focusVenueId);
+
+    if (!venue) {
+      return;
+    }
+
+    if (venue.mapPosition) {
+      const point = findWalkablePointNear({
+        x: venue.mapPosition.x,
+        y: venue.mapPosition.y,
+        radius: VENUE_MAP.player.radius,
+        bounds: VENUE_MAP.playableBounds,
+        obstacles: VENUE_MAP.obstacles,
+        maxDistance: Math.max(320, venue.mapPosition.interactionRadius + 120),
+      });
+
+      if (point) {
+        this.player.setPosition(point.x, point.y);
+        this.player.setDepth(point.y);
+        this.cameras.main.centerOn(point.x, point.y);
+        this.updateNearbyVenue();
+      }
+    }
+
+    this.bridge.emit("venue:interact", { venueId: venue.id });
   }
 
   private handleInteractKey = (): void => {

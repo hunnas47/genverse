@@ -6,6 +6,8 @@ import { BeachScene } from "@/game/scenes/beach-scene";
 export interface CreateGameOptions {
   parent: HTMLElement;
   events: GameEventBridge;
+  /** Optional venue to focus when the scene starts, usually from a deep link. */
+  focusVenueId?: string | null;
 }
 
 /**
@@ -15,13 +17,14 @@ export interface CreateGameOptions {
 export async function createGame({
   parent,
   events,
+  focusVenueId = null,
 }: CreateGameOptions): Promise<Phaser.Game> {
   const { default: PhaserRuntime } = await import("phaser");
 
   const config: Phaser.Types.Core.GameConfig = {
     type: PhaserRuntime.AUTO,
     backgroundColor: "#0b6f8e",
-    scene: [new BeachScene(events)],
+    scene: [new BeachScene(events, focusVenueId)],
     render: {
       antialias: true,
       roundPixels: true,
