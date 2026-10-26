@@ -1,4 +1,16 @@
 import type { VenueMapConfig } from "@/types/map";
+import type { VenueCategory } from "@/types/venue";
+
+/**
+ * Shared marker colors for the Phaser map and the React minimap. Numeric values
+ * keep Phaser's graphics API simple; the minimap converts them to CSS colors.
+ */
+export const VENUE_MARKER_COLORS: Record<VenueCategory, number> = {
+  stage: 0xf7c873,
+  expo: 0xe86a4a,
+  facility: 0x7bd3c8,
+  booth: 0x8fa7ff,
+};
 
 /**
  * World geometry for the supplied GEN M venue map.

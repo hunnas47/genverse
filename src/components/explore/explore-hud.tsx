@@ -1,7 +1,9 @@
 import {
   ArrowLeft,
   ArrowUpRight,
+  CalendarDays,
   ChevronDown,
+  CircleHelp,
   MapPin,
   Move,
 } from "lucide-react";
@@ -27,6 +29,18 @@ function ControlsContent({ compact = false }: { compact?: boolean }) {
       </p>
       <p className="mt-1 text-sm font-medium">Explore the beach</p>
 
+      <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-relaxed text-white/70">
+        <Move aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-lime" />
+        Drag the joystick or tap the map to walk there.
+      </p>
+      <p className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-relaxed text-white/70">
+        <MapPin
+          aria-hidden="true"
+          className="mt-0.5 size-3.5 shrink-0 text-lime"
+        />
+        Tap a venue marker or use the directory to open its panel.
+      </p>
+
       <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-white/60">
         <Key>W</Key>
         <Key>A</Key>
@@ -46,15 +60,10 @@ function ControlsContent({ compact = false }: { compact?: boolean }) {
         <span>view nearby venue</span>
       </div>
 
-      <p className="mt-3 max-w-xs text-[10px] leading-relaxed text-white/60 sm:text-[11px]">
-        Approach a venue marker and press E or Enter to open its panel and see
-        its sessions.
-      </p>
-
       {!compact && (
-        <p className="mt-3 flex items-center gap-1.5 text-[10px] text-white/60">
-          <Move aria-hidden="true" className="size-3.5 text-lime" />
-          The camera follows your character.
+        <p className="mt-3 max-w-xs text-[10px] leading-relaxed text-white/60 sm:text-[11px]">
+          The camera follows your character. The sea and major structures block
+          movement.
         </p>
       )}
 
@@ -96,42 +105,45 @@ export function ExploreHud() {
         </div>
 
         <div className="pointer-events-auto flex items-center gap-2">
-          <ActionLink href="/sessions" size="sm">
-            Programme
-            <ArrowUpRight aria-hidden="true" className="size-3.5" />
+          <ActionLink
+            href="/sessions"
+            size="sm"
+            ariaLabel="Programme"
+          >
+            <CalendarDays aria-hidden="true" className="size-3.5" />
+            <span className="hidden min-[360px]:inline">Programme</span>
           </ActionLink>
-          <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-brand-deep/75 px-3 py-2 font-display text-[9px] font-bold tracking-[0.16em] text-white/60 uppercase shadow-lift backdrop-blur-md sm:flex">
+
+          <details className="group relative lg:hidden">
+            <summary
+              aria-label="Explorer controls and help"
+              className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-white/20 bg-brand-deep/85 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [&::-webkit-details-marker]:hidden"
+            >
+              <CircleHelp aria-hidden="true" className="size-4" />
+              <span className="hidden sm:inline">Controls</span>
+              <ChevronDown
+                aria-hidden="true"
+                className="hidden size-3.5 transition-transform group-open:rotate-180 sm:block"
+              />
+            </summary>
+            <div className="absolute top-full right-0 mt-2 max-h-[calc(100dvh-6rem)] w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-white/15 bg-brand-deep/95 p-4 text-white shadow-lift backdrop-blur-md">
+              <ControlsContent compact />
+            </div>
+          </details>
+
+          <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-brand-deep/75 px-3 py-2 font-display text-[9px] font-bold tracking-[0.16em] text-white/60 uppercase shadow-lift backdrop-blur-md lg:flex">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-lime" />
             Venue map
             <span className="text-white/30">/</span>
-            Interactions on
+            Tap to walk
           </div>
         </div>
       </header>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-5 sm:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-        <section className="pointer-events-auto hidden max-w-sm rounded-2xl border border-white/15 bg-brand-deep/85 p-4 text-white shadow-lift backdrop-blur-md sm:block">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden items-end justify-start gap-4 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:flex">
+        <section className="pointer-events-auto max-w-sm rounded-2xl border border-white/15 bg-brand-deep/85 p-4 text-white shadow-lift backdrop-blur-md">
           <ControlsContent />
         </section>
-
-        <details className="group pointer-events-auto relative max-w-sm sm:hidden">
-          <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-white/20 bg-brand-deep/85 px-4 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [&::-webkit-details-marker]:hidden">
-            <MapPin aria-hidden="true" className="size-3.5" />
-            Controls
-            <ChevronDown
-              aria-hidden="true"
-              className="size-3.5 transition-transform group-open:rotate-180"
-            />
-          </summary>
-          <div className="absolute bottom-full left-0 mb-2 w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl border border-white/15 bg-brand-deep/95 p-4 text-white shadow-lift backdrop-blur-md">
-            <ControlsContent compact />
-          </div>
-        </details>
-
-        <p className="hidden max-w-48 rounded-full border border-white/10 bg-brand-deep/65 px-3 py-1.5 text-right text-[10px] leading-relaxed text-white/70 backdrop-blur-sm md:block">
-          Camera follows your character. The sea and major structures block
-          movement.
-        </p>
       </div>
     </>
   );

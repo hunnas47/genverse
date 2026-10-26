@@ -2,7 +2,7 @@
 
 import { ArrowUpRight, MapPin, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 
 import {
   formatSessionTimeRange,
@@ -14,7 +14,7 @@ import {
 import { formatActiveDays, VENUE_CATEGORY_LABELS } from "@/lib/venues";
 import type { Venue } from "@/types/venue";
 
-export function VenuePanel({
+export const VenuePanel = memo(function VenuePanel({
   venue,
   onClose,
 }: {
@@ -208,4 +208,4 @@ export function VenuePanel({
       </div>
     </aside>
   );
-}
+});

@@ -23,11 +23,16 @@ export async function createGame({
 
   const config: Phaser.Types.Core.GameConfig = {
     type: PhaserRuntime.AUTO,
-    backgroundColor: "#0b6f8e",
+    backgroundColor: "#2c2d6f",
     scene: [new BeachScene(events, focusVenueId)],
     render: {
       antialias: true,
       roundPixels: true,
+    },
+    // Movement uses real frame time (clamped in the scene), so a slow device
+    // should not make the explorer walk in slow motion.
+    fps: {
+      smoothStep: false,
     },
     scale: {
       parent,
@@ -37,7 +42,7 @@ export async function createGame({
     },
     input: {
       keyboard: true,
-      mouse: false,
+      mouse: true,
       touch: true,
       gamepad: false,
     },

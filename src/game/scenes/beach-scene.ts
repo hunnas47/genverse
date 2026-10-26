@@ -1,37 +1,43 @@
 import Phaser from "phaser";
 
 import { VENUES, VENUES_BY_ID } from "@/data/venues";
-import { VENUE_MAP } from "@/data/venue-map";
+import { VENUE_MAP, VENUE_MARKER_COLORS } from "@/data/venue-map";
 import type { GameEventBridge } from "@/game/event-bridge";
+import type { NavigationTarget } from "@/game/events";
 import {
   canOccupyPosition,
   findWalkablePointNear,
 } from "@/game/systems/collision-system";
-import type { VenueCategory } from "@/types/venue";
+import {
+  buildNavigationGrid,
+  findNavigationPath,
+  type NavigationGrid,
+} from "@/game/systems/pathfinding";
+import type { MapPoint } from "@/types/map";
+import type { Venue } from "@/types/venue";
 
 const MAP_TEXTURE_KEY = "genm-venue-map";
 const MOBILE_BREAKPOINT = 640;
-
-const MARKER_COLORS: Record<VenueCategory, number> = {
-  stage: 0xf7c873,
-  expo: 0xe86a4a,
-  facility: 0x7bd3c8,
-  booth: 0x8fa7ff,
-};
-
 const MARKER_DEPTH = 5000;
+const PATH_DEPTH = -500;
+const PLAYER_POSITION_INTERVAL = 80;
+const WAYPOINT_ARRIVAL_DISTANCE = 6;
+const GRID_CELL_SIZE = 20;
+const VENUE_TAP_RADIUS = 38;
 
 type MovementKeys = Record<
   "up" | "down" | "left" | "right",
   Phaser.Input.Keyboard.Key
 >;
 
+type NavigationReason = "arrived" | "cancelled" | "unreachable";
+
 /**
  * The venue-map scene.
  *
- * Phaser owns drawing, movement, camera, and collision. React owns the overlay
- * and will own venue/session panels in later milestones. The scene reads only
- * world geometry from data, keeping official content out of the engine.
+ * Phaser owns drawing, movement, camera, and collision. React owns the overlay,
+ * joystick, minimap, and venue panels. Keyboard, joystick, and tap-to-move all
+ * feed the same collision helper and the same movement loop.
  */
 export class BeachScene extends Phaser.Scene {
   private player?: Phaser.GameObjects.Container;
@@ -41,10 +47,29 @@ export class BeachScene extends Phaser.Scene {
   private interactKey?: Phaser.Input.Keyboard.Key;
   private enterKey?: Phaser.Input.Keyboard.Key;
   private movement = new Phaser.Math.Vector2();
+  private joystickMovement = new Phaser.Math.Vector2();
   private walkTime = 0;
   private reducedMotion = false;
   private nearbyVenueId: string | null = null;
   private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
+
+  private navigationGrid?: NavigationGrid;
+  private path: MapPoint[] = [];
+  private pathIndex = 0;
+  private destination: MapPoint | null = null;
+  private pendingVenueId: string | null = null;
+  private pathGraphics?: Phaser.GameObjects.Graphics;
+  private targetMarker?: Phaser.GameObjects.Arc;
+  private targetTween?: Phaser.Tweens.Tween;
+  private unsubscribeMove?: () => void;
+  private unsubscribeNavigate?: () => void;
+  private unsubscribeCancel?: () => void;
+  private lastPositionEmit = -1000;
+  private readonly lastEmittedPosition = new Phaser.Math.Vector2(
+    Number.NaN,
+    Number.NaN,
+  );
+  private lastMoving = false;
 
   constructor(
     private readonly bridge: GameEventBridge,
@@ -62,13 +87,47 @@ export class BeachScene extends Phaser.Scene {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    this.cameras.main.setBackgroundColor("#0b6f8e");
+    this.cameras.main.setBackgroundColor("#2c2d6f");
 
     this.createMapBackground();
     this.createVenueMarkers();
     this.createPlayer();
     this.setupInput();
     this.setupCamera();
+
+    this.navigationGrid = buildNavigationGrid({
+      bounds: VENUE_MAP.playableBounds,
+      obstacles: VENUE_MAP.obstacles,
+      radius: VENUE_MAP.player.radius,
+      cellSize: GRID_CELL_SIZE,
+    });
+    this.pathGraphics = this.add
+      .graphics()
+      .setDepth(PATH_DEPTH)
+      .setVisible(false);
+
+    this.unsubscribeMove = this.bridge.on("input:move", ({ x, y }) => {
+      this.joystickMovement.set(x, y);
+
+      if (this.joystickMovement.lengthSq() > 1) {
+        this.joystickMovement.normalize();
+      }
+    });
+    this.unsubscribeNavigate = this.bridge.on(
+      "navigation:goto",
+      ({ target }) => {
+        this.navigateTo(target);
+      },
+    );
+    this.unsubscribeCancel = this.bridge.on("navigation:cancel", () => {
+      this.cancelNavigation("cancelled");
+    });
+
+    this.input.on(
+      Phaser.Input.Events.POINTER_DOWN,
+      this.handlePointerDown,
+      this,
+    );
 
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
@@ -80,11 +139,12 @@ export class BeachScene extends Phaser.Scene {
       worldWidth: VENUE_MAP.world.width,
       worldHeight: VENUE_MAP.world.height,
     });
+    this.emitPlayerPosition(0, false, true);
     this.updateNearbyVenue();
     this.focusRequestedVenue();
   }
 
-  update(_time: number, delta: number): void {
+  update(time: number, delta: number): void {
     if (!this.player || !this.character) {
       return;
     }
@@ -92,80 +152,39 @@ export class BeachScene extends Phaser.Scene {
     const step = Math.min(delta, 50) / 1000;
     this.movement.set(0, 0);
 
-    if (this.cursors?.left.isDown || this.keys?.left.isDown) {
-      this.movement.x -= 1;
-    }
-    if (this.cursors?.right.isDown || this.keys?.right.isDown) {
-      this.movement.x += 1;
-    }
-    if (this.cursors?.up.isDown || this.keys?.up.isDown) {
-      this.movement.y -= 1;
-    }
-    if (this.cursors?.down.isDown || this.keys?.down.isDown) {
-      this.movement.y += 1;
+    if (!this.isUiFocused()) {
+      if (this.cursors?.left.isDown || this.keys?.left.isDown) {
+        this.movement.x -= 1;
+      }
+      if (this.cursors?.right.isDown || this.keys?.right.isDown) {
+        this.movement.x += 1;
+      }
+      if (this.cursors?.up.isDown || this.keys?.up.isDown) {
+        this.movement.y -= 1;
+      }
+      if (this.cursors?.down.isDown || this.keys?.down.isDown) {
+        this.movement.y += 1;
+      }
     }
 
-    if (this.movement.lengthSq() > 0) {
+    if (this.joystickMovement.lengthSq() > 0.0001) {
+      this.movement.add(this.joystickMovement);
+    }
+
+    let moving = false;
+
+    if (this.movement.lengthSq() > 0.0001) {
       this.movement.normalize();
-
-      const bounds = VENUE_MAP.playableBounds;
-      const radius = VENUE_MAP.player.radius;
-      const speed = VENUE_MAP.player.speed;
-      const obstacles = VENUE_MAP.obstacles;
-
-      const nextX = Phaser.Math.Clamp(
-        this.player.x + this.movement.x * speed * step,
-        bounds.x + radius,
-        bounds.x + bounds.width - radius,
-      );
-
-      if (
-        canOccupyPosition({
-          x: nextX,
-          y: this.player.y,
-          radius,
-          bounds,
-          obstacles,
-        })
-      ) {
-        this.player.x = nextX;
-      }
-
-      const nextY = Phaser.Math.Clamp(
-        this.player.y + this.movement.y * speed * step,
-        bounds.y + radius,
-        bounds.y + bounds.height - radius,
-      );
-
-      if (
-        canOccupyPosition({
-          x: this.player.x,
-          y: nextY,
-          radius,
-          bounds,
-          obstacles,
-        })
-      ) {
-        this.player.y = nextY;
-      }
-
-      this.player.setDepth(this.player.y);
-      this.walkTime += step;
-
-      const bob = this.reducedMotion
-        ? 0
-        : Math.sin(this.walkTime * 14) * 2;
-      this.character.setY(bob);
-      this.character.setRotation(
-        this.reducedMotion ? 0 : Math.sin(this.walkTime * 14) * 0.025,
-      );
+      this.cancelNavigation("cancelled");
+      moving = this.moveDirect(step);
+    } else if (this.path.length > 0) {
+      moving = this.followPath(step);
     } else {
-      this.walkTime = 0;
-      this.character.setY(0);
-      this.character.setRotation(0);
+      this.stopWalkAnimation();
     }
 
     this.updateNearbyVenue();
+    this.emitPlayerPosition(time, moving);
   }
 
   private createMapBackground(): void {
@@ -215,7 +234,7 @@ export class BeachScene extends Phaser.Scene {
       }
 
       const { x, y } = venue.mapPosition;
-      const color = MARKER_COLORS[venue.category];
+      const color = VENUE_MARKER_COLORS[venue.category];
 
       const ring = this.add
         .circle(x, y, 17)
@@ -311,6 +330,7 @@ export class BeachScene extends Phaser.Scene {
         this.player.setDepth(point.y);
         this.cameras.main.centerOn(point.x, point.y);
         this.updateNearbyVenue();
+        this.emitPlayerPosition(0, false, true);
       }
     }
 
@@ -318,10 +338,523 @@ export class BeachScene extends Phaser.Scene {
   }
 
   private handleInteractKey = (): void => {
+    if (this.isUiFocused()) {
+      return;
+    }
+
     if (this.nearbyVenueId) {
+      this.cancelNavigation("cancelled");
       this.bridge.emit("venue:interact", { venueId: this.nearbyVenueId });
     }
   };
+
+  private handlePointerDown = (pointer: Phaser.Input.Pointer): void => {
+    if (!this.player || !this.navigationGrid) {
+      return;
+    }
+
+    if (pointer.rightButtonDown() || pointer.middleButtonDown()) {
+      return;
+    }
+
+    const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+
+    if (!this.isInsidePlayableBounds(world.x, world.y)) {
+      return;
+    }
+
+    let nearestVenue: Venue | null = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (const venue of VENUES) {
+      if (!venue.mapPosition) {
+        continue;
+      }
+
+      const distance = Phaser.Math.Distance.Between(
+        world.x,
+        world.y,
+        venue.mapPosition.x,
+        venue.mapPosition.y,
+      );
+      const hitRadius = Math.max(
+        VENUE_TAP_RADIUS,
+        venue.mapPosition.interactionRadius * 0.28,
+      );
+
+      if (distance <= hitRadius && distance < nearestDistance) {
+        nearestVenue = venue;
+        nearestDistance = distance;
+      }
+    }
+
+    if (nearestVenue) {
+      this.navigateTo({ kind: "venue", venueId: nearestVenue.id });
+      return;
+    }
+
+    this.navigateTo({ kind: "point", x: world.x, y: world.y });
+  };
+
+  private navigateTo(target: NavigationTarget): void {
+    if (!this.player || !this.navigationGrid) {
+      return;
+    }
+
+    if (target.kind === "venue") {
+      const venue = VENUES_BY_ID.get(target.venueId);
+
+      if (!venue?.mapPosition) {
+        this.rejectNavigation();
+        return;
+      }
+
+      const distance = Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        venue.mapPosition.x,
+        venue.mapPosition.y,
+      );
+
+      if (distance <= venue.mapPosition.interactionRadius) {
+        this.cancelNavigation("cancelled");
+        this.bridge.emit("venue:interact", { venueId: venue.id });
+        return;
+      }
+
+      const goal = findWalkablePointNear({
+        x: venue.mapPosition.x,
+        y: venue.mapPosition.y,
+        radius: VENUE_MAP.player.radius,
+        bounds: VENUE_MAP.playableBounds,
+        obstacles: VENUE_MAP.obstacles,
+        maxDistance: Math.max(
+          320,
+          venue.mapPosition.interactionRadius + 140,
+        ),
+      });
+
+      if (!goal) {
+        this.rejectNavigation();
+        return;
+      }
+
+      this.startNavigation(goal, venue.id);
+      return;
+    }
+
+    if (!this.isInsidePlayableBounds(target.x, target.y)) {
+      this.rejectNavigation();
+      return;
+    }
+
+    const goal = findWalkablePointNear({
+      x: target.x,
+      y: target.y,
+      radius: VENUE_MAP.player.radius,
+      bounds: VENUE_MAP.playableBounds,
+      obstacles: VENUE_MAP.obstacles,
+      maxDistance: 220,
+    });
+
+    if (!goal) {
+      this.rejectNavigation();
+      return;
+    }
+
+    this.startNavigation(goal, null);
+  }
+
+  private startNavigation(goal: MapPoint, venueId: string | null): void {
+    if (!this.player || !this.navigationGrid) {
+      return;
+    }
+
+    const path = findNavigationPath({
+      grid: this.navigationGrid,
+      start: { x: this.player.x, y: this.player.y },
+      goal,
+    });
+
+    if (!path || path.length === 0) {
+      this.rejectNavigation();
+      return;
+    }
+
+    if (path.length === 1) {
+      this.cancelNavigation("cancelled");
+
+      if (venueId) {
+        this.bridge.emit("venue:interact", { venueId });
+      }
+
+      return;
+    }
+
+    this.cancelNavigation("cancelled");
+    this.path = path;
+    this.pathIndex = 1;
+    this.destination = goal;
+    this.pendingVenueId = venueId;
+    this.drawNavigationPath(path);
+    this.showTargetMarker(goal);
+    this.bridge.emit("navigation:state", {
+      active: true,
+      targetX: goal.x,
+      targetY: goal.y,
+      venueId,
+    });
+  }
+
+  private rejectNavigation(): void {
+    this.cancelNavigation("cancelled");
+    this.bridge.emit("navigation:state", {
+      active: false,
+      targetX: null,
+      targetY: null,
+      venueId: null,
+      reason: "unreachable",
+    });
+  }
+
+  private followPath(step: number): boolean {
+    if (!this.player) {
+      return false;
+    }
+
+    const waypoint = this.path[this.pathIndex];
+
+    if (!waypoint) {
+      this.finishNavigation();
+      return false;
+    }
+
+    const dx = waypoint.x - this.player.x;
+    const dy = waypoint.y - this.player.y;
+    const distance = Math.hypot(dx, dy);
+    const maxStep = VENUE_MAP.player.speed * step;
+    const arrivalDistance = Math.max(WAYPOINT_ARRIVAL_DISTANCE, maxStep);
+
+    if (distance <= arrivalDistance) {
+      if (
+        canOccupyPosition({
+          x: waypoint.x,
+          y: waypoint.y,
+          radius: VENUE_MAP.player.radius,
+          bounds: VENUE_MAP.playableBounds,
+          obstacles: VENUE_MAP.obstacles,
+        })
+      ) {
+        this.player.setPosition(waypoint.x, waypoint.y);
+        this.player.setDepth(waypoint.y);
+      }
+
+      this.pathIndex += 1;
+
+      if (this.pathIndex >= this.path.length) {
+        this.finishNavigation();
+        return false;
+      }
+
+      this.animateWalk(step);
+      return true;
+    }
+
+    const moved = this.moveBy(
+      (dx / distance) * maxStep,
+      (dy / distance) * maxStep,
+      step,
+    );
+
+    if (!moved) {
+      this.cancelNavigation("unreachable");
+      return false;
+    }
+
+    return true;
+  }
+
+  private moveDirect(step: number): boolean {
+    if (!this.player) {
+      return false;
+    }
+
+    const speed = VENUE_MAP.player.speed;
+    const moved = this.moveBy(
+      this.movement.x * speed * step,
+      this.movement.y * speed * step,
+      step,
+    );
+
+    if (!moved) {
+      this.stopWalkAnimation();
+    }
+
+    return moved;
+  }
+
+  /**
+   * Shared collision-aware movement used by keyboard, joystick, and path
+   * following. The axes are resolved separately so the player slides along
+   * obstacles instead of stopping dead.
+   */
+  private moveBy(dx: number, dy: number, step: number): boolean {
+    if (!this.player) {
+      return false;
+    }
+
+    const bounds = VENUE_MAP.playableBounds;
+    const radius = VENUE_MAP.player.radius;
+    const obstacles = VENUE_MAP.obstacles;
+    let moved = false;
+
+    const nextX = Phaser.Math.Clamp(
+      this.player.x + dx,
+      bounds.x + radius,
+      bounds.x + bounds.width - radius,
+    );
+
+    if (
+      nextX !== this.player.x &&
+      canOccupyPosition({
+        x: nextX,
+        y: this.player.y,
+        radius,
+        bounds,
+        obstacles,
+      })
+    ) {
+      this.player.x = nextX;
+      moved = true;
+    }
+
+    const nextY = Phaser.Math.Clamp(
+      this.player.y + dy,
+      bounds.y + radius,
+      bounds.y + bounds.height - radius,
+    );
+
+    if (
+      nextY !== this.player.y &&
+      canOccupyPosition({
+        x: this.player.x,
+        y: nextY,
+        radius,
+        bounds,
+        obstacles,
+      })
+    ) {
+      this.player.y = nextY;
+      moved = true;
+    }
+
+    if (moved) {
+      this.player.setDepth(this.player.y);
+      this.animateWalk(step);
+    }
+
+    return moved;
+  }
+
+  private finishNavigation(): void {
+    const venueId = this.pendingVenueId;
+
+    this.clearNavigationState();
+    this.bridge.emit("navigation:state", {
+      active: false,
+      targetX: null,
+      targetY: null,
+      venueId: null,
+      reason: "arrived",
+    });
+
+    if (venueId) {
+      this.bridge.emit("venue:interact", { venueId });
+    }
+  }
+
+  private cancelNavigation(
+    reason: Exclude<NavigationReason, "arrived">,
+  ): void {
+    if (!this.destination && this.path.length === 0 && !this.pendingVenueId) {
+      return;
+    }
+
+    this.clearNavigationState();
+    this.bridge.emit("navigation:state", {
+      active: false,
+      targetX: null,
+      targetY: null,
+      venueId: null,
+      reason,
+    });
+  }
+
+  private clearNavigationState(): void {
+    this.path = [];
+    this.pathIndex = 0;
+    this.destination = null;
+    this.pendingVenueId = null;
+
+    this.pathGraphics?.clear();
+    this.pathGraphics?.setVisible(false);
+
+    this.targetTween?.stop();
+    this.targetTween = undefined;
+    this.targetMarker?.destroy();
+    this.targetMarker = undefined;
+
+    this.stopWalkAnimation();
+  }
+
+  private drawNavigationPath(points: MapPoint[]): void {
+    if (!this.pathGraphics) {
+      return;
+    }
+
+    const graphics = this.pathGraphics;
+
+    const stroke = (width: number, color: number, alpha: number) => {
+      graphics.lineStyle(width, color, alpha);
+      graphics.beginPath();
+      graphics.moveTo(points[0].x, points[0].y);
+
+      for (let index = 1; index < points.length; index += 1) {
+        graphics.lineTo(points[index].x, points[index].y);
+      }
+
+      graphics.strokePath();
+    };
+
+    graphics.clear();
+    stroke(8, 0x2c2d6f, 0.18);
+    stroke(3, 0xedf2b5, 0.7);
+    graphics.setVisible(true);
+  }
+
+  private showTargetMarker(goal: MapPoint): void {
+    this.targetTween?.stop();
+    this.targetMarker?.destroy();
+
+    const marker = this.add
+      .circle(goal.x, goal.y, 16)
+      .setStrokeStyle(3, 0xedf2b5, 0.95)
+      .setFillStyle(0xedf2b5, 0.12)
+      .setDepth(MARKER_DEPTH + 2);
+
+    this.targetMarker = marker;
+
+    if (!this.reducedMotion) {
+      this.targetTween = this.tweens.add({
+        targets: marker,
+        scale: { from: 0.85, to: 1.2 },
+        alpha: { from: 1, to: 0.45 },
+        duration: 850,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
+    }
+  }
+
+  private animateWalk(step: number): void {
+    if (!this.character) {
+      return;
+    }
+
+    this.walkTime += step;
+
+    const bob = this.reducedMotion ? 0 : Math.sin(this.walkTime * 14) * 2;
+    this.character.setY(bob);
+    this.character.setRotation(
+      this.reducedMotion ? 0 : Math.sin(this.walkTime * 14) * 0.025,
+    );
+  }
+
+  private stopWalkAnimation(): void {
+    this.walkTime = 0;
+    this.character?.setY(0);
+    this.character?.setRotation(0);
+  }
+
+  private emitPlayerPosition(
+    time: number,
+    moving: boolean,
+    force = false,
+  ): void {
+    if (!this.player) {
+      return;
+    }
+
+    if (!force) {
+      if (
+        time - this.lastPositionEmit < PLAYER_POSITION_INTERVAL &&
+        moving === this.lastMoving
+      ) {
+        return;
+      }
+
+      if (
+        Math.abs(this.player.x - this.lastEmittedPosition.x) < 0.5 &&
+        Math.abs(this.player.y - this.lastEmittedPosition.y) < 0.5 &&
+        moving === this.lastMoving
+      ) {
+        return;
+      }
+    }
+
+    this.lastPositionEmit = time;
+    this.lastEmittedPosition.set(this.player.x, this.player.y);
+    this.lastMoving = moving;
+    this.bridge.emit("player:position", {
+      x: this.player.x,
+      y: this.player.y,
+      moving,
+    });
+  }
+
+  private isInsidePlayableBounds(x: number, y: number): boolean {
+    const bounds = VENUE_MAP.playableBounds;
+
+    return (
+      x >= bounds.x &&
+      x <= bounds.x + bounds.width &&
+      y >= bounds.y &&
+      y <= bounds.y + bounds.height
+    );
+  }
+
+  /**
+   * Keyboard events are global in Phaser, so ignore interaction/movement keys
+   * while a real UI control or dialog owns focus. The game host itself is not
+   * treated as UI, so normal keyboard play still works.
+   */
+  private isUiFocused(): boolean {
+    if (typeof document === "undefined") {
+      return false;
+    }
+
+    const active = document.activeElement;
+
+    if (!active || active === document.body) {
+      return false;
+    }
+
+    if (
+      active === this.game.canvas ||
+      active === this.game.canvas.parentElement
+    ) {
+      return false;
+    }
+
+    return (
+      active instanceof HTMLElement &&
+      (active.closest("[role='dialog']") !== null ||
+        active.matches(
+          "a, button, input, select, textarea, summary, [role='button']",
+        ))
+    );
+  }
 
   private createPlayer(): void {
     const { x, y } = VENUE_MAP.spawn;
@@ -373,11 +906,11 @@ export class BeachScene extends Phaser.Scene {
     };
     this.interactKey = keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.E,
-      true,
+      false,
     );
     this.enterKey = keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.ENTER,
-      true,
+      false,
     );
     this.interactKey.on(
       Phaser.Input.Keyboard.Events.DOWN,
@@ -397,8 +930,6 @@ export class BeachScene extends Phaser.Scene {
       Phaser.Input.Keyboard.KeyCodes.A,
       Phaser.Input.Keyboard.KeyCodes.S,
       Phaser.Input.Keyboard.KeyCodes.D,
-      Phaser.Input.Keyboard.KeyCodes.E,
-      Phaser.Input.Keyboard.KeyCodes.ENTER,
     ]);
   }
 
@@ -431,6 +962,7 @@ export class BeachScene extends Phaser.Scene {
 
   private handleWindowBlur = (): void => {
     this.input.keyboard?.resetKeys();
+    this.joystickMovement.set(0, 0);
   };
 
   private handleShutdown(): void {
@@ -444,7 +976,18 @@ export class BeachScene extends Phaser.Scene {
       Phaser.Input.Keyboard.Events.DOWN,
       this.handleInteractKey,
     );
+    this.input.off(
+      Phaser.Input.Events.POINTER_DOWN,
+      this.handlePointerDown,
+      this,
+    );
+    this.unsubscribeMove?.();
+    this.unsubscribeNavigate?.();
+    this.unsubscribeCancel?.();
+    this.clearNavigationState();
     this.markerRings.clear();
     this.nearbyVenueId = null;
+    this.navigationGrid = undefined;
+    this.pathGraphics = undefined;
   }
 }
