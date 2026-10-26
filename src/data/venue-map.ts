@@ -13,6 +13,17 @@ export const VENUE_MARKER_COLORS: Record<VenueCategory, number> = {
 };
 
 /**
+ * Text colors chosen per marker fill so the two-letter map label stays legible
+ * at world scale.
+ */
+export const VENUE_MARKER_TEXT_COLORS: Record<VenueCategory, string> = {
+  stage: "#2c2d6f",
+  expo: "#ffffff",
+  facility: "#17343e",
+  booth: "#1c1d3a",
+};
+
+/**
  * World geometry for the supplied GEN M venue map.
  *
  * World units match the source image pixels 1:1. Obstacle footprints are

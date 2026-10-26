@@ -25,6 +25,13 @@ export interface GameEventMap {
     worldWidth: number;
     worldHeight: number;
   };
+  /**
+   * The supplied map artwork failed to load. The scene keeps running with a
+   * simplified background so movement and venue data remain usable.
+   */
+  "game:map-fallback": {
+    message: string;
+  };
   "venue:nearby": {
     venueId: string | null;
   };

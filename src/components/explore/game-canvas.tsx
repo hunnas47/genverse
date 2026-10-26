@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import type Phaser from "phaser";
 
 import { MiniMap } from "@/components/explore/mini-map";
@@ -15,6 +16,8 @@ import type { Venue } from "@/types/venue";
 
 type GameStatus = "loading" | "ready" | "error";
 
+const BOOT_TIMEOUT_MS = 15000;
+
 export function GameCanvas({
   focusVenueId = null,
 }: {
@@ -25,6 +28,10 @@ export function GameCanvas({
   const bridgeRef = useRef<GameEventBridge | null>(null);
   const [status, setStatus] = useState<GameStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [mapFallbackMessage, setMapFallbackMessage] = useState<string | null>(
+    null,
+  );
   const [nearbyVenueId, setNearbyVenueId] = useState<string | null>(null);
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [playerPosition, setPlayerPosition] = useState<MapPoint | null>(null);
@@ -44,12 +51,61 @@ export function GameCanvas({
     bridgeRef.current = bridge;
 
     let cancelled = false;
+    let ready = false;
+
+    setStatus("loading");
+    setErrorMessage(null);
+    setMapFallbackMessage(null);
+    setNearbyVenueId(null);
+    setSelectedVenueId(null);
+    setPlayerPosition(null);
+    setNavigationTarget(null);
+    setDirectoryOpen(false);
+
+    const bootTimeout = window.setTimeout(() => {
+      if (cancelled || ready) {
+        return;
+      }
+
+      setErrorMessage(
+        "The beach is taking longer than expected to load. Check your connection, then try again.",
+      );
+      setStatus("error");
+    }, BOOT_TIMEOUT_MS);
+
+    const handleVisibilityChange = () => {
+      const game = gameRef.current;
+
+      if (!game) {
+        return;
+      }
+
+      if (document.hidden) {
+        game.loop.sleep();
+      } else {
+        game.loop.wake();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const unsubscribeReady = bridge.on("game:ready", () => {
-      if (!cancelled) {
-        setStatus("ready");
+      if (cancelled) {
+        return;
       }
+
+      ready = true;
+      window.clearTimeout(bootTimeout);
+      setStatus("ready");
     });
+    const unsubscribeMapFallback = bridge.on(
+      "game:map-fallback",
+      ({ message }) => {
+        if (!cancelled) {
+          setMapFallbackMessage(message);
+        }
+      },
+    );
     const unsubscribeNearby = bridge.on("venue:nearby", ({ venueId }) => {
       if (!cancelled) {
         setNearbyVenueId(venueId);
@@ -107,11 +163,16 @@ export function GameCanvas({
         }
 
         gameRef.current = game;
+
+        if (document.hidden) {
+          game.loop.sleep();
+        }
       } catch (error) {
         if (cancelled) {
           return;
         }
 
+        window.clearTimeout(bootTimeout);
         console.error("Unable to start the GEN M beach scene.", error);
         setErrorMessage(
           error instanceof Error ? error.message : "The game could not start.",
@@ -124,7 +185,10 @@ export function GameCanvas({
 
     return () => {
       cancelled = true;
+      window.clearTimeout(bootTimeout);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       unsubscribeReady();
+      unsubscribeMapFallback();
       unsubscribeNearby();
       unsubscribeInteract();
       unsubscribePosition();
@@ -137,7 +201,11 @@ export function GameCanvas({
       game?.destroy(true);
       container.replaceChildren();
     };
-  }, [focusVenueId]);
+  }, [attempt, focusVenueId]);
+
+  const retry = useCallback(() => {
+    setAttempt((value) => value + 1);
+  }, []);
 
   useEffect(() => {
     if (!navigationNotice) {
@@ -223,9 +291,10 @@ export function GameCanvas({
       <div
         ref={hostRef}
         role="application"
-        aria-label="GEN M beach explorer. Walk with W, A, S, D, the arrow keys, or the on-screen joystick. Tap or click the map to walk to a point. Press E or Enter to view a nearby venue."
+        aria-label="GEN M beach explorer. Walk with W, A, S, D, the arrow keys, or the on-screen joystick. Tap or click the map to walk to a point. Press E or Enter to view a nearby venue, and Escape to stop walking."
+        aria-keyshortcuts="W A S D ArrowUp ArrowDown ArrowLeft ArrowRight E Enter Escape"
         tabIndex={0}
-        className="h-full w-full touch-none select-none outline-none [&>canvas]:block [&>canvas]:h-full [&>canvas]:w-full"
+        className="h-full w-full touch-none select-none [&>canvas]:block [&>canvas]:h-full [&>canvas]:w-full focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-lime"
       />
 
       {status !== "ready" && (
@@ -241,8 +310,8 @@ export function GameCanvas({
               </p>
               <button
                 type="button"
-                onClick={() => window.location.reload()}
-                className="mt-5 inline-flex min-h-10 items-center justify-center rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                onClick={retry}
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 Try again
               </button>
@@ -258,6 +327,24 @@ export function GameCanvas({
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {status === "ready" && mapFallbackMessage && (
+        <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex justify-center px-3 sm:top-24">
+          <div className="pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-3 text-brand-deep shadow-lift">
+            <p role="status" className="text-xs leading-relaxed">
+              {mapFallbackMessage}
+            </p>
+            <button
+              type="button"
+              onClick={() => setMapFallbackMessage(null)}
+              aria-label="Dismiss map loading notice"
+              className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            >
+              <X aria-hidden="true" className="size-3.5" />
+            </button>
+          </div>
         </div>
       )}
 

@@ -99,6 +99,7 @@ export function VenueDirectory({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby="venue-directory-description"
         className="pointer-events-auto flex max-h-[min(82dvh,44rem)] w-full max-w-lg flex-col overflow-hidden rounded-[2rem] border border-brand-deep/15 bg-cream text-brand-deep shadow-lift sm:max-h-[calc(100dvh-4rem)] sm:w-[420px]"
       >
         <div className="flex items-start justify-between gap-4 border-b border-brand-deep/10 p-5">
@@ -112,7 +113,10 @@ export function VenueDirectory({
             >
               Find a venue
             </h2>
-            <p className="mt-1 max-w-xs text-xs leading-relaxed text-brand-deep/75">
+            <p
+              id="venue-directory-description"
+              className="mt-1 max-w-xs text-xs leading-relaxed text-brand-deep/75"
+            >
               Choose a venue to walk there. Its panel opens when you arrive.
             </p>
           </div>
@@ -122,7 +126,7 @@ export function VenueDirectory({
             type="button"
             onClick={onClose}
             aria-label="Close venue directory"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             <X aria-hidden="true" className="size-4" />
           </button>
@@ -180,7 +184,7 @@ export function VenueDirectory({
                             disabled={!canNavigate}
                             onClick={() => onNavigate(venue)}
                             className={cn(
-                              "inline-flex min-h-10 shrink-0 items-center justify-center rounded-full px-3 py-2 font-display text-[9px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep",
+                              "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full px-3 py-2 font-display text-[9px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep",
                               canNavigate
                                 ? isNearby
                                   ? "bg-lime text-brand-deep hover:bg-brand-deep hover:text-lime"

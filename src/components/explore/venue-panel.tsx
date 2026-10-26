@@ -78,7 +78,7 @@ export const VenuePanel = memo(function VenuePanel({
             type="button"
             onClick={onClose}
             aria-label="Close venue details"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             <X aria-hidden="true" className="size-4" />
           </button>
@@ -178,7 +178,7 @@ export const VenuePanel = memo(function VenuePanel({
 
               <Link
                 href={`/sessions?venue=${venue.id}`}
-                className="inline-flex min-h-10 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                className="inline-flex min-h-11 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 View full programme
                 <ArrowUpRight aria-hidden="true" className="size-3.5" />
@@ -192,7 +192,7 @@ export const VenuePanel = memo(function VenuePanel({
             href={venue.officialUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             Official venue page
             <ArrowUpRight aria-hidden="true" className="size-3.5" />

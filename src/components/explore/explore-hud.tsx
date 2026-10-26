@@ -41,7 +41,7 @@ function ControlsContent({ compact = false }: { compact?: boolean }) {
         Tap a venue marker or use the directory to open its panel.
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-white/60">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-white/75">
         <Key>W</Key>
         <Key>A</Key>
         <Key>S</Key>
@@ -53,15 +53,20 @@ function ControlsContent({ compact = false }: { compact?: boolean }) {
         <Key>→</Key>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/60">
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/75">
         <Key>E</Key>
         <span>or</span>
         <Key>Enter</Key>
         <span>view nearby venue</span>
       </div>
 
+      <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-white/75">
+        <Key>Esc</Key>
+        <span>stop walking</span>
+      </div>
+
       {!compact && (
-        <p className="mt-3 max-w-xs text-[10px] leading-relaxed text-white/60 sm:text-[11px]">
+        <p className="mt-3 max-w-xs text-[10px] leading-relaxed text-white/75 sm:text-[11px]">
           The camera follows your character. The sea and major structures block
           movement.
         </p>
@@ -86,7 +91,7 @@ export function ExploreHud() {
           <Link
             href="/"
             aria-label="Back to the GEN M home page"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             <ArrowLeft aria-hidden="true" className="size-4" />
           </Link>
@@ -117,7 +122,7 @@ export function ExploreHud() {
           <details className="group relative lg:hidden">
             <summary
               aria-label="Explorer controls and help"
-              className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full border border-white/20 bg-brand-deep/85 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [&::-webkit-details-marker]:hidden"
+              className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-white/20 bg-brand-deep/85 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [&::-webkit-details-marker]:hidden"
             >
               <CircleHelp aria-hidden="true" className="size-4" />
               <span className="hidden sm:inline">Controls</span>
@@ -131,7 +136,7 @@ export function ExploreHud() {
             </div>
           </details>
 
-          <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-brand-deep/75 px-3 py-2 font-display text-[9px] font-bold tracking-[0.16em] text-white/60 uppercase shadow-lift backdrop-blur-md lg:flex">
+          <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-brand-deep/75 px-3 py-2 font-display text-[9px] font-bold tracking-[0.16em] text-white/75 uppercase shadow-lift backdrop-blur-md lg:flex">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-lime" />
             Venue map
             <span className="text-white/30">/</span>

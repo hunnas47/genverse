@@ -18,17 +18,19 @@ Build an illustrated, top-down 2D beach world based on the supplied GEN M venue 
 
 ## Current repository state
 
-Verified on 2026-10-25. Update this section when the project foundation changes.
+Verified on 2026-10-26. Update this section when the project foundation changes.
 
-- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones through M4 plus a genm.in-inspired design pass across the home page, programme, and explorer chrome.
+- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones through M6 plus the genm.in-inspired design pass across the home page, programme, and explorer chrome.
 - Next.js `16.4.3` App Router, React `19.3.0`, TypeScript `strict`, ESLint 9 flat config.
 - Tailwind CSS v4 is wired through the `@tailwindcss/turbopack` loader in `next.config.ts`.
 - Phaser `4.2.1` and Shadcn UI tooling are installed. The installed Phaser major version is 4, despite older references to Phaser 3 in planning documents.
-- `/explore` renders a client-only Phaser scene using the supplied venue map, with a movable player, camera follow, world bounds, approximate collision geometry, venue markers, proximity prompts, and a React venue panel.
+- `/explore` renders a client-only Phaser scene using the supplied venue map, with a movable player, camera follow, world bounds, approximate collision geometry, labelled venue markers, proximity prompts, A* tap-to-move, and a React venue panel.
+- M5 navigation includes the virtual joystick, tap-to-move pathfinding, minimap with walk-to-point, and a focus-trapped venue directory.
+- M6 polish includes labelled landmark markers, a player halo, a boot timeout with in-place retry, a simplified-map fallback with a dismissible notice, route-level error/404 pages, tab-visibility loop pausing, and a documented README.
 - Official S1–S7 venue names, descriptions, active days, and source links are in `src/data/venues.ts`, verified from `https://www.genm.in/venues` on 2026-10-24. S7 has no map marker because its official venue page says the map location is to be announced.
 - Map-only expo and facility labels (`A1`, `A3`, `B`, `C`, `S`, `O`, `R`, `E`, `P`) are marked `supplied-map` and are provisional. `A2` is not a separate record because the official venue list has no A2 entry.
 - `/sessions` is a searchable official programme with day, venue, and text filters, expandable session details, official session links, and venue deep links.
-- Official session and speaker fixtures are in `src/data/sessions.json` and `src/data/speakers.json`, extracted from `https://www.genm.in/sessions` and verified on 2026-10-25. `src/lib/programme.ts` validates venue, day, time, speaker, and status references at module load.
+- Official session and speaker fixtures are in `src/data/sessions.json` and `src/data/speakers.json`, extracted from `https://www.genm.in/sessions` and verified on 2026-10-25. On 2026-10-26 all 60 session IDs, days, venues, times, titles, subtitles, speaker IDs, and all 182 speaker names were re-checked against the official site's session bundle with no differences. `src/lib/programme.ts` validates venue, day, time, speaker, and status references at module load.
 - `/explore?venue=<id>` focuses a venue, moves the player to a nearby walkable point, and opens its panel. Venue panels list official sessions and link back to the programme.
 - Phaser and React communicate through the typed bridge in `src/game/events.ts` and `src/game/event-bridge.ts`.
 - Supplied map images and the GEN M wordmark live in `public/images/`. The no-legend `GEN-M-venue-map.jpg` is the current game background.
@@ -136,9 +138,10 @@ Build the playable map first, followed by movement, collisions, venue interactio
 - **M2 — Real map background:** supplied map fitted to world coordinates, calibrated collision geometry, sea/structure blocking, camera scaling. Done; venue anchors remain approximate to the artwork.
 - **M3 — Venue interactions:** canonical venue records, markers and interaction zones, proximity prompts, React venue panel, typed event bridge. Done. Official S1–S7 records are verified; map-only facilities are provisional; S7 has no marker because its official map location is to be announced.
 - **M4 — Session browser:** typed session models, local fixtures and validation, day/venue filters, session cards, session-to-map linking, official data research. Done. The official 60-session, 182-speaker programme is verified from `https://www.genm.in/sessions`; `/sessions` supports day, venue, and text filters, expandable details, and map deep links. S7 sessions show “Map location TBA” because the official location is unpublished.
-- **Design pass — genm.in-inspired UI:** local Neoverse/FKL Dhikk fonts, Anek Malayalam for Malayalam copy, shared site header/footer/action-link/wave components, restyled home, programme, and explorer HUD/panel. Done; M5 remains the next milestone.
-- **M5 — Navigation and mobile controls:** virtual joystick, tap-to-move, walkable pathfinding, minimap/directory, portrait and landscape polish.
-- **M6 — Polish and release:** artwork refinement, loading/error states, touch and keyboard accessibility, aspect-ratio testing, lifecycle checks, programme verification, deployment docs.
+- **Design pass — genm.in-inspired UI:** local Neoverse/FKL Dhikk fonts, Anek Malayalam for Malayalam copy, shared site header/footer/action-link/wave components, restyled home, programme, and explorer HUD/panel. Done.
+- **M5 — Navigation and mobile controls:** virtual joystick, tap-to-move, walkable pathfinding, minimap/directory, portrait and landscape polish. Done.
+- **M6 — Polish and release:** artwork refinement, loading/error states, touch and keyboard accessibility, aspect-ratio testing, lifecycle checks, programme verification, deployment docs. Done; awaiting review.
+- No later milestone is defined in the project reference. Future work should come from user review or new requirements.
 
 Do not skip ahead or bundle milestones unless asked. The current milestone is the first item above that is not yet complete.
 
