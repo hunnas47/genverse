@@ -428,9 +428,9 @@ export function GameCanvas({
     setCheckingInVenueId(null);
 
     if (result.accepted) {
-      setQuestNotice(`Checked in! +${result.points} points`);
+      setQuestNotice(`Stamped! +${result.points} points`);
     } else if (result.reason === "already-checked-in") {
-      setQuestNotice("Already checked in here today.");
+      setQuestNotice("Already stamped here today.");
     }
   }, [selectedVenueId, checkingInVenueId]);
 

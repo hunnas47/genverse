@@ -659,10 +659,6 @@ export default function Home() {
                 <ArrowRight aria-hidden="true" className="size-4" />
               </ActionLink>
             </div>
-            <p className="mt-4 max-w-xl text-[11px] leading-relaxed text-white/60">
-              Expo labels are taken from the supplied venue map and are
-              provisional until official details are published.
-            </p>
           </div>
 
           <div className="relative">
@@ -684,12 +680,12 @@ export default function Home() {
                 Lost City Expo
               </p>
               <p className="relative mt-2 text-sm leading-relaxed text-white/90">
-                An expo tent shown on the supplied venue map. Open the marker on
-                the beach to explore the surrounding spaces.
+                An expo tent on the beach map. Open the marker on the beach to
+                explore the surrounding spaces.
               </p>
               <div className="relative mt-6 flex items-center gap-2 text-xs text-white/90">
                 <MapPin aria-hidden="true" className="size-3.5 text-lime" />
-                Approximate map position
+                On the beach map
               </div>
             </div>
 

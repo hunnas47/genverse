@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { VENUES } from "@/data/venues";
@@ -173,9 +173,6 @@ export function VenueDirectory({
                             </div>
                             <p className="mt-0.5 text-[10px] text-brand-deep/75">
                               {VENUE_CATEGORY_LABELS[venue.category]}
-                              {venue.verification === "supplied-map"
-                                ? " · Map label"
-                                : " · Official"}
                             </p>
                           </div>
 
@@ -207,11 +204,6 @@ export function VenueDirectory({
             );
           })}
 
-          <p className="mt-2 flex items-start gap-1.5 rounded-xl border border-brand-deep/10 bg-brand-deep/5 px-3 py-2 text-[10px] leading-relaxed text-brand-deep/75">
-            <MapPin aria-hidden="true" className="mt-0.5 size-3 shrink-0" />
-            Facilities marked “Map label” come from the supplied venue map and
-            are provisional. S7 has no published map location yet.
-          </p>
         </div>
       </section>
     </div>

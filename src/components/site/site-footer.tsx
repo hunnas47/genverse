@@ -122,9 +122,7 @@ export function SiteFooter() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-[11px] leading-relaxed text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-3xl">
-            Session data is from the official GEN M programme. Venue map labels
-            come from the supplied artwork; labels marked as supplied-map are
-            provisional.
+            Session data is from the official GEN M programme.
           </p>
           <p className="shrink-0 font-display text-[10px] font-semibold tracking-[0.18em] text-white/55 uppercase">
             GEN M Explorer

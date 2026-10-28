@@ -215,13 +215,6 @@ export function SessionCard({
             </div>
           )}
 
-          {venue?.verification === "supplied-map" && (
-            <p className="rounded-2xl border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/75">
-              {venue.mapLabel} is a map label from the supplied venue map.
-              Official venue details are not published for this area yet.
-            </p>
-          )}
-
           {venue?.note && (
             <p className="rounded-2xl border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/75">
               {venue.note}

@@ -1,8 +1,15 @@
 "use client";
 
-import { ArrowUpRight, Check, MapPin, Sparkles, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  LoaderCircle,
+  Sparkles,
+  Stamp,
+  X,
+} from "lucide-react";
 import Link from "next/link";
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 import {
   formatSessionTimeRange,
@@ -11,8 +18,11 @@ import {
   groupSessionsByDay,
   isMalayalam,
 } from "@/lib/programme";
+import { cn } from "@/lib/utils";
 import { formatActiveDays, VENUE_CATEGORY_LABELS } from "@/lib/venues";
 import type { Venue } from "@/types/venue";
+
+const STAMP_DURATION_MS = 1800;
 
 export const VenuePanel = memo(function VenuePanel({
   venue,
@@ -28,10 +38,51 @@ export const VenuePanel = memo(function VenuePanel({
   onCheckIn: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const stampTimerRef = useRef<number | null>(null);
+  const previousVenueIdRef = useRef(venue.id);
+  const previousCheckedInRef = useRef(checkedIn);
+  const [stampActive, setStampActive] = useState(false);
   const titleId = `venue-panel-title-${venue.id}`;
   const activeDays = formatActiveDays(venue.activeDays);
   const sessions = getSessionsForVenue(venue.id);
   const sessionGroups = groupSessionsByDay(sessions);
+
+  useEffect(() => {
+    if (previousVenueIdRef.current !== venue.id) {
+      previousVenueIdRef.current = venue.id;
+      previousCheckedInRef.current = checkedIn;
+      setStampActive(false);
+      return;
+    }
+
+    if (!previousCheckedInRef.current && checkedIn) {
+      previousCheckedInRef.current = true;
+      setStampActive(true);
+
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate([18, 40, 35]);
+      }
+
+      if (stampTimerRef.current !== null) {
+        window.clearTimeout(stampTimerRef.current);
+      }
+
+      stampTimerRef.current = window.setTimeout(() => {
+        stampTimerRef.current = null;
+        setStampActive(false);
+      }, STAMP_DURATION_MS);
+    } else {
+      previousCheckedInRef.current = checkedIn;
+    }
+  }, [checkedIn, venue.id]);
+
+  useEffect(() => {
+    return () => {
+      if (stampTimerRef.current !== null) {
+        window.clearTimeout(stampTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -54,6 +105,35 @@ export const VenuePanel = memo(function VenuePanel({
       aria-labelledby={titleId}
       className="pointer-events-none absolute inset-0 z-30"
     >
+      {stampActive && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-0 z-[60] grid place-items-center overflow-hidden pb-72 sm:pb-0"
+        >
+          <div className="relative grid size-44 place-items-center sm:size-52">
+            <div className="quest-stamp-glow absolute -inset-4 rounded-full bg-lime/30 opacity-0 blur-2xl" />
+            <span className="quest-stamp-ring absolute inset-0 rounded-full border-2 border-lime/70 opacity-0" />
+            <span
+              className="quest-stamp-ring absolute inset-5 rounded-full border border-dashed border-brand-deep/40 opacity-0"
+              style={{ animationDelay: "120ms" }}
+            />
+            <div className="quest-stamp-slam relative grid size-36 place-items-center rounded-full border-[3px] border-brand-deep bg-lime text-brand-deep shadow-[0_20px_60px_rgba(28,29,58,0.45)] sm:size-44">
+              <span className="absolute inset-2 rounded-full border border-brand-deep/35" />
+              <span className="font-display text-[9px] font-bold tracking-[0.3em] uppercase">
+                GEN M
+              </span>
+              <span className="mt-0.5 font-display text-2xl font-black tracking-[0.06em] uppercase sm:text-3xl">
+                Stamped
+              </span>
+              <span className="mt-0.5 inline-flex items-center gap-1 font-display text-[9px] font-bold tracking-[0.14em] uppercase">
+                <Check aria-hidden="true" className="size-3" />
+                {venue.mapLabel} · +25 pts
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[min(70dvh,32rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-brand-deep/15 bg-cream p-5 text-brand-deep shadow-lift sm:inset-x-auto sm:top-24 sm:right-5 sm:bottom-auto sm:max-h-[calc(100dvh-12rem)] sm:w-[400px] sm:p-6">
         <div
           aria-hidden="true"
@@ -90,12 +170,6 @@ export const VenuePanel = memo(function VenuePanel({
           </button>
         </div>
 
-        <p className="mt-4 rounded-2xl border border-brand-deep/10 bg-brand-deep/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/75">
-          {venue.verification === "official"
-            ? "Official venue information verified from the GEN M website."
-            : "Label from the supplied venue map. Official details are not verified yet."}
-        </p>
-
         {venue.description && (
           <p className="mt-4 text-sm leading-relaxed text-brand-deep/75">
             {venue.description}
@@ -103,18 +177,26 @@ export const VenuePanel = memo(function VenuePanel({
         )}
 
         {venue.mapPosition && (
-          <div className="mt-4 rounded-2xl border border-brand/20 bg-lime/35 p-3.5">
+          <div
+            className={cn(
+              "relative mt-4 rounded-2xl border border-brand/20 bg-lime/35 p-3.5",
+              stampActive && "quest-card-thud",
+            )}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="flex items-center gap-1.5 font-display text-[9px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
                   <Sparkles aria-hidden="true" className="size-3" />
                   Beach Quest
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-brand-deep/75">
+                <p
+                  role="status"
+                  className="mt-1 text-xs leading-relaxed text-brand-deep/75"
+                >
                   {checkedIn
-                    ? "Checked in today. You earned 25 points here."
+                    ? "Stamped today. You earned 25 points here."
                     : checkInPending
-                      ? "Saving your check-in…"
+                      ? "Stamping your passport…"
                       : "Check in for 25 quest points. One stamp per venue per day."}
                 </p>
               </div>
@@ -123,15 +205,30 @@ export const VenuePanel = memo(function VenuePanel({
                 type="button"
                 onClick={onCheckIn}
                 disabled={checkedIn || checkInPending}
-                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand-deep px-3.5 py-2 font-display text-[9px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep disabled:cursor-default disabled:bg-brand-deep/10 disabled:text-brand-deep/60"
+                aria-busy={checkInPending || undefined}
+                className={cn(
+                  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[9px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
+                  checkedIn
+                    ? "bg-brand-deep text-lime"
+                    : checkInPending
+                      ? "bg-brand-deep/80 text-lime"
+                      : "bg-brand-deep text-lime hover:bg-brand-deep/90",
+                )}
               >
-                {checkedIn && (
+                {checkInPending ? (
+                  <LoaderCircle
+                    aria-hidden="true"
+                    className="size-3.5 motion-safe:animate-spin"
+                  />
+                ) : checkedIn ? (
                   <Check aria-hidden="true" className="size-3.5" />
+                ) : (
+                  <Stamp aria-hidden="true" className="size-3.5" />
                 )}
                 {checkInPending
-                  ? "Checking in…"
+                  ? "Stamping…"
                   : checkedIn
-                    ? "Checked in"
+                    ? "Stamped"
                     : "Check in"}
               </button>
             </div>
@@ -167,9 +264,7 @@ export const VenuePanel = memo(function VenuePanel({
 
           {sessions.length === 0 ? (
             <p className="mt-1 text-xs leading-relaxed text-brand-deep/75">
-              {venue.verification === "official"
-                ? "No official sessions are listed for this venue."
-                : "This map facility does not have a published session programme."}
+              No sessions are listed for this venue.
             </p>
           ) : (
             <div className="mt-2 space-y-4">
@@ -241,12 +336,6 @@ export const VenuePanel = memo(function VenuePanel({
           </a>
         )}
 
-        <p className="mt-4 flex items-start gap-1.5 text-[10px] leading-relaxed text-brand-deep/70">
-          <MapPin aria-hidden="true" className="mt-0.5 size-3 shrink-0" />
-          {venue.mapPosition
-            ? "Map position is approximate and calibrated from the supplied artwork."
-            : "This venue has no map marker yet."}
-        </p>
       </div>
     </aside>
   );
