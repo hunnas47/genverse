@@ -9,6 +9,7 @@ const exploreLinks = [
   { href: "/", label: "Home" },
   { href: "/explore", label: "Venue map" },
   { href: "/sessions", label: "Programme" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/explore?venue=a1", label: "Expo spaces" },
 ] as const;
 

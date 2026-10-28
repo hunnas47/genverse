@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, MapPin, X } from "lucide-react";
+import { ArrowUpRight, Check, MapPin, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { memo, useEffect, useRef } from "react";
 
@@ -17,9 +17,15 @@ import type { Venue } from "@/types/venue";
 export const VenuePanel = memo(function VenuePanel({
   venue,
   onClose,
+  checkedIn,
+  checkInPending = false,
+  onCheckIn,
 }: {
   venue: Venue;
   onClose: () => void;
+  checkedIn: boolean;
+  checkInPending?: boolean;
+  onCheckIn: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = `venue-panel-title-${venue.id}`;
@@ -94,6 +100,42 @@ export const VenuePanel = memo(function VenuePanel({
           <p className="mt-4 text-sm leading-relaxed text-brand-deep/75">
             {venue.description}
           </p>
+        )}
+
+        {venue.mapPosition && (
+          <div className="mt-4 rounded-2xl border border-brand/20 bg-lime/35 p-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 font-display text-[9px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
+                  <Sparkles aria-hidden="true" className="size-3" />
+                  Beach Quest
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-brand-deep/75">
+                  {checkedIn
+                    ? "Checked in today. You earned 25 points here."
+                    : checkInPending
+                      ? "Saving your check-in…"
+                      : "Check in for 25 quest points. One stamp per venue per day."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={onCheckIn}
+                disabled={checkedIn || checkInPending}
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand-deep px-3.5 py-2 font-display text-[9px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep disabled:cursor-default disabled:bg-brand-deep/10 disabled:text-brand-deep/60"
+              >
+                {checkedIn && (
+                  <Check aria-hidden="true" className="size-3.5" />
+                )}
+                {checkInPending
+                  ? "Checking in…"
+                  : checkedIn
+                    ? "Checked in"
+                    : "Check in"}
+              </button>
+            </div>
+          </div>
         )}
 
         {activeDays && (

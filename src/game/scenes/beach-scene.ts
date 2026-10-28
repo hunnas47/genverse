@@ -18,6 +18,7 @@ import {
   type NavigationGrid,
 } from "@/game/systems/pathfinding";
 import type { MapPoint } from "@/types/map";
+import type { QuestShell } from "@/types/quest";
 import type { Venue } from "@/types/venue";
 
 const MAP_TEXTURE_KEY = "genm-venue-map";
@@ -28,6 +29,7 @@ const PLAYER_POSITION_INTERVAL = 80;
 const WAYPOINT_ARRIVAL_DISTANCE = 6;
 const GRID_CELL_SIZE = 20;
 const VENUE_TAP_RADIUS = 38;
+const SHELL_COLLECT_RADIUS = 44;
 
 type MovementKeys = Record<
   "up" | "down" | "left" | "right",
@@ -59,6 +61,16 @@ export class BeachScene extends Phaser.Scene {
   private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
   private nearbyTween?: Phaser.Tweens.Tween;
 
+  private readonly shellMarkers = new Map<
+    string,
+    Phaser.GameObjects.Container
+  >();
+  private readonly collectedShellIds: Set<string>;
+  private readonly pendingShellIds = new Set<string>();
+  private readonly blockedShellIds = new Set<string>();
+  private unsubscribeShellResult?: () => void;
+  private unsubscribeQuestState?: () => void;
+
   private navigationGrid?: NavigationGrid;
   private path: MapPoint[] = [];
   private pathIndex = 0;
@@ -80,8 +92,11 @@ export class BeachScene extends Phaser.Scene {
   constructor(
     private readonly bridge: GameEventBridge,
     private readonly focusVenueId: string | null = null,
+    private readonly shells: readonly QuestShell[] = [],
+    collectedShellIds: readonly string[] = [],
   ) {
     super({ key: "BeachScene" });
+    this.collectedShellIds = new Set(collectedShellIds);
   }
 
   preload(): void {
@@ -97,6 +112,7 @@ export class BeachScene extends Phaser.Scene {
 
     this.createMapBackground();
     this.createVenueMarkers();
+    this.createShells();
     this.createPlayer();
     this.setupInput();
     this.setupCamera();
@@ -128,6 +144,18 @@ export class BeachScene extends Phaser.Scene {
     this.unsubscribeCancel = this.bridge.on("navigation:cancel", () => {
       this.cancelNavigation("cancelled");
     });
+    this.unsubscribeShellResult = this.bridge.on(
+      "quest:shell-result",
+      this.handleShellResult,
+    );
+    this.unsubscribeQuestState = this.bridge.on(
+      "quest:sync-state",
+      ({ collectedShellIds }) => {
+        for (const shellId of collectedShellIds) {
+          this.removeShell(shellId);
+        }
+      },
+    );
 
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
@@ -147,6 +175,7 @@ export class BeachScene extends Phaser.Scene {
     });
     this.emitPlayerPosition(0, false, true);
     this.updateNearbyVenue();
+    this.updateNearbyShell();
     this.focusRequestedVenue();
   }
 
@@ -190,6 +219,7 @@ export class BeachScene extends Phaser.Scene {
     }
 
     this.updateNearbyVenue();
+    this.updateNearbyShell();
     this.emitPlayerPosition(time, moving);
   }
 
@@ -275,6 +305,133 @@ export class BeachScene extends Phaser.Scene {
 
       this.markerRings.set(venue.id, ring);
     }
+  }
+
+  private createShells(): void {
+    for (const shell of this.shells) {
+      if (this.collectedShellIds.has(shell.id)) {
+        continue;
+      }
+
+      const container = this.add
+        .container(shell.x, shell.y)
+        .setDepth(shell.y + 4);
+      const shadow = this.add.ellipse(0, 10, 24, 9, 0x17343e, 0.16);
+      const glow = this.add
+        .circle(0, 0, 19, 0xedf2b5, 0.14)
+        .setStrokeStyle(2, 0xf7f3e8, 0.55);
+      const shellGraphics = this.add.graphics();
+
+      shellGraphics.fillStyle(0xf7f3e8, 1);
+      shellGraphics.lineStyle(1.5, 0xb8865b, 0.95);
+      shellGraphics.beginPath();
+      shellGraphics.arc(0, 0, 10, Math.PI * 1.1, Math.PI * 1.9, false);
+      shellGraphics.closePath();
+      shellGraphics.fillPath();
+      shellGraphics.strokePath();
+
+      for (let index = 0; index < 4; index += 1) {
+        const angle = Math.PI * 1.18 + (index / 3) * Math.PI * 0.64;
+
+        shellGraphics.beginPath();
+        shellGraphics.moveTo(0, 3);
+        shellGraphics.lineTo(Math.cos(angle) * 10, Math.sin(angle) * 10);
+        shellGraphics.strokePath();
+      }
+
+      shellGraphics.fillStyle(0xc98b6b, 1);
+      shellGraphics.fillCircle(0, 4, 2.5);
+
+      container.add([shadow, glow, shellGraphics]);
+      this.shellMarkers.set(shell.id, container);
+
+      if (!this.reducedMotion) {
+        this.tweens.add({
+          targets: container,
+          scale: { from: 0.94, to: 1.06 },
+          duration: 1400,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.easeInOut",
+        });
+      }
+    }
+  }
+
+  /**
+   * Shells are collected by walking close, so the interact key stays reserved
+   * for venues. React decides whether a find counts and answers with
+   * `quest:shell-result`.
+   */
+  private updateNearbyShell(): void {
+    if (!this.player || this.shellMarkers.size === 0) {
+      return;
+    }
+
+    for (const [shellId, marker] of this.shellMarkers) {
+      if (
+        this.pendingShellIds.has(shellId) ||
+        this.collectedShellIds.has(shellId)
+      ) {
+        continue;
+      }
+
+      const distance = Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        marker.x,
+        marker.y,
+      );
+
+      if (distance <= SHELL_COLLECT_RADIUS) {
+        if (this.blockedShellIds.has(shellId)) {
+          continue;
+        }
+
+        this.pendingShellIds.add(shellId);
+        this.bridge.emit("quest:shell-found", { shellId });
+      } else if (
+        this.blockedShellIds.has(shellId) &&
+        distance > SHELL_COLLECT_RADIUS + 12
+      ) {
+        this.blockedShellIds.delete(shellId);
+      }
+    }
+  }
+
+  private handleShellResult = ({
+    shellId,
+    accepted,
+  }: {
+    shellId: string;
+    accepted: boolean;
+  }): void => {
+    this.pendingShellIds.delete(shellId);
+
+    if (accepted) {
+      this.removeShell(shellId);
+      return;
+    }
+
+    // Stay put instead of re-emitting every frame; unblock once the player
+    // steps away from the shell.
+    this.blockedShellIds.add(shellId);
+  };
+
+  private removeShell(shellId: string): void {
+    const marker = this.shellMarkers.get(shellId);
+
+    this.pendingShellIds.delete(shellId);
+    this.blockedShellIds.delete(shellId);
+    this.collectedShellIds.add(shellId);
+
+    if (!marker) {
+      return;
+    }
+
+    this.shellMarkers.delete(shellId);
+    this.tweens.killTweensOf(marker);
+    marker.destroy(true);
   }
 
   private updateNearbyVenue(): void {
@@ -1057,10 +1214,17 @@ export class BeachScene extends Phaser.Scene {
     this.unsubscribeMove?.();
     this.unsubscribeNavigate?.();
     this.unsubscribeCancel?.();
+    this.unsubscribeShellResult?.();
+    this.unsubscribeShellResult = undefined;
+    this.unsubscribeQuestState?.();
+    this.unsubscribeQuestState = undefined;
     this.clearNavigationState();
     this.nearbyTween?.stop();
     this.nearbyTween = undefined;
     this.markerRings.clear();
+    this.shellMarkers.clear();
+    this.pendingShellIds.clear();
+    this.blockedShellIds.clear();
     this.nearbyVenueId = null;
     this.navigationGrid = undefined;
     this.pathGraphics = undefined;

@@ -2,12 +2,16 @@ import type Phaser from "phaser";
 
 import type { GameEventBridge } from "@/game/event-bridge";
 import { BeachScene } from "@/game/scenes/beach-scene";
+import type { QuestShell } from "@/types/quest";
 
 export interface CreateGameOptions {
   parent: HTMLElement;
   events: GameEventBridge;
   /** Optional venue to focus when the scene starts, usually from a deep link. */
   focusVenueId?: string | null;
+  /** Today's shells and any already collected on this device. */
+  shells?: readonly QuestShell[];
+  collectedShellIds?: readonly string[];
 }
 
 /**
@@ -18,13 +22,17 @@ export async function createGame({
   parent,
   events,
   focusVenueId = null,
+  shells = [],
+  collectedShellIds = [],
 }: CreateGameOptions): Promise<Phaser.Game> {
   const { default: PhaserRuntime } = await import("phaser");
 
   const config: Phaser.Types.Core.GameConfig = {
     type: PhaserRuntime.AUTO,
     backgroundColor: "#2c2d6f",
-    scene: [new BeachScene(events, focusVenueId)],
+    scene: [
+      new BeachScene(events, focusVenueId, shells, collectedShellIds),
+    ],
     render: {
       antialias: true,
       roundPixels: true,

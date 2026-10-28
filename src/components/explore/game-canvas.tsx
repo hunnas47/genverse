@@ -5,18 +5,45 @@ import { X } from "lucide-react";
 import type Phaser from "phaser";
 
 import { MiniMap } from "@/components/explore/mini-map";
+import { QuestHud } from "@/components/explore/quest-hud";
+import { QuestJoinDialog } from "@/components/explore/quest-join-dialog";
+import { QuestPanel } from "@/components/explore/quest-panel";
 import { VenueDirectory } from "@/components/explore/venue-directory";
 import { VenuePanel } from "@/components/explore/venue-panel";
 import { VenuePrompt } from "@/components/explore/venue-prompt";
 import { VirtualJoystick } from "@/components/explore/virtual-joystick";
 import { VENUES_BY_ID } from "@/data/venues";
 import { GameEventBridge } from "@/game/event-bridge";
+import { liveQuestStore } from "@/lib/quest/live-store";
+import { useQuest } from "@/lib/quest/use-quest";
 import type { MapPoint } from "@/types/map";
+import type { QuestNameResult } from "@/types/quest";
 import type { Venue } from "@/types/venue";
 
 type GameStatus = "loading" | "ready" | "error";
 
 const BOOT_TIMEOUT_MS = 15000;
+const JOIN_PROMPT_STORAGE_KEY = "genm:quest:join-prompt-dismissed";
+
+function hasDismissedJoinPrompt(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return window.sessionStorage.getItem(JOIN_PROMPT_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberJoinPromptDismissed(): void {
+  try {
+    window.sessionStorage.setItem(JOIN_PROMPT_STORAGE_KEY, "1");
+  } catch {
+    // Session storage can be blocked; the in-memory state still works.
+  }
+}
 
 export function GameCanvas({
   focusVenueId = null,
@@ -40,8 +67,21 @@ export function GameCanvas({
   );
   const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
   const [directoryOpen, setDirectoryOpen] = useState(false);
+  const [questPanelOpen, setQuestPanelOpen] = useState(false);
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [joinDismissed, setJoinDismissed] = useState(hasDismissedJoinPrompt);
+  const [questNotice, setQuestNotice] = useState<string | null>(null);
+  const [checkingInVenueId, setCheckingInVenueId] = useState<string | null>(
+    null,
+  );
+  const quest = useQuest();
+  const questPeriodId = quest.snapshot?.period.id ?? null;
 
   useEffect(() => {
+    if (!quest.ready) {
+      return;
+    }
+
     const host = hostRef.current;
     if (!host) {
       return;
@@ -143,6 +183,33 @@ export function GameCanvas({
         );
       }
     });
+    const unsubscribeShellFound = bridge.on(
+      "quest:shell-found",
+      ({ shellId }) => {
+        void (async () => {
+          const result = await liveQuestStore.collectShell(shellId);
+
+          if (cancelled) {
+            return;
+          }
+
+          bridge.emit("quest:shell-result", {
+            shellId,
+            accepted: result.accepted,
+          });
+
+          if (result.accepted) {
+            const points = result.points + result.bonusPoints;
+
+            setQuestNotice(
+              result.bonusPoints > 0
+                ? `Full set! +${points} points`
+                : `Shell found! +${points} points`,
+            );
+          }
+        })();
+      },
+    );
 
     async function boot() {
       try {
@@ -151,10 +218,13 @@ export function GameCanvas({
           return;
         }
 
+        const snapshot = liveQuestStore.getSnapshot();
         const game = await createGame({
           parent: container,
           events: bridge,
           focusVenueId,
+          shells: snapshot.period.shellSet.shells,
+          collectedShellIds: snapshot.collectedShellIds,
         });
 
         if (cancelled) {
@@ -193,6 +263,7 @@ export function GameCanvas({
       unsubscribeInteract();
       unsubscribePosition();
       unsubscribeNavigation();
+      unsubscribeShellFound();
       bridge.clear();
       bridgeRef.current = null;
 
@@ -201,7 +272,7 @@ export function GameCanvas({
       game?.destroy(true);
       container.replaceChildren();
     };
-  }, [attempt, focusVenueId]);
+  }, [attempt, focusVenueId, quest.ready, questPeriodId]);
 
   const retry = useCallback(() => {
     setAttempt((value) => value + 1);
@@ -216,6 +287,29 @@ export function GameCanvas({
 
     return () => window.clearTimeout(timer);
   }, [navigationNotice]);
+
+  useEffect(() => {
+    if (!questNotice) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setQuestNotice(null), 3200);
+
+    return () => window.clearTimeout(timer);
+  }, [questNotice]);
+
+  const collectedShellKey =
+    quest.snapshot?.collectedShellIds.join("|") ?? "";
+
+  useEffect(() => {
+    if (!collectedShellKey) {
+      return;
+    }
+
+    bridgeRef.current?.emit("quest:sync-state", {
+      collectedShellIds: collectedShellKey.split("|"),
+    });
+  }, [collectedShellKey]);
 
   const nearbyVenue = nearbyVenueId
     ? (VENUES_BY_ID.get(nearbyVenueId) ?? null)
@@ -283,8 +377,71 @@ export function GameCanvas({
     hostRef.current?.focus();
   }, []);
 
+  const handleJoin = useCallback(
+    async (name: string): Promise<QuestNameResult> => {
+      const result = await liveQuestStore.join(name);
+
+      if (result.ok) {
+        rememberJoinPromptDismissed();
+        setJoinDismissed(true);
+        setJoinDialogOpen(false);
+        setQuestNotice(`Welcome, ${result.value}. Find today's shells!`);
+      }
+
+      return result;
+    },
+    [],
+  );
+
+  const dismissJoin = useCallback(() => {
+    rememberJoinPromptDismissed();
+    setJoinDismissed(true);
+    setJoinDialogOpen(false);
+  }, []);
+
+  const openJoinDialog = useCallback(() => {
+    setQuestPanelOpen(false);
+    setJoinDialogOpen(true);
+  }, []);
+
+  const openQuest = useCallback(() => {
+    if (!quest.snapshot?.joined) {
+      setJoinDialogOpen(true);
+      return;
+    }
+
+    setQuestPanelOpen(true);
+  }, [quest.snapshot?.joined]);
+
+  const closeQuestPanel = useCallback(() => {
+    setQuestPanelOpen(false);
+    hostRef.current?.focus();
+  }, []);
+
+  const checkInSelectedVenue = useCallback(async () => {
+    if (!selectedVenueId || checkingInVenueId) {
+      return;
+    }
+
+    setCheckingInVenueId(selectedVenueId);
+    const result = await liveQuestStore.checkInVenue(selectedVenueId);
+    setCheckingInVenueId(null);
+
+    if (result.accepted) {
+      setQuestNotice(`Checked in! +${result.points} points`);
+    } else if (result.reason === "already-checked-in") {
+      setQuestNotice("Already checked in here today.");
+    }
+  }, [selectedVenueId, checkingInVenueId]);
+
   const showBottomControls =
     status === "ready" && !selectedVenue && !directoryOpen;
+  const showJoinDialog =
+    joinDialogOpen ||
+    (status === "ready" &&
+      quest.ready &&
+      !quest.snapshot?.joined &&
+      !joinDismissed);
 
   return (
     <div className="absolute inset-0">
@@ -330,8 +487,12 @@ export function GameCanvas({
         </div>
       )}
 
+      {status === "ready" && quest.snapshot && (
+        <QuestHud snapshot={quest.snapshot} onOpen={openQuest} />
+      )}
+
       {status === "ready" && mapFallbackMessage && (
-        <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex justify-center px-3 sm:top-24">
+        <div className="pointer-events-none absolute inset-x-0 top-36 z-30 flex justify-center px-3 sm:top-32">
           <div className="pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-3 text-brand-deep shadow-lift">
             <p role="status" className="text-xs leading-relaxed">
               {mapFallbackMessage}
@@ -345,6 +506,15 @@ export function GameCanvas({
               <X aria-hidden="true" className="size-3.5" />
             </button>
           </div>
+        </div>
+      )}
+
+      {status === "ready" && questNotice && (
+        <div
+          role="status"
+          className="pointer-events-none absolute top-36 left-3 z-30 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-2.5 text-xs leading-relaxed text-brand-deep shadow-lift sm:top-40 sm:left-5"
+        >
+          {questNotice}
         </div>
       )}
 
@@ -372,7 +542,16 @@ export function GameCanvas({
         )}
 
       {selectedVenue && (
-        <VenuePanel venue={selectedVenue} onClose={closeVenue} />
+        <VenuePanel
+          venue={selectedVenue}
+          onClose={closeVenue}
+          checkedIn={
+            quest.snapshot?.checkedInVenueIds.includes(selectedVenue.id) ??
+            false
+          }
+          checkInPending={checkingInVenueId === selectedVenue.id}
+          onCheckIn={checkInSelectedVenue}
+        />
       )}
 
       {directoryOpen && (
@@ -390,6 +569,24 @@ export function GameCanvas({
         >
           {navigationNotice}
         </div>
+      )}
+
+      {status === "ready" && quest.snapshot && questPanelOpen && (
+        <QuestPanel
+          snapshot={quest.snapshot}
+          sync={quest.sync}
+          onClose={closeQuestPanel}
+          onJoinRequest={openJoinDialog}
+        />
+      )}
+
+      {showJoinDialog && (
+        <QuestJoinDialog
+          open
+          initialName={quest.snapshot?.profile?.displayName ?? ""}
+          onJoin={handleJoin}
+          onDismiss={dismissJoin}
+        />
       )}
     </div>
   );

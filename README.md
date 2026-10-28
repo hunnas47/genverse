@@ -16,6 +16,7 @@ browse the official session programme without entering the game.
 | `/sessions?day=nov-14` | Opens the programme with a day preselected |
 | `/sessions?venue=s2` | Filters the programme to one venue |
 | `/sessions?session=<id>` | Expands a specific session |
+| `/leaderboard` | Daily and all-time Beach Quest leaderboard |
 
 ## Stack
 
@@ -24,6 +25,8 @@ browse the official session programme without entering the game.
 - Tailwind CSS v4 through the `@tailwindcss/turbopack` loader
 - Phaser `4.2.1`, loaded client-side only
 - Shadcn UI tooling and Base UI primitives
+- Supabase Postgres, anonymous auth, RPCs, and row-level security for the
+  shared Beach Quest
 - Local Neoverse Sans and FKL Dhikk fonts, plus Anek Malayalam for Malayalam
   session titles
 
@@ -50,6 +53,34 @@ allowedDevOrigins: ["192.168.1.20"],
 
 This setting is development-only and does not affect a production build.
 
+### Shared leaderboard setup
+
+The map and programme work without a backend. The shared Beach Quest needs a
+free Supabase project:
+
+1. Create a project at <https://supabase.com>.
+2. In **Authentication → Providers**, enable **Anonymous Sign-Ins**.
+3. Open the SQL editor and run
+   `supabase/migrations/20261028100000_beach_quest.sql`. The migration is
+   idempotent, so rerunning it is safe.
+4. Add the project URL and **publishable/anon** key to `.env.local`:
+
+   ```bash
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-publishable-key
+   ```
+
+   Never put the secret/service-role key in this app or in a `NEXT_PUBLIC_*`
+   variable.
+5. Verify the project:
+
+   ```bash
+   npm run check:supabase
+   ```
+
+Without these variables the app stays in local-only mode. The publishable key
+is safe to ship because writes go through validated RPCs and row-level security.
+
 ## Commands
 
 | Command | What it does |
@@ -57,11 +88,61 @@ This setting is development-only and does not affect a production build.
 | `npm run dev` | Start the Next.js dev server |
 | `npm run lint` | Run ESLint |
 | `npx tsc --noEmit` | Type-check without emitting files |
+| `npm test` | Run the Vitest quest, SQL, and rule tests |
+| `npm run check:supabase` | Check remote anonymous auth and quest RPCs |
 | `npm run build` | Create a production build |
 | `npm start` | Serve the production build on port 3000 |
 
-There is no test runner in the repository. Do not claim automated tests ran;
-use lint, type-check, build, and a manual or scripted browser pass instead.
+`npm test` covers quest period rotation, display-name validation, scoring,
+idempotency, cooldowns, streaks, shell walkability, the SQL migration, and
+seed drift between the SQL and TypeScript data. The SQL tests use PGlite, so
+they do not need a remote Supabase project. There is no browser/E2E suite and
+no CI, so still do a manual pass on `/explore` at phone and desktop widths.
+
+## Beach Quest
+
+The map includes a daily shell hunt, a venue passport, and a shared leaderboard:
+
+- A display name is optional at first visit; progress still works as a guest.
+  Guest points carry over when the visitor chooses a name, and unnamed players
+  stay off the leaderboard.
+- Ten shells rotate daily from three hand-placed sets in `src/data/quest.ts`.
+  Walking within 44 world units collects one. A full set adds a 50-point bonus.
+- Opening a venue panel and checking in earns 25 points once per venue per day.
+- Streaks count consecutive active days; the HUD shows today's points, shell
+  progress, and the streak.
+- The daily period and leaderboard reset use Asia/Kolkata (IST).
+- `/leaderboard` shows today's board and an all-time board. The panel also shows
+  how many explorers were seen in the last five minutes.
+
+The local store in `src/lib/quest/store.ts` is still the offline source of
+truth. The sync layer in `src/lib/quest/live-store.ts`:
+
+- signs in anonymously and caches the server snapshot;
+- sends writes through the Supabase RPCs first;
+- falls back to the local store when offline and queues unsynced finds in
+  `genm:quest:queue:v1`;
+- replays queued finds with enough spacing for the server cooldown;
+- layers pending local points over the cached server state so the HUD never
+  waits for the network.
+
+The server is authoritative for today's shell set, duplicate finds, the
+1.2-second shell gap, venue IDs, points, streaks, and leaderboard ranking. The
+server cannot prove that a phone was physically near a shell; walking proximity
+is an on-device rule. Do not attach valuable prizes without adding stronger
+anti-cheat.
+
+Local progress uses `genm:quest:v1`. Clearing site data also clears the
+anonymous Supabase session, so server points from the old anonymous identity
+cannot be recovered without adding real accounts.
+
+To hide an inappropriate leaderboard name, run this in the Supabase SQL editor:
+
+```sql
+update public.players
+set is_hidden = true
+where lower(display_name) = lower('name to hide');
+```
 
 ## Data and provenance
 
@@ -105,8 +186,11 @@ up refreshed data.
 src/app/         routes, metadata, global styles, error and 404 states
 src/components/  React UI: explorer shell, HUD, panels, directory, joystick
 src/game/        Phaser scene, typed bridge, collision, A* pathfinding
-src/data/        venue records, programme fixtures, world geometry
+src/data/        venue records, programme fixtures, world geometry, quest data
+src/lib/quest/   local-first quest store, sync layer, period rotation, name rules
+src/lib/supabase/ browser client and anonymous session bootstrap
 src/types/       shared domain and search-param types
+supabase/        SQL migration for tables, seeds, RPCs, RLS, and grants
 public/images/   supplied map artwork and GEN M wordmark
 ```
 
@@ -116,6 +200,9 @@ public/images/   supplied map artwork and GEN M wordmark
   same collision-aware movement loop in `src/game/scenes/beach-scene.ts`.
 - The scene and React communicate only through the typed contract in
   `src/game/events.ts` and `src/game/event-bridge.ts`.
+- Shared quest state is fetched with compact RPC calls rather than Realtime.
+  The map does not stream other players' positions; the shared layer is an
+  asynchronous leaderboard plus a five-minute presence count.
 - World units match the supplied map image pixels (`1989 × 1453`). Playable
   bounds, obstacles, spawn, and marker colors live in `src/data/venue-map.ts`.
 - The map image is loaded at runtime. If it fails, the scene draws a simplified
@@ -141,12 +228,31 @@ public/images/   supplied map artwork and GEN M wordmark
 
 ## Deployment
 
-The app has no backend, database, environment variables, or privileged keys.
+**Live:** <https://genm-explorer.vercel.app> (Vercel production, Supabase Free).
+
+The programme and map are bundled at build time. The shared Beach Quest uses
+Supabase's free tier; there is no other backend or secret key in the app.
+
+### Supabase
+
+Apply `supabase/migrations/20261028100000_beach_quest.sql` in the SQL editor and
+enable **Authentication → Providers → Anonymous Sign-Ins** before the first
+deployment. Run `npm run check:supabase` against the production project. Keep
+the service-role key out of Vercel and the browser.
 
 ### Vercel
 
-Import the repository, keep the detected Next.js settings, and deploy. No extra
-configuration is required.
+Import the repository and keep the detected Next.js settings. Add these
+environment variables to the Production (and Preview, if used) environment:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-publishable-key
+```
+
+`NEXT_PUBLIC_*` values are inlined at build time, so redeploy after changing
+them. A deployment without the variables still serves the map and programme,
+but the quest stays local to each device.
 
 ### Node server
 
@@ -158,7 +264,8 @@ npm start
 
 Serve port 3000 behind your reverse proxy. Static assets under `/_next/static`
 and `public/images` can be cached aggressively; HTML and programme data change
-only on redeploy.
+only on redeploy. Set the same public Supabase variables in the build
+environment.
 
 Before a public launch, confirm branding and content authorization with GEN M.
 This repository is an independent explorer and should not be presented as an
@@ -171,4 +278,13 @@ official GEN M product without that approval.
 - Nine sessions have no published speakers.
 - The programme is a point-in-time extraction; verify against the official site
   before the event.
-- No automated test suite is installed yet.
+- Beach Quest walking proximity is a client-side rule. The server blocks
+  duplicate, out-of-set, and rapid submissions but cannot prove physical
+  presence.
+- The shared layer is asynchronous: it shows points and a presence count, not
+  live avatars or positions. This is intentional for the free tier.
+- Clearing site data creates a new anonymous identity. Old server points remain
+  but cannot be recovered without real accounts.
+- Display names are not a secure identity; the event team can hide a name with
+  the SQL above.
+- There is no browser/E2E test suite yet.

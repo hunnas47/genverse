@@ -72,13 +72,23 @@ function ControlsContent({ compact = false }: { compact?: boolean }) {
         </p>
       )}
 
-      <Link
-        href="/sessions"
-        className="pointer-events-auto mt-3 inline-flex min-h-10 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-      >
-        Browse the full programme
-        <ArrowUpRight aria-hidden="true" className="size-3.5" />
-      </Link>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <Link
+          href="/sessions"
+          className="pointer-events-auto inline-flex min-h-11 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        >
+          Browse the full programme
+          <ArrowUpRight aria-hidden="true" className="size-3.5" />
+        </Link>
+
+        <Link
+          href="/leaderboard"
+          className="pointer-events-auto inline-flex min-h-11 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        >
+          Beach Quest leaderboard
+          <ArrowUpRight aria-hidden="true" className="size-3.5" />
+        </Link>
+      </div>
     </>
   );
 }

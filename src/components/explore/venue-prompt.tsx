@@ -13,7 +13,7 @@ export function VenuePrompt({
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none absolute inset-x-0 top-32 z-20 flex justify-center px-3 sm:top-36"
+      className="pointer-events-none absolute inset-x-0 top-40 z-20 flex justify-center px-3 sm:top-36"
     >
       <button
         type="button"

@@ -11,6 +11,7 @@ const navLinks = [
   { href: "/#venues", label: "Venues" },
   { href: "/#expo", label: "Expo" },
   { href: "/sessions", label: "Sessions" },
+  { href: "/leaderboard", label: "Leaderboard" },
 ] as const;
 
 function NavLink({ href, label }: { href: string; label: string }) {

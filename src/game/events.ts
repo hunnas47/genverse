@@ -56,6 +56,19 @@ export interface GameEventMap {
     y: number;
     moving: boolean;
   };
+  /** The player walked into a shell; React owns the score and persistence. */
+  "quest:shell-found": {
+    shellId: string;
+  };
+  /** Confirms whether a shell should disappear (accepted) or stay (rejected). */
+  "quest:shell-result": {
+    shellId: string;
+    accepted: boolean;
+  };
+  /** Shared state changed; remove any shells that were already collected. */
+  "quest:sync-state": {
+    collectedShellIds: readonly string[];
+  };
 }
 
 export type GameEventName = keyof GameEventMap;

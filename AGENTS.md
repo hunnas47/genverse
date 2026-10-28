@@ -8,142 +8,79 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# GEN M Explorer — Project Instructions
+# GEN M Explorer
 
-You are my coding partner for building a mobile-responsive interactive 2D venue explorer for GEN M.
+Mobile-first 2D beach explorer for GEN M (Kozhikode Beach, 13–15 Nov 2026): branded landing page, Phaser venue map at `/explore`, official programme at `/sessions`. `GENM_EXPLORER_PROJECT_REFERENCE.md` is the product spec and outranks this file; `README.md` has the full data and deployment story.
 
-## Product vision
+## Stack quirks
 
-Build an illustrated, top-down 2D beach world based on the supplied GEN M venue map. Visitors can walk around using keyboard controls or a mobile joystick, tap destinations to move, interact with venues, and view official session information.
-
-## Current repository state
-
-Verified on 2026-10-26. Update this section when the project foundation changes.
-
-- `create-next-app` foundation with three commits; the current working tree contains the playable explorer milestones through M6 plus the genm.in-inspired design pass across the home page, programme, and explorer chrome.
-- Next.js `16.4.3` App Router, React `19.3.0`, TypeScript `strict`, ESLint 9 flat config.
-- Tailwind CSS v4 is wired through the `@tailwindcss/turbopack` loader in `next.config.ts`.
-- Phaser `4.2.1` and Shadcn UI tooling are installed. The installed Phaser major version is 4, despite older references to Phaser 3 in planning documents.
-- `/explore` renders a client-only Phaser scene using the supplied venue map, with a movable player, camera follow, world bounds, approximate collision geometry, labelled venue markers, proximity prompts, A* tap-to-move, and a React venue panel.
-- M5 navigation includes the virtual joystick, tap-to-move pathfinding, minimap with walk-to-point, and a focus-trapped venue directory.
-- M6 polish includes labelled landmark markers, a player halo, a boot timeout with in-place retry, a simplified-map fallback with a dismissible notice, route-level error/404 pages, tab-visibility loop pausing, and a documented README.
-- Official S1–S7 venue names, descriptions, active days, and source links are in `src/data/venues.ts`, verified from `https://www.genm.in/venues` on 2026-10-24. S7 has no map marker because its official venue page says the map location is to be announced.
-- Map-only expo and facility labels (`A1`, `A3`, `B`, `C`, `S`, `O`, `R`, `E`, `P`) are marked `supplied-map` and are provisional. `A2` is not a separate record because the official venue list has no A2 entry.
-- `/sessions` is a searchable official programme with day, venue, and text filters, expandable session details, official session links, and venue deep links.
-- Official session and speaker fixtures are in `src/data/sessions.json` and `src/data/speakers.json`, extracted from `https://www.genm.in/sessions` and verified on 2026-10-25. On 2026-10-26 all 60 session IDs, days, venues, times, titles, subtitles, speaker IDs, and all 182 speaker names were re-checked against the official site's session bundle with no differences. `src/lib/programme.ts` validates venue, day, time, speaker, and status references at module load.
-- `/explore?venue=<id>` focuses a venue, moves the player to a nearby walkable point, and opens its panel. Venue panels list official sessions and link back to the programme.
-- Phaser and React communicate through the typed bridge in `src/game/events.ts` and `src/game/event-bridge.ts`.
-- Supplied map images and the GEN M wordmark live in `public/images/`. The no-legend `GEN-M-venue-map.jpg` is the current game background.
-- Local fonts live in `src/app/fonts/`: Neoverse Sans (400/500), FKL Dhikk (300/400/600/700/900), and the GEN M wordmark is `public/images/genm-logo.png`. Anek Malayalam is loaded through `next/font/google` and applied to `lang="ml"` content.
-- The visual system uses deep indigo (`#2c2d6f`), brand periwinkle (`#5964ae`), lime (`#edf2b5`), cream (`#f7f3e8`), and lavender (`#dfe2f3`), with wave dividers and shared `SiteHeader`/`SiteFooter`/`ActionLink` components.
-- `GENM_EXPLORER_PROJECT_REFERENCE.md` is the primary product specification and takes precedence when it conflicts with this file.
-- **Not installed yet:** a test runner and any backend/database.
-- The home page is a branded landing page with entry points to the map and programme. Official session data is now in the repo; venue map labels remain provisional where marked `supplied-map`.
-- `/sessions?day=<id>` opens the programme with that day preselected; `?venue=<id>` and `?session=<id>` continue to deep-link the programme.
-- `next.config.ts` enables `cacheComponents`, `partialPrefetching`, and `experimental.agentFeedback`.
-- `next.config.ts` also allows the current LAN host in `allowedDevOrigins` so a phone can load dev assets; update the IP when the network changes.
-- Import alias: `@/*` maps to `src/*`.
-- No test script exists; do not claim tests ran.
-
-## Technology
-
-- Next.js 16 App Router
-- React and TypeScript
-- Phaser 4 (installed) for the game world; the project reference still says Phaser 3
-- Tailwind CSS v4
-- Shadcn UI for accessible interface components
-- `next/font/local` for Neoverse Sans and FKL Dhikk; `next/font/google` for Anek Malayalam
-- Typed local data; official venue records are in TypeScript and the official programme/speaker fixtures are JSON
-- Git for version control
-
-Add a dependency only when the current milestone needs it. Use the installed Phaser version unless a verified compatibility issue justifies a change.
-
-## Architecture
-
-- Keep Phaser logic separate from React UI.
-- Load Phaser client-side only (dynamic import inside a client component; keep it out of server render).
-- Use typed venue and session models.
-- Keep map positions, collisions, and interaction zones in configurable data, not hardcoded in scenes.
-- Use one movement system for keyboard, joystick, and tap-to-move; all inputs must feed the same movement intent and collision handling.
-- Communicate between Phaser and React through a documented, typed event interface. Keep the contract in one module; avoid untyped global events and ad-hoc DOM events.
-- Keep session browsing usable without entering the game.
-- Add a backend only when justified by verified data integration requirements.
-
-### Target structure
-
-Adjust deliberately rather than by accident:
-
-```text
-src/app/        routes, layout, global styles
-src/components/ React UI: explorer shell, panels, mobile controls
-src/game/       Phaser scenes, systems, input, event bridge
-src/data/       venues, sessions, map/collision config
-src/types/      shared domain and event types
-public/assets/  map art, sprites, audio
-```
-
-## Domain data rules
-
-- Never invent official venue details, speakers, sessions, or times.
-- Use only user-supplied or verifiably official data. If a field is unknown, represent it as missing/`TBD` rather than guessing.
-- Keep official content separate from placeholder visuals so real data can be dropped in safely.
-- Every venue reference in map config must resolve to a real entry in the venue data; validate this at build time or with a small script.
-
-## Development rules
-
-1. Inspect the existing code before editing.
-2. Work in small, testable milestones.
-3. Implement the smallest complete feature that satisfies each task.
-4. Run appropriate lint, type-check, and build commands after significant changes.
-5. Fix errors introduced by your changes.
-6. Never claim a command or test passed unless you ran it and verified the result.
-7. Never invent official venue details, speakers, sessions, or times.
-8. Do not expose credentials or put privileged API keys in client-side code.
-9. Preserve working features and avoid unnecessary dependencies.
-10. Explain important decisions and list changed files after each task.
-11. Ask before destructive operations, deployment, or actions involving real credentials.
-12. Prefer accessible, performant, mobile-first UI.
+- Next.js `16.4.3` App Router, React `19.3.0`, TypeScript strict, Tailwind CSS v4, Phaser `4.2.1`. The installed Phaser is **v4**, not v3 — v3 examples and APIs may not apply.
+- Phaser must stay client-only: it is dynamically imported in `src/game/create-game.ts`. `import type Phaser` in UI files is fine; a value import in a server component is not.
+- Tailwind v4 has no config file: tokens live in `@theme inline` in `src/app/globals.css`, loaded through `@tailwindcss/turbopack` in `next.config.ts`.
+- `cn` comes from the `cn` package, not clsx/tailwind-merge: app code imports it from `@/lib/utils`, while generated `src/components/ui/` files import it from `"cn"` directly.
+- Shadcn uses the `base-nova` style and Base UI (`@base-ui/react`), not Radix; generated primitives go in `src/components/ui/`.
+- `cacheComponents` and `partialPrefetching` are enabled. Page `searchParams` are promises (`SearchParams` in `src/types/search.ts`) resolved with `use()` inside the client wrappers, and route files use generated types like `LayoutProps<"/">` — don't hand-write either.
+- `next dev` owns the two `BEGIN:nextjs-agent-*` blocks in this file; don't delete them, and include `AGENTS.md` when committing.
+- `allowedDevOrigins` in `next.config.ts` hard-codes the current LAN IP for phone testing; update it when the network changes.
 
 ## Commands
 
 ```bash
-npm run dev          # Next.js dev server
+npm run dev          # dev server
 npm run lint         # ESLint
-npx tsc --noEmit     # type-check (no dedicated script yet)
-npm run build        # production build
-npm start            # serve the production build
+npx tsc --noEmit     # type-check (no npm script)
+npm test             # Vitest quest, SQL, and rule tests
+npm run check:supabase # remote auth and quest RPC smoke check
+npm run build        # production build (Turbopack; also runs TypeScript)
+npm start            # serve the build
 ```
 
-For each milestone: run `npm run lint` and `npx tsc --noEmit`; run `npm run build` before calling the milestone complete. Report the exact commands and outcomes.
+There is no CI and no browser/E2E suite. Run `npm test` for the quest rules and
+PGlite SQL migration tests, then lint + type-check, then the build. Never claim a
+check ran unless you ran it; report the exact commands and outcomes. The game
+itself still needs a manual pass on `/explore` at phone and desktop widths.
 
-## Visual direction
+## Architecture
 
-Use the genm.in-inspired system: Neoverse for editorial headings and body copy, FKL Dhikk for uppercase labels, buttons, and numerals, deep indigo/periwinkle/lime/cream surfaces, wave section transitions, rounded cards, and restrained motion. Keep the illustrated beach map and venue markers clear, respect `prefers-reduced-motion`, maintain readable contrast over the artwork, and keep touch targets comfortably sized. Text on brand surfaces uses high-opacity white/cream or deep indigo, and translucent cards stay dark enough to keep normal-text contrast. The map must remain usable at phone widths and in landscape.
+- `/` is a static landing page. `/explore` is a full-screen Phaser canvas with a React HUD; `/sessions` must stay usable without opening the game. `/leaderboard` is the shared daily/all-time board and must work without the canvas.
+- Keep Phaser out of React and React out of Phaser. All cross-boundary traffic uses the typed `GameEventMap` in `src/game/events.ts` plus `GameEventBridge` (`src/game/event-bridge.ts`); add events there, never ad-hoc DOM or global events.
+- Keyboard, joystick, and tap-to-move all feed one movement intent and one collision-aware loop in `src/game/scenes/beach-scene.ts`. Don't add a parallel movement path.
+- World units equal the map image pixels (`1989 × 1453`). Playable bounds, obstacles, spawn, and marker colors are in `src/data/venue-map.ts`; venue anchors and interaction radii are in `src/data/venues.ts`.
+- Camera zoom is `max(preferred, cover)` so the artwork never letterboxes; the scene pauses its loop when the tab is hidden and is destroyed on unmount.
+- Deep links: `/explore?venue=<id>`, `/sessions?day=<id>|venue=<id>|session=<id>`. Venue panels link to the programme and vice versa. S7 intentionally has `mapPosition: null` (official location TBA).
+- Assets: map art and wordmark in `public/images/`; fonts in `src/app/fonts/`. Tailwind font utilities: `font-sans`/`font-heading` = Neoverse Sans, `font-display` = FKL Dhikk, `font-malayalam` = Anek Malayalam.
+- Beach Quest is local-first: `src/lib/quest/store.ts` owns scoring, idempotency, cooldowns, and `localStorage` (`genm:quest:v1`); `src/lib/quest/live-store.ts` adds the Supabase session, cached server state, offline queue (`genm:quest:queue:v1`), and optimistic pending points. `src/lib/quest/period.ts` owns the Asia/Kolkata day and shell-set rotation. UI and Phaser only call the live store; don't add a parallel scoring path. The server is authoritative once reachable, while the local store keeps the map usable offline.
+- Shell finds and results cross the Phaser/React boundary through `quest:shell-found` / `quest:shell-result` in `GameEventMap`; `quest:sync-state` removes shells that the shared state already has. Collection is proximity-based; don't add a parallel interact-key path.
+- The shared backend is Supabase Free (Postgres, anonymous auth, SECURITY DEFINER RPCs, RLS) in `supabase/migrations/20261028100000_beach_quest.sql`. The browser uses only `NEXT_PUBLIC_SUPABASE_URL` and the publishable/anon key; never add the service-role key. The shared layer is an async leaderboard plus a five-minute presence count, not live positional multiplayer. Don't add another service without a verified data need.
 
-## Milestone workflow
+## Data provenance (hard rules)
 
-Work one milestone at a time. For each milestone:
+- Never invent venues, sessions, speakers, times, or links. Use only user-supplied or verifiably official data; unknown stays missing/`TBD`.
+- `src/data/venues.ts`: S1–S7 are `verification: "official"` (checked against genm.in/venues). Map-only labels (`A1`, `A3`, `B`, `C`, `S`, `O`, `R`, `E`, `P`) are `verification: "supplied-map"` and provisional. There is deliberately no `A2` venue.
+- `src/data/sessions.json` and `speakers.json` hold the official programme (60 sessions, 182 speakers; 9 sessions have no published speakers). Metadata lives in `src/data/programme.ts` (`PROGRAMME_VERIFIED_AT`, `PROGRAMME_NOTICE`).
+- `src/lib/programme.ts` validates day, time, venue, speaker, role, status, and URL references at module load, so bad data fails `npm run build`. Keep validation intact when editing fixtures, and update the verified date and notice.
+- All programme times are Asia/Kolkata; day IDs are `nov-13`, `nov-14`, `nov-15`.
+- Programme data is bundled at build time; a deployment must be rebuilt to pick up changes.
+- Map anchors and obstacle footprints are approximate to the supplied artwork, not official coordinates.
+- `src/data/quest.ts` shell coordinates are hand-placed, not official. `src/data/quest.test.ts` fails if a shell is outside the playable bounds or inside a collision obstacle, so keep the walkability test when moving them. Points, cooldowns, and rotation anchors are game rules, not event facts; change them deliberately.
 
-1. State the goal, scope, and acceptance criteria.
-2. Implement only that scope.
-3. Verify with lint, type-check, and (when relevant) a production build.
-4. Report decisions, verification results, and changed files.
-5. Stop for review before starting the next milestone.
+## Conventions
 
-## Initial scope and roadmap
+- Reuse the existing design tokens and utilities (`bg-brand-deep`, `text-lime`, `bg-cream`, `font-display`, `shadow-lift`, …) and the `SiteHeader`/`SiteFooter`/`ActionLink`/`WaveDivider` components; don't introduce raw hex or a second design system.
+- Preserve accessibility: labelled controls, `motion-safe:`/`motion-reduce:` for animation, `focus-visible` rings, live regions for status, and touch targets at least 44 px. The map must work at phone widths and in landscape.
+- `experimental.agentFeedback` is on, so `next dev` may rewrite the feedback block at the end of this file.
 
-Build the playable map first, followed by movement, collisions, venue interactions, session data, navigation, and mobile polish.
+## Status
 
-- **M1 — Setup and playable placeholder:** client-only Phaser scene, placeholder beach, keyboard movement, camera follow, world bounds, cleanup. Done.
-- **M2 — Real map background:** supplied map fitted to world coordinates, calibrated collision geometry, sea/structure blocking, camera scaling. Done; venue anchors remain approximate to the artwork.
-- **M3 — Venue interactions:** canonical venue records, markers and interaction zones, proximity prompts, React venue panel, typed event bridge. Done. Official S1–S7 records are verified; map-only facilities are provisional; S7 has no marker because its official map location is to be announced.
-- **M4 — Session browser:** typed session models, local fixtures and validation, day/venue filters, session cards, session-to-map linking, official data research. Done. The official 60-session, 182-speaker programme is verified from `https://www.genm.in/sessions`; `/sessions` supports day, venue, and text filters, expandable details, and map deep links. S7 sessions show “Map location TBA” because the official location is unpublished.
-- **Design pass — genm.in-inspired UI:** local Neoverse/FKL Dhikk fonts, Anek Malayalam for Malayalam copy, shared site header/footer/action-link/wave components, restyled home, programme, and explorer HUD/panel. Done.
-- **M5 — Navigation and mobile controls:** virtual joystick, tap-to-move, walkable pathfinding, minimap/directory, portrait and landscape polish. Done.
-- **M6 — Polish and release:** artwork refinement, loading/error states, touch and keyboard accessibility, aspect-ratio testing, lifecycle checks, programme verification, deployment docs. Done; awaiting review.
-- No later milestone is defined in the project reference. Future work should come from user review or new requirements.
-
-Do not skip ahead or bundle milestones unless asked. The current milestone is the first item above that is not yet complete.
+M1–M6 and the genm.in-inspired design pass are complete. The Beach Quest slice
+is implemented: daily shell hunt, venue check-ins, points, streaks, join dialog,
+HUD/panel, Supabase-backed shared state, offline queue, presence, and
+`/leaderboard`. The SQL migration is validated locally with PGlite, the remote
+Supabase project has Anonymous Sign-Ins enabled and the migration applied, and
+the app is live at <https://genm-explorer.vercel.app>. A headless mobile pass
+covered joining, the leaderboard, and a venue check-in; a real phone pass is
+still recommended. Take new scope from the user, implement one milestone at a
+time, and stop for review before starting the next.
 
 <!-- BEGIN:nextjs-agent-feedback -->
 
