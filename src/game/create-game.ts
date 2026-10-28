@@ -14,6 +14,34 @@ export interface CreateGameOptions {
   collectedShellIds?: readonly string[];
 }
 
+const MAX_RENDER_SCALE = 3;
+const MAX_RENDER_PIXELS = 12_000_000;
+
+/**
+ * Phones have a device pixel ratio of 2–3, but Phaser sizes its canvas in CSS
+ * pixels by default. Rendering at device resolution keeps the map labels,
+ * markers, and player crisp instead of upscaling a low-resolution canvas.
+ */
+function getRenderScale(width: number, height: number): number {
+  if (typeof window === "undefined") {
+    return 1;
+  }
+
+  const deviceScale = Math.min(window.devicePixelRatio || 1, MAX_RENDER_SCALE);
+  const pixelBudgetScale = Math.sqrt(
+    MAX_RENDER_PIXELS / Math.max(1, width * height),
+  );
+
+  return Math.max(1, Math.min(deviceScale, pixelBudgetScale));
+}
+
+function getParentSize(parent: HTMLElement): { width: number; height: number } {
+  return {
+    width: Math.max(1, parent.clientWidth || window.innerWidth),
+    height: Math.max(1, parent.clientHeight || window.innerHeight),
+  };
+}
+
 /**
  * Boots Phaser on the client. Phaser itself is imported dynamically so it is
  * never evaluated during the server render.
@@ -27,8 +55,13 @@ export async function createGame({
 }: CreateGameOptions): Promise<Phaser.Game> {
   const { default: PhaserRuntime } = await import("phaser");
 
+  const initialSize = getParentSize(parent);
+  const initialScale = getRenderScale(initialSize.width, initialSize.height);
+
   const config: Phaser.Types.Core.GameConfig = {
     type: PhaserRuntime.AUTO,
+    width: Math.round(initialSize.width * initialScale),
+    height: Math.round(initialSize.height * initialScale),
     backgroundColor: "#2c2d6f",
     scene: [
       new BeachScene(events, focusVenueId, shells, collectedShellIds),
@@ -44,9 +77,11 @@ export async function createGame({
     },
     scale: {
       parent,
-      mode: PhaserRuntime.Scale.RESIZE,
-      width: "100%",
-      height: "100%",
+      // NONE lets us keep the drawing buffer at device resolution while the
+      // CSS size stays in layout pixels. The scene divides by scale.zoom when
+      // choosing its camera zoom.
+      mode: PhaserRuntime.Scale.NONE,
+      zoom: 1 / initialScale,
     },
     input: {
       keyboard: true,
@@ -56,5 +91,51 @@ export async function createGame({
     },
   };
 
-  return new PhaserRuntime.Game(config);
+  const game = new PhaserRuntime.Game(config);
+
+  let resizeFrame = 0;
+
+  const resize = () => {
+    resizeFrame = 0;
+
+    const size = getParentSize(parent);
+    const renderScale = getRenderScale(size.width, size.height);
+
+    if (game.scale.zoom !== 1 / renderScale) {
+      game.scale.setZoom(1 / renderScale);
+    }
+
+    game.scale.resize(
+      Math.round(size.width * renderScale),
+      Math.round(size.height * renderScale),
+    );
+  };
+
+  const scheduleResize = () => {
+    if (resizeFrame !== 0) {
+      return;
+    }
+
+    resizeFrame = window.requestAnimationFrame(resize);
+  };
+
+  const resizeObserver =
+    typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(scheduleResize);
+
+  resizeObserver?.observe(parent);
+  window.addEventListener("resize", scheduleResize);
+
+  game.events.once(PhaserRuntime.Core.Events.DESTROY, () => {
+    resizeObserver?.disconnect();
+    window.removeEventListener("resize", scheduleResize);
+
+    if (resizeFrame !== 0) {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = 0;
+    }
+  });
+
+  return game;
 }

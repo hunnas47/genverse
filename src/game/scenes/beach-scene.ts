@@ -166,6 +166,7 @@ export class BeachScene extends Phaser.Scene {
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.handleShutdown, this);
     window.addEventListener("blur", this.handleWindowBlur);
+    window.addEventListener("keydown", this.handleMovementKeyDown);
 
     this.handleResize(this.scale.gameSize);
 
@@ -1115,12 +1116,22 @@ export class BeachScene extends Phaser.Scene {
       return;
     }
 
-    this.cursors = keyboard.createCursorKeys();
+    // Capture is deliberately disabled for movement keys. Otherwise Phaser
+    // calls preventDefault globally and the join dialog cannot receive WASD
+    // or arrow-key input.
+    this.cursors = {
+      up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP, false),
+      down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN, false),
+      left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT, false),
+      right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT, false),
+      space: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE, false),
+      shift: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT, false),
+    };
     this.keys = {
-      up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W, true),
-      down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S, true),
-      left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, true),
-      right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D, true),
+      up: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W, false),
+      down: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S, false),
+      left: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, false),
+      right: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D, false),
     };
     this.interactKey = keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.E,
@@ -1147,17 +1158,30 @@ export class BeachScene extends Phaser.Scene {
       this.handleCancelKey,
     );
 
-    keyboard.addCapture([
-      Phaser.Input.Keyboard.KeyCodes.UP,
-      Phaser.Input.Keyboard.KeyCodes.DOWN,
-      Phaser.Input.Keyboard.KeyCodes.LEFT,
-      Phaser.Input.Keyboard.KeyCodes.RIGHT,
-      Phaser.Input.Keyboard.KeyCodes.W,
-      Phaser.Input.Keyboard.KeyCodes.A,
-      Phaser.Input.Keyboard.KeyCodes.S,
-      Phaser.Input.Keyboard.KeyCodes.D,
-    ]);
   }
+
+  /**
+   * Phaser's keyboard capture list would swallow WASD and arrow keys even
+   * while the join dialog input owns focus. Only prevent the browser default
+   * for movement keys during actual play, so the page cannot scroll under the
+   * game.
+   */
+  private handleMovementKeyDown = (event: KeyboardEvent): void => {
+    if (this.isUiFocused()) {
+      return;
+    }
+
+    if (
+      event.key === "ArrowUp" ||
+      event.key === "ArrowDown" ||
+      event.key === "ArrowLeft" ||
+      event.key === "ArrowRight" ||
+      event.key === " " ||
+      event.code === "Space"
+    ) {
+      event.preventDefault();
+    }
+  };
 
   private setupCamera(): void {
     if (!this.player) {
@@ -1176,14 +1200,20 @@ export class BeachScene extends Phaser.Scene {
   private handleResize(gameSize?: Phaser.Structs.Size): void {
     const width = gameSize?.width ?? this.scale.width;
     const height = gameSize?.height ?? this.scale.height;
-    const preferredZoom = width < MOBILE_BREAKPOINT ? 0.9 : 1;
+    // The canvas is sized in device pixels; scale.zoom converts it back to
+    // layout pixels for the mobile breakpoint and cover calculation.
+    const layoutWidth = width * this.scale.zoom;
+    const layoutHeight = height * this.scale.zoom;
+    const preferredZoom = layoutWidth < MOBILE_BREAKPOINT ? 0.9 : 1;
     const coverZoom = Math.max(
-      width / VENUE_MAP.world.width,
-      height / VENUE_MAP.world.height,
+      layoutWidth / VENUE_MAP.world.width,
+      layoutHeight / VENUE_MAP.world.height,
     );
 
     // Never letterbox the artwork on unusually large or short viewports.
-    this.cameras.main.setZoom(Math.max(preferredZoom, coverZoom));
+    this.cameras.main.setZoom(
+      Math.max(preferredZoom, coverZoom) / this.scale.zoom,
+    );
   }
 
   private handleWindowBlur = (): void => {
@@ -1194,6 +1224,7 @@ export class BeachScene extends Phaser.Scene {
   private handleShutdown(): void {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     window.removeEventListener("blur", this.handleWindowBlur);
+    window.removeEventListener("keydown", this.handleMovementKeyDown);
     this.interactKey?.off(
       Phaser.Input.Keyboard.Events.DOWN,
       this.handleInteractKey,
