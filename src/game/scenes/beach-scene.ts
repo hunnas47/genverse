@@ -15,6 +15,7 @@ import {
 import {
   buildNavigationGrid,
   findNavigationPath,
+  findReachablePointNear,
   type NavigationGrid,
 } from "@/game/systems/pathfinding";
 import type { MapPoint } from "@/types/map";
@@ -229,7 +230,7 @@ export class BeachScene extends Phaser.Scene {
       this.drawMapFallback();
       this.bridge.emit("game:map-fallback", {
         message:
-          "The illustrated map could not be loaded. You can still walk, use the directory, and open venue details on a simplified background.",
+          "The venue map could not be loaded. You can still walk, use the directory, and open venue details on a simplified background.",
       });
       return;
     }
@@ -245,16 +246,47 @@ export class BeachScene extends Phaser.Scene {
     const { width, height } = VENUE_MAP.world;
     const graphics = this.add.graphics().setDepth(-1000);
 
+    const oceanHeight = Math.round(height * 0.18);
+    const beachHeight = Math.round(height * 0.1);
+    const parkTop = oceanHeight + beachHeight;
+    const roadTop = Math.round(height * 0.74);
+    const roadHeight = Math.round(height * 0.065);
+
     graphics.fillStyle(0x0b5874, 1);
-    graphics.fillRect(0, 0, width, 390);
+    graphics.fillRect(0, 0, width, oceanHeight);
     graphics.fillStyle(0xf1d49a, 1);
-    graphics.fillRect(0, 390, width, height - 390);
+    graphics.fillRect(0, oceanHeight, width, beachHeight);
+    graphics.fillStyle(0xe7d7b8, 1);
+    graphics.fillRect(0, parkTop, width, roadTop - parkTop);
+    graphics.fillStyle(0x3d4650, 1);
+    graphics.fillRect(0, roadTop, width, roadHeight);
+    graphics.fillStyle(0x3f7a3f, 1);
+    graphics.fillRect(
+      0,
+      roadTop + roadHeight,
+      width,
+      height - roadTop - roadHeight,
+    );
+
+    // Keep the central plaza and entrance axis recognizable even without art.
+    graphics.fillStyle(0xe7c7bd, 1);
+    graphics.fillCircle(width * 0.46, height * 0.49, 42);
+    graphics.lineStyle(3, 0xd7b1a5, 0.85);
+    graphics.strokeCircle(width * 0.46, height * 0.49, 42);
+    graphics.lineStyle(18, 0xd9c7ad, 0.7);
+    graphics.lineBetween(
+      width * 0.46,
+      height * 0.52,
+      width * 0.46,
+      height * 0.73,
+    );
 
     this.add
       .text(
         width / 2,
-        height / 2,
-        "Venue map artwork could not be loaded.\nMovement boundaries are still active.",
+        height * 0.52,
+        "Venue map artwork could not be loaded.\n" +
+          "Movement boundaries are still active.",
         {
           fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
           fontSize: "24px",
@@ -522,14 +554,16 @@ export class BeachScene extends Phaser.Scene {
       return;
     }
 
-    if (venue.mapPosition) {
-      const point = findWalkablePointNear({
+    if (venue.mapPosition && this.navigationGrid) {
+      const point = findReachablePointNear({
+        grid: this.navigationGrid,
+        start: { x: this.player.x, y: this.player.y },
         x: venue.mapPosition.x,
         y: venue.mapPosition.y,
         radius: VENUE_MAP.player.radius,
         bounds: VENUE_MAP.playableBounds,
         obstacles: VENUE_MAP.obstacles,
-        maxDistance: Math.max(320, venue.mapPosition.interactionRadius + 120),
+        maxDistance: venue.mapPosition.interactionRadius,
       });
 
       if (point) {
@@ -637,16 +671,15 @@ export class BeachScene extends Phaser.Scene {
         return;
       }
 
-      const goal = findWalkablePointNear({
+      const goal = findReachablePointNear({
+        grid: this.navigationGrid,
+        start: { x: this.player.x, y: this.player.y },
         x: venue.mapPosition.x,
         y: venue.mapPosition.y,
         radius: VENUE_MAP.player.radius,
         bounds: VENUE_MAP.playableBounds,
         obstacles: VENUE_MAP.obstacles,
-        maxDistance: Math.max(
-          320,
-          venue.mapPosition.interactionRadius + 140,
-        ),
+        maxDistance: venue.mapPosition.interactionRadius,
       });
 
       if (!goal) {

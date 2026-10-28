@@ -5,7 +5,7 @@ import type { Venue } from "@/types/venue";
  *
  * Official stage names, descriptions, active days, and source links were
  * verified from https://www.genm.in/venues on 2026-10-24. Map positions are
- * approximate, calibrated against the supplied map artwork only.
+ * approximate, calibrated against the final map artwork only.
  *
  * Facilities and expo labels are taken from the supplied map legend and are
  * marked `verification: "supplied-map"`; they are not presented as official
@@ -23,7 +23,7 @@ export const VENUES: readonly Venue[] = [
     activeDays: ["2026-11-15"],
     category: "stage",
     officialUrl: "https://www.genm.in/venues/s1",
-    mapPosition: { x: 370, y: 760, interactionRadius: 140 },
+    mapPosition: { x: 145, y: 690, interactionRadius: 140 },
     verification: "official",
   },
   {
@@ -35,7 +35,7 @@ export const VENUES: readonly Venue[] = [
     activeDays: ["2026-11-13", "2026-11-14", "2026-11-15"],
     category: "stage",
     officialUrl: "https://www.genm.in/venues/s2",
-    mapPosition: { x: 570, y: 765, interactionRadius: 125 },
+    mapPosition: { x: 390, y: 527, interactionRadius: 130 },
     verification: "official",
   },
   {
@@ -47,7 +47,7 @@ export const VENUES: readonly Venue[] = [
     activeDays: ["2026-11-14", "2026-11-15"],
     category: "stage",
     officialUrl: "https://www.genm.in/venues/s3",
-    mapPosition: { x: 1206, y: 610, interactionRadius: 105 },
+    mapPosition: { x: 919, y: 387, interactionRadius: 125 },
     verification: "official",
   },
   {
@@ -58,7 +58,7 @@ export const VENUES: readonly Venue[] = [
     activeDays: ["2026-11-14"],
     category: "stage",
     officialUrl: "https://www.genm.in/venues/s4",
-    mapPosition: { x: 1438, y: 764, interactionRadius: 95 },
+    mapPosition: { x: 1077, y: 527, interactionRadius: 120 },
     verification: "official",
   },
   {
@@ -70,7 +70,7 @@ export const VENUES: readonly Venue[] = [
     activeDays: ["2026-11-14", "2026-11-15"],
     category: "stage",
     officialUrl: "https://www.genm.in/venues/s5",
-    mapPosition: { x: 1755, y: 745, interactionRadius: 130 },
+    mapPosition: { x: 1382, y: 578, interactionRadius: 120 },
     verification: "official",
   },
   {
@@ -82,7 +82,7 @@ export const VENUES: readonly Venue[] = [
     activeDays: ["2026-11-14", "2026-11-15"],
     category: "stage",
     officialUrl: "https://www.genm.in/venues/s6",
-    mapPosition: { x: 1585, y: 920, interactionRadius: 100 },
+    mapPosition: { x: 1226, y: 684, interactionRadius: 120 },
     verification: "official",
   },
   {
@@ -104,7 +104,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "A1",
     description: "Expo tent on the beach map.",
     category: "expo",
-    mapPosition: { x: 1610, y: 520, interactionRadius: 130 },
+    mapPosition: { x: 1241, y: 405, interactionRadius: 180 },
     verification: "supplied-map",
   },
   {
@@ -113,7 +113,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "A3",
     description: "Expo area on the beach map.",
     category: "expo",
-    mapPosition: { x: 1188, y: 780, interactionRadius: 110 },
+    mapPosition: { x: 910, y: 535, interactionRadius: 120 },
     verification: "supplied-map",
   },
   {
@@ -122,7 +122,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "B",
     description: "Booth cluster on the beach map.",
     category: "booth",
-    mapPosition: { x: 630, y: 650, interactionRadius: 150 },
+    mapPosition: { x: 470, y: 420, interactionRadius: 150 },
     verification: "supplied-map",
   },
   {
@@ -131,7 +131,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "C",
     description: "Informal discussion areas on the beach map.",
     category: "facility",
-    mapPosition: { x: 1050, y: 580, interactionRadius: 190 },
+    mapPosition: { x: 777, y: 428, interactionRadius: 150 },
     verification: "supplied-map",
   },
   {
@@ -140,7 +140,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "S",
     description: "Photo booth on the beach map.",
     category: "facility",
-    mapPosition: { x: 884, y: 530, interactionRadius: 105 },
+    mapPosition: { x: 696, y: 270, interactionRadius: 100 },
     verification: "supplied-map",
   },
   {
@@ -149,7 +149,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "O",
     description: "Event office on the beach map.",
     category: "facility",
-    mapPosition: { x: 1002, y: 965, interactionRadius: 100 },
+    mapPosition: { x: 787, y: 744, interactionRadius: 110 },
     verification: "supplied-map",
   },
   {
@@ -158,7 +158,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "R",
     description: "Registration point on the beach map.",
     category: "facility",
-    mapPosition: { x: 800, y: 900, interactionRadius: 90 },
+    mapPosition: { x: 580, y: 707, interactionRadius: 100 },
     verification: "supplied-map",
   },
   {
@@ -167,7 +167,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "E",
     description: "Main entrance on the beach map.",
     category: "facility",
-    mapPosition: { x: 880, y: 995, interactionRadius: 80 },
+    mapPosition: { x: 675, y: 755, interactionRadius: 100 },
     verification: "supplied-map",
   },
   {
@@ -176,7 +176,7 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "P",
     description: "Parking area on the beach map.",
     category: "facility",
-    mapPosition: { x: 1375, y: 920, interactionRadius: 130 },
+    mapPosition: { x: 1048, y: 713, interactionRadius: 140 },
     verification: "supplied-map",
   },
 ];

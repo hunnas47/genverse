@@ -1,4 +1,7 @@
-import { canOccupyPosition } from "./collision-system";
+import {
+  canOccupyPosition,
+  findWalkablePointNear,
+} from "./collision-system";
 import type { CollisionObstacle, MapPoint, RectBounds } from "@/types/map";
 
 export interface NavigationGrid {
@@ -458,4 +461,108 @@ function isWalkableCell(
     row < grid.rows &&
     grid.walkable[row * grid.cols + col] === 1
   );
+}
+
+/**
+ * Finds a walkable point near a target that can actually be reached from the
+ * current position.
+ *
+ * Venue markers can sit inside a dense cluster of umbrellas or on a building
+ * footprint. The nearest walkable point may be a small isolated pocket, so this
+ * helper tries the nearest point first and then floods the reachable grid to
+ * find the closest reachable cell inside the allowed interaction radius.
+ */
+export function findReachablePointNear({
+  grid,
+  start,
+  x,
+  y,
+  radius,
+  bounds,
+  obstacles,
+  maxDistance,
+  step = 20,
+}: {
+  grid: NavigationGrid;
+  start: MapPoint;
+  x: number;
+  y: number;
+  radius: number;
+  bounds: RectBounds;
+  obstacles: CollisionObstacle[];
+  maxDistance: number;
+  step?: number;
+}): MapPoint | null {
+  const nearest = findWalkablePointNear({
+    x,
+    y,
+    radius,
+    bounds,
+    obstacles,
+    maxDistance,
+    step,
+  });
+
+  if (nearest && findNavigationPath({ grid, start, goal: nearest })) {
+    return nearest;
+  }
+
+  const startCell = findVisibleCell(grid, start);
+
+  if (!startCell) {
+    return null;
+  }
+
+  // Flood the reachable grid once, then pick the reachable cell closest to the
+  // marker. This is much faster than running A* for every candidate point and
+  // handles markers inside dense clusters without trapping the player.
+  const cellCount = grid.cols * grid.rows;
+  const visited = new Uint8Array(cellCount);
+  const queue: number[] = [startCell.row * grid.cols + startCell.col];
+  let best: MapPoint | null = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  visited[queue[0]] = 1;
+
+  for (let head = 0; head < queue.length; head += 1) {
+    const index = queue[head];
+    const col = index % grid.cols;
+    const row = Math.floor(index / grid.cols);
+    const point = cellCenter(grid, { col, row });
+    const distance = Math.hypot(point.x - x, point.y - y);
+
+    if (distance <= maxDistance && distance < bestDistance) {
+      best = point;
+      bestDistance = distance;
+    }
+
+    for (const direction of DIRECTIONS) {
+      const nextCol = col + direction.dc;
+      const nextRow = row + direction.dr;
+
+      if (!isWalkableCell(grid, nextCol, nextRow)) {
+        continue;
+      }
+
+      if (
+        direction.dc !== 0 &&
+        direction.dr !== 0 &&
+        (!isWalkableCell(grid, col + direction.dc, row) ||
+          !isWalkableCell(grid, col, row + direction.dr))
+      ) {
+        continue;
+      }
+
+      const nextIndex = nextRow * grid.cols + nextCol;
+
+      if (visited[nextIndex]) {
+        continue;
+      }
+
+      visited[nextIndex] = 1;
+      queue.push(nextIndex);
+    }
+  }
+
+  return best;
 }

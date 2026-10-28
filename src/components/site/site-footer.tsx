@@ -87,7 +87,7 @@ export function SiteFooter() {
           <div>
             <Logo />
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/60">
-              A visual guide to the GEN M beach confluence. Walk the illustrated
+              A visual guide to the GEN M beach confluence. Walk the detailed
               venue map, find every stage, and plan your day with the official
               programme.
             </p>

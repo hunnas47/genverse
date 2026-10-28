@@ -1,7 +1,7 @@
 # GEN M Explorer
 
 A mobile-responsive, interactive 2D beach explorer for the GEN M venue at
-Kozhikode Beach, 13–15 November 2026. Visitors can walk the illustrated venue
+Kozhikode Beach, 13–15 November 2026. Visitors can walk the detailed venue
 map with a keyboard, a virtual joystick, or tap-to-move, open venue details, and
 browse the official session programme without entering the game.
 
@@ -191,7 +191,7 @@ src/lib/quest/   local-first quest store, sync layer, period rotation, name rule
 src/lib/supabase/ browser client and anonymous session bootstrap
 src/types/       shared domain and search-param types
 supabase/        SQL migration for tables, seeds, RPCs, RLS, and grants
-public/images/   supplied map artwork and GEN M wordmark
+public/images/   final map artwork and GEN M wordmark
 ```
 
 - Phaser is imported dynamically inside a client component, never during server
@@ -203,8 +203,18 @@ public/images/   supplied map artwork and GEN M wordmark
 - Shared quest state is fetched with compact RPC calls rather than Realtime.
   The map does not stream other players' positions; the shared layer is an
   asynchronous leaderboard plus a five-minute presence count.
-- World units match the supplied map image pixels (`1989 × 1453`). Playable
+- World units match the final map image pixels (`1467 × 1072`). Playable
   bounds, obstacles, spawn, and marker colors live in `src/data/venue-map.ts`.
+- The final map is a top-down, pre-rendered 3D beach park: S1 Freedom Square on
+  the far left, the green entrance arch and central staircase at bottom center,
+  the Arabian Sea and golden beach along the top, and Beach Road with dense
+  palms and red-tiled Kerala rooftops below. Keep new markers, shells,
+  obstacles, and UI overlays aligned to that layout; the artwork itself has no
+  baked-in labels.
+- `public/images/paths.png` is the owner's collision sketch: `#4D4D4D` marks
+  blocked buildings and venue markers, while `#39FF14` marks paths. The
+  playable bounds include Beach Road and the roadside strip; open park space is
+  walkable unless it sits inside a dark footprint.
 - The map image is loaded at runtime. If it fails, the scene draws a simplified
   beach, keeps collisions and venue data usable, and React shows a dismissible
   notice.

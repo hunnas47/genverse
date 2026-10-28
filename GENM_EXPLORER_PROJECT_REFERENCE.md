@@ -43,12 +43,12 @@ These decisions were selected by the project owner.
 
 | Decision | Selection |
 |---|---|
-| Visual style | Illustrated 2D |
+| Visual style | Top-down 3D pre-rendered, claymation-inspired beach park |
 | Movement | Free movement and tap-to-move |
-| Map approach | Hybrid: start with the supplied map image, progressively enhance it with custom artwork |
+| Map approach | Final 3D pre-rendered beachfront artwork with separate Phaser and React overlays |
 | Initial scope | Working MVP first |
 | Platform | Responsive website, mobile-first |
-| Perspective | Top-down 2D |
+| Perspective | Top-down 2D gameplay over pre-rendered 3D art |
 | Main interaction | Explore, approach venues, interact, read venue/session details |
 | Schedule | Must be accessible without playing the game |
 | Development | Local Linux Mint system |
@@ -86,17 +86,28 @@ Do not add a database, authentication, multiplayer, or other infrastructure with
 
 # 4. Event and Map Context
 
-The supplied venue-map image is the geographic reference for the world. It shows:
+The final venue-map image is the geographic reference for the world. It is a
+top-down, pre-rendered 3D beach park in a premium claymation-inspired style. It
+shows:
 
-- Arabian Sea along the upper edge.
-- Sandy coastal venue.
-- Walking paths and landscaped areas.
-- Beach Road along the bottom.
-- A secondary road on the left.
-- Multiple stages and activity zones.
+- Arabian Sea and golden sand along the upper edge.
+- S1 Freedom Square on the far left, with monolithic gray concrete slabs and
+  red laterite stone roofing rising out of the beach sand.
+- The main entrance at bottom center: an open stone staircase from a green
+  decorative arch gateway onto the pink-and-grey circular plaza.
+- Walking paths, landscaped areas, stages, expo tents, and pavilions across the
+  central park.
+- Beach Road along the bottom, with dense coconut palms and traditional
+  red-tiled Kerala rooftops below it.
 - Entrance, registration, parking, and other facilities.
 
-The supplied no-legend map is stored at `public/images/GEN-M-venue-map.jpg` and is used as the current game background.
+The final artwork has no baked-in graphic text, labels, or letterbox badges.
+All map text is rendered by Phaser and React overlays.
+
+The final map is stored at `public/images/genm-venue-map-final.webp` (with the
+source PNG at `public/images/Coastal Park Beachfront Map.png`) and is the active
+game background. It is the visual source of truth for future level layout,
+positioning logic, UI boundaries, asset placement, and coordinate strategy.
 
 ## Venue Legend from the Supplied Map
 
@@ -133,13 +144,24 @@ The graphic identifies seven primary stages, S1–S7. Other facilities and expo 
 
 ## Map-Art Direction
 
-- Preserve the recognizable geography and relative positions of the supplied map.
-- The first prototype may use the map image as a background.
-- Progressively replace or enhance areas with custom illustrations.
-- Keep venue text, interaction prompts, and UI separate from the background artwork where possible.
-- Use separate layers for terrain, structures, signs, interaction zones, and player.
-- Recreate or remove the original title and legend for the in-game view when appropriate.
-- Do not invent venue details or alter the actual layout merely to improve aesthetics.
+- The final 3D pre-rendered beachfront map is the visual source of truth. Do
+  not replace its layout, architecture, or surrounding geography with a
+  different art direction.
+- Preserve the recognizable geography and relative positions of S1 Freedom
+  Square, the bottom-center entrance and central plaza, the beach/sea edge, the
+  road, and the palm-and-rooftop foreground.
+- Keep venue text, interaction prompts, and UI separate from the background
+  artwork. The final art intentionally has no baked-in labels or badges.
+- Use separate layers for terrain, structures, interaction zones, and player.
+- Base new markers, shells, obstacles, playable bounds, and UI safe areas on the
+  final image pixels (`1467 × 1072`).
+- Use the owner's `public/images/paths.png` collision sketch as the collision
+  reference: `#4D4D4D` marks blocked buildings and venue markers, while
+  `#39FF14` marks paths. Include Beach Road and the roadside strip in the
+  playable bounds; all other open park space is walkable unless it sits inside
+  a dark footprint.
+- Do not invent venue details or alter the actual layout merely to improve
+  aesthetics.
 
 # 5. MVP Scope
 
@@ -147,7 +169,7 @@ The graphic identifies seven primary stages, S1–S7. Other facilities and expo 
 
 1. Responsive Next.js application shell.
 2. `/explore` page containing a Phaser canvas.
-3. Illustrated placeholder beach, followed by the supplied map background.
+3. Final 3D pre-rendered beach background with Phaser/React map overlays.
 4. Player movement with WASD and arrow keys.
 5. Camera following and world boundaries.
 6. Collision boundaries for blocked areas.
@@ -428,7 +450,7 @@ genm-explorer/
 ├── public/
 │   ├── images/
 │   │   ├── genm-logo.svg
-│   │   └── venue-map-original.png
+│   │   └── genm-venue-map-final.webp
 │   └── game/
 │       ├── map/
 │       │   ├── beach-base.png
@@ -681,7 +703,7 @@ Suggested commit messages:
 - Keep important information accessible outside the game canvas.
 - Avoid elaborate artwork until movement, map geometry, and interactions are reliable.
 
-The supplied map should guide geography and location placement. Custom artwork must not make the actual venue layout misleading.
+The final map is the visual source of truth for geography and location placement. Future artwork or UI must not make the actual venue layout misleading.
 
 # 17. Performance and Reliability
 
@@ -722,7 +744,7 @@ Proceed one milestone at a time. Do not ask the agent to build the entire applic
 
 These are open questions, not established facts. Item 2 was resolved on 2026-10-24.
 
-1. Exact coordinates and dimensions of all venue locations on the supplied map. Current anchors are approximate and calibrated from the artwork.
+1. Exact coordinates and dimensions of all venue locations on the final map. Current anchors are approximate and calibrated from the artwork.
 2. Canonical official labels and duplicate/overlapping labels. Resolved for S1–S7 from `https://www.genm.in/venues`; A2 is treated as an area label associated with S5 (Herverse), and map-only facility labels remain provisional.
 3. The complete official session dataset and how it can be accessed reliably.
 4. Whether an officially supported public API or export exists.

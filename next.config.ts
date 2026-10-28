@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   // Next blocks dev-only assets from origins other than localhost. Add the LAN
   // address used for phone testing; update it if the network changes.
-  allowedDevOrigins: ["192.168.77.118"],
+  allowedDevOrigins: ["192.168.217.118"],
   experimental: {
     agentFeedback: true,
   },

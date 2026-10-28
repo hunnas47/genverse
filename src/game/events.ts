@@ -26,7 +26,7 @@ export interface GameEventMap {
     worldHeight: number;
   };
   /**
-   * The supplied map artwork failed to load. The scene keeps running with a
+   * The final map artwork failed to load. The scene keeps running with a
    * simplified background so movement and venue data remain usable.
    */
   "game:map-fallback": {

@@ -302,7 +302,7 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-relaxed text-white/65 sm:text-lg">
-              Walk the illustrated beach, find every stage, and plan your day
+              Walk the detailed beach, find every stage, and plan your day
               with the official GEN M programme.
             </p>
 
@@ -333,7 +333,7 @@ export default function Home() {
               <div className="relative aspect-[4/3] overflow-hidden rounded-[1.6rem]">
                 <Image
                   src={VENUE_MAP.image.src}
-                  alt="Illustrated GEN M beach venue map"
+                  alt="Detailed GEN M beach venue map"
                   fill
                   sizes="(min-width: 1024px) 45vw, 100vw"
                   className="object-cover"
@@ -341,20 +341,20 @@ export default function Home() {
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(44,45,111,0.12)_0%,rgba(44,45,111,0.56)_100%)]" />
                 <div className="grain absolute inset-0 opacity-[0.08]" />
 
-                <span className="absolute top-[46%] left-[17%] inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur">
+                <span className="absolute top-[42%] left-[10%] inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur">
                   <span className="size-1.5 rounded-full bg-lime" /> S1
                 </span>
-                <span className="absolute top-[44%] left-[32%] hidden items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur sm:inline-flex">
+                <span className="absolute top-[49%] left-[27%] hidden items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur sm:inline-flex">
                   <span className="size-1.5 rounded-full bg-lime" /> S2
                 </span>
-                <span className="absolute top-[33%] left-[57%] hidden items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur md:inline-flex">
+                <span className="absolute top-[36%] left-[63%] hidden items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur md:inline-flex">
                   <span className="size-1.5 rounded-full bg-lime" /> S3
                 </span>
-                <span className="absolute top-[43%] left-[72%] inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur">
+                <span className="absolute top-[54%] left-[88%] inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur">
                   <span className="size-1.5 rounded-full bg-lime" /> S5
                 </span>
 
-                <span className="absolute bottom-[24%] left-[38%] inline-flex items-center gap-2 rounded-full bg-lime px-2.5 py-1.5 font-display text-[9px] font-bold tracking-[0.1em] text-brand-deep uppercase shadow-lg">
+                <span className="absolute bottom-[29%] left-[46%] inline-flex items-center gap-2 rounded-full bg-lime px-2.5 py-1.5 font-display text-[9px] font-bold tracking-[0.1em] text-brand-deep uppercase shadow-lg">
                   <span className="relative flex size-2">
                     <span className="absolute inline-flex size-full rounded-full bg-brand-deep/50 motion-safe:animate-ping" />
                     <span className="relative inline-flex size-2 rounded-full bg-brand-deep" />
@@ -478,7 +478,7 @@ export default function Home() {
             </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-white/90">
               GEN M Explorer is a visual guide to the beach confluence. Walk the
-              illustrated venue map, open any stage, and jump straight into the
+              detailed venue map, open any stage, and jump straight into the
               official programme. No printed map folding required.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
