@@ -59,8 +59,12 @@ export const VenuePanel = memo(function VenuePanel({
       previousCheckedInRef.current = true;
       setStampActive(true);
 
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        navigator.vibrate([18, 40, 35]);
+      try {
+        // Haptics are optional. Some browsers expose vibrate but reject the
+        // call, which must not take down the stamp or the page.
+        navigator.vibrate?.([18, 40, 35]);
+      } catch {
+        // Ignore unsupported or blocked vibration.
       }
 
       if (stampTimerRef.current !== null) {
