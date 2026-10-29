@@ -31,6 +31,7 @@ import type { Venue } from "@/types/venue";
 
 const MAP_TEXTURE_KEY = "genm-venue-map";
 const MOBILE_BREAKPOINT = 640;
+const MOBILE_PLAYER_SPEED = 180;
 const MARKER_DEPTH = 5000;
 const PATH_DEPTH = -500;
 const PLAYER_POSITION_INTERVAL = 80;
@@ -67,6 +68,7 @@ export class BeachScene extends Phaser.Scene {
   private joystickMovement = new Phaser.Math.Vector2();
   private walkTime = 0;
   private reducedMotion = false;
+  private mobileLayout = false;
   private nearbyVenueId: string | null = null;
   private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
   private nearbyTween?: Phaser.Tweens.Tween;
@@ -792,7 +794,7 @@ export class BeachScene extends Phaser.Scene {
     const dx = waypoint.x - this.player.x;
     const dy = waypoint.y - this.player.y;
     const distance = Math.hypot(dx, dy);
-    const maxStep = VENUE_MAP.player.speed * step;
+    const maxStep = this.getPlayerSpeed() * step;
     const arrivalDistance = Math.max(WAYPOINT_ARRIVAL_DISTANCE, maxStep);
 
     if (distance <= arrivalDistance) {
@@ -840,7 +842,7 @@ export class BeachScene extends Phaser.Scene {
       return false;
     }
 
-    const speed = VENUE_MAP.player.speed;
+    const speed = this.getPlayerSpeed();
     const moved = this.moveBy(
       this.movement.x * speed * step,
       this.movement.y * speed * step,
@@ -1294,6 +1296,10 @@ export class BeachScene extends Phaser.Scene {
     }
   }
 
+  private getPlayerSpeed(): number {
+    return this.mobileLayout ? MOBILE_PLAYER_SPEED : VENUE_MAP.player.speed;
+  }
+
   private handleResize(gameSize?: Phaser.Structs.Size): void {
     const width = gameSize?.width ?? this.scale.width;
     const height = gameSize?.height ?? this.scale.height;
@@ -1301,7 +1307,8 @@ export class BeachScene extends Phaser.Scene {
     // layout pixels for the mobile breakpoint and cover calculation.
     const layoutWidth = width * this.scale.zoom;
     const layoutHeight = height * this.scale.zoom;
-    const preferredZoom = layoutWidth < MOBILE_BREAKPOINT ? 0.9 : 1;
+    this.mobileLayout = layoutWidth < MOBILE_BREAKPOINT;
+    const preferredZoom = this.mobileLayout ? 0.9 : 1;
     const coverZoom = Math.max(
       layoutWidth / VENUE_MAP.world.width,
       layoutHeight / VENUE_MAP.world.height,

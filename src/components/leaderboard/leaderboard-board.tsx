@@ -42,7 +42,91 @@ function scopeLabel(scope: LeaderboardScope): string {
   return scope === "daily" ? "today" : "all time";
 }
 
-export function LeaderboardBoard() {
+const PODIUM_STYLES = [
+  {
+    place: 2,
+    label: "Runner-up",
+    height: "h-20",
+    block: "bg-white/75",
+    ring: "border-brand-deep/15",
+  },
+  {
+    place: 1,
+    label: "Champion",
+    height: "h-28",
+    block: "bg-lime",
+    ring: "border-brand-deep/25",
+  },
+  {
+    place: 3,
+    label: "Third",
+    height: "h-16",
+    block: "bg-coral/25",
+    ring: "border-coral/40",
+  },
+] as const;
+
+function Podium({ rows }: { rows: LeaderboardRow[] }) {
+  const top = rows.slice(0, 3);
+
+  return (
+    <div className="mt-5 rounded-[1.5rem] border border-brand-deep/10 bg-brand-deep/5 p-3">
+      <p className="text-center font-display text-[9px] font-bold tracking-[0.2em] text-brand-deep/55 uppercase">
+        Top explorers
+      </p>
+      <ol className="mt-3 grid grid-cols-3 items-end gap-2">
+        {PODIUM_STYLES.map(({ place, label, height, block, ring }) => {
+          const row = top.find((candidate) => candidate.rank === place);
+
+          return (
+            <li key={place} className="flex min-w-0 flex-col items-center">
+              {row ? (
+                <>
+                  <span
+                    aria-label={`Rank ${row.rank}`}
+                    className={
+                      place === 1
+                        ? "grid size-9 place-items-center rounded-full bg-brand-deep text-lime shadow-lift"
+                        : "grid size-8 place-items-center rounded-full border border-brand-deep/15 bg-white/80 font-display text-[10px] font-bold text-brand-deep/70"
+                    }
+                  >
+                    {place === 1 ? (
+                      <Trophy aria-hidden="true" className="size-4" />
+                    ) : (
+                      place
+                    )}
+                  </span>
+                  <span className="mt-1.5 w-full truncate text-center text-[11px] font-semibold">
+                    {row.displayName}
+                  </span>
+                  <span className="text-[10px] font-bold text-brand-deep/55">
+                    {row.points} pts
+                  </span>
+                  <span
+                    className={`mt-2 flex w-full items-start justify-center rounded-t-xl border ${ring} ${block} ${height} pt-2 font-display text-[9px] font-bold tracking-[0.12em] text-brand-deep/70 uppercase`}
+                  >
+                    {label}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="size-8" />
+                  <span className="mt-1.5 h-4 w-full" />
+                  <span className="h-3.5 w-8" />
+                  <span
+                    className={`mt-2 w-full rounded-t-xl border border-dashed border-brand-deep/10 bg-white/25 ${height}`}
+                  />
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean }) {
   const [scope, setScope] = useState<LeaderboardScope>("daily");
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -255,6 +339,10 @@ export function LeaderboardBoard() {
           Refresh
         </button>
       </div>
+
+      {showPodium && !loading && !error && rows.length > 0 && (
+        <Podium rows={rows} />
+      )}
 
       <div className="mt-4" aria-busy={loading}>
         {loading ? (
