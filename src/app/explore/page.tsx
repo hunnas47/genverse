@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { ExploreHud } from "@/components/explore/explore-hud";
 import { ExplorePageContent } from "@/components/explore/explore-page-content";
 import type { SearchParams } from "@/types/search";
 
@@ -37,7 +36,6 @@ export default function ExplorePage({
       <Suspense fallback={<ExploreLoading />}>
         <ExplorePageContent searchParams={searchParams} />
       </Suspense>
-      <ExploreHud />
     </main>
   );
 }

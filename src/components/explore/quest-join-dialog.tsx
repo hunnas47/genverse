@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { Move, Sparkles, Stamp } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import type { QuestNameResult } from "@/types/quest";
@@ -119,7 +119,7 @@ export function QuestJoinDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="w-full max-w-md rounded-[2rem] border border-brand-deep/15 bg-cream p-6 text-brand-deep shadow-lift sm:p-7"
+        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-[2rem] border border-brand-deep/15 bg-cream p-6 text-brand-deep shadow-lift sm:p-7"
       >
         <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-deep px-3 py-1.5 font-display text-[9px] font-bold tracking-[0.16em] text-lime uppercase">
           <Sparkles aria-hidden="true" className="size-3" />
@@ -134,6 +134,32 @@ export function QuestJoinDialog({
             ? "Your existing points stay with you. Pick the name other explorers will see."
             : "Pick a display name to save your shells and venue stamps. No email or password. You can change it later."}
         </p>
+
+        {!isRenaming && (
+          <ul className="quest-join-steps mt-4 grid gap-2 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-3 text-[11px] leading-relaxed text-brand-deep/75">
+            <li className="flex items-start gap-2">
+              <Move
+                aria-hidden="true"
+                className="mt-0.5 size-3.5 shrink-0 text-brand-deep/60"
+              />
+              Drag the joystick or tap the map to explore.
+            </li>
+            <li className="flex items-start gap-2">
+              <Sparkles
+                aria-hidden="true"
+                className="mt-0.5 size-3.5 shrink-0 text-brand-deep/60"
+              />
+              Walk near a glowing shell to collect it.
+            </li>
+            <li className="flex items-start gap-2">
+              <Stamp
+                aria-hidden="true"
+                className="mt-0.5 size-3.5 shrink-0 text-brand-deep/60"
+              />
+              Open a venue and check in for 25 points.
+            </li>
+          </ul>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-5">
           <label

@@ -64,6 +64,8 @@ export interface GameEventMap {
   "quest:shell-result": {
     shellId: string;
     accepted: boolean;
+    points?: number;
+    bonusPoints?: number;
   };
   /** Shared state changed; remove any shells that were already collected. */
   "quest:sync-state": {

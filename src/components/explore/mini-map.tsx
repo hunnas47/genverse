@@ -1,7 +1,7 @@
 "use client";
 
-import { List } from "lucide-react";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import { ChevronDown, List, Map as MapIcon } from "lucide-react";
+import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import { VENUES } from "@/data/venues";
 import {
@@ -33,6 +33,8 @@ export function MiniMap({
   onOpenDirectory: () => void;
   className?: string;
 }) {
+  const [expanded, setExpanded] = useState(true);
+
   const handleMapClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     if (event.detail === 0) {
       onOpenDirectory();
@@ -62,75 +64,103 @@ export function MiniMap({
   return (
     <section
       className={cn(
-        "pointer-events-auto w-[136px] rounded-2xl border border-white/15 bg-brand-deep/85 p-2 text-white shadow-lift backdrop-blur-md sm:w-[176px]",
+        "pointer-events-auto w-[148px] rounded-2xl border border-white/15 bg-brand-deep/85 p-2 text-white shadow-lift backdrop-blur-md sm:w-[184px]",
         className,
       )}
     >
-      <button
-        type="button"
-        onClick={handleMapClick}
-        aria-label="Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. Your position is marked in lime."
-        className="relative block w-full overflow-hidden rounded-xl border border-white/20 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-        style={{
-          aspectRatio: `${VENUE_MAP.world.width} / ${VENUE_MAP.world.height}`,
-          backgroundImage: `url("${VENUE_MAP.image.src}")`,
-          backgroundSize: "100% 100%",
-        }}
-      >
-        {VENUES.map((venue) => {
-          if (!venue.mapPosition) {
-            return null;
-          }
+      {expanded ? (
+        <button
+          type="button"
+          onClick={handleMapClick}
+          aria-label="Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. Your position is marked in lime."
+          className="relative block w-full overflow-hidden rounded-xl border border-white/20 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+          style={{
+            aspectRatio: `${VENUE_MAP.world.width} / ${VENUE_MAP.world.height}`,
+            backgroundImage: `url("${VENUE_MAP.image.src}")`,
+            backgroundSize: "100% 100%",
+          }}
+        >
+          {VENUES.map((venue) => {
+            if (!venue.mapPosition) {
+              return null;
+            }
 
-          return (
+            return (
+              <span
+                key={venue.id}
+                aria-hidden="true"
+                className="absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/85 shadow-sm"
+                style={{
+                  left: `${(venue.mapPosition.x / VENUE_MAP.world.width) * 100}%`,
+                  top: `${(venue.mapPosition.y / VENUE_MAP.world.height) * 100}%`,
+                  backgroundColor: toCssColor(
+                    VENUE_MARKER_COLORS[venue.category],
+                  ),
+                }}
+              />
+            );
+          })}
+
+          {target && (
             <span
-              key={venue.id}
+              data-testid="mini-map-target"
               aria-hidden="true"
-              className="absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/85 shadow-sm"
+              className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-cream shadow"
               style={{
-                left: `${(venue.mapPosition.x / VENUE_MAP.world.width) * 100}%`,
-                top: `${(venue.mapPosition.y / VENUE_MAP.world.height) * 100}%`,
-                backgroundColor: toCssColor(
-                  VENUE_MARKER_COLORS[venue.category],
-                ),
+                left: `${(target.x / VENUE_MAP.world.width) * 100}%`,
+                top: `${(target.y / VENUE_MAP.world.height) * 100}%`,
               }}
             />
-          );
-        })}
+          )}
 
-        {target && (
-          <span
-            data-testid="mini-map-target"
+          {playerPosition && (
+            <span
+              data-testid="mini-map-player"
+              aria-hidden="true"
+              className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-lime shadow"
+              style={{
+                left: `${(playerPosition.x / VENUE_MAP.world.width) * 100}%`,
+                top: `${(playerPosition.y / VENUE_MAP.world.height) * 100}%`,
+              }}
+            />
+          )}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-cream/10 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        >
+          <MapIcon aria-hidden="true" className="size-3.5" />
+          Map
+        </button>
+      )}
+
+      <div className="mt-2 flex items-stretch gap-1.5">
+        <button
+          type="button"
+          onClick={onOpenDirectory}
+          className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl bg-lime px-1.5 py-2 font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        >
+          <List aria-hidden="true" className="size-3.5 shrink-0" />
+          <span className="truncate">Directory</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          aria-label={expanded ? "Collapse the mini map" : "Expand the mini map"}
+          className="grid size-11 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10 text-white/75 transition hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        >
+          <ChevronDown
             aria-hidden="true"
-            className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-cream shadow"
-            style={{
-              left: `${(target.x / VENUE_MAP.world.width) * 100}%`,
-              top: `${(target.y / VENUE_MAP.world.height) * 100}%`,
-            }}
+            className={cn(
+              "size-3.5 transition-transform",
+              !expanded && "rotate-180",
+            )}
           />
-        )}
-
-        {playerPosition && (
-          <span
-            data-testid="mini-map-player"
-            aria-hidden="true"
-            className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-lime shadow"
-            style={{
-              left: `${(playerPosition.x / VENUE_MAP.world.width) * 100}%`,
-              top: `${(playerPosition.y / VENUE_MAP.world.height) * 100}%`,
-            }}
-          />
-        )}
-      </button>
-
-      <button
-        type="button"
-        onClick={onOpenDirectory}
-        className="mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-lime px-2 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-      >
-        <List aria-hidden="true" className="size-3.5" />
-        Directory
-      </button>
+        </button>
+      </div>
     </section>
   );
 }

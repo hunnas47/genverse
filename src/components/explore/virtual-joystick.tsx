@@ -19,8 +19,9 @@ const DEAD_ZONE = 0.16;
 /**
  * Touch-first joystick that feeds the same movement intent as the keyboard.
  *
- * It only reports a normalized vector. Collision, camera, and animation stay in
- * the Phaser scene, so every input path shares one movement system.
+ * It reports an analog vector capped at unit length, so a small tilt walks
+ * slowly. Collision, camera, and animation stay in the Phaser scene, so every
+ * input path shares one movement system.
  */
 export function VirtualJoystick({
   onMove,

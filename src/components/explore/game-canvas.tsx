@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import type Phaser from "phaser";
 
+import { ExploreGuide } from "@/components/explore/explore-guide";
 import { MiniMap } from "@/components/explore/mini-map";
 import { QuestHud } from "@/components/explore/quest-hud";
 import { QuestJoinDialog } from "@/components/explore/quest-join-dialog";
@@ -13,6 +14,7 @@ import { VenuePanel } from "@/components/explore/venue-panel";
 import { VenuePrompt } from "@/components/explore/venue-prompt";
 import { VirtualJoystick } from "@/components/explore/virtual-joystick";
 import { VENUES_BY_ID } from "@/data/venues";
+import { VENUE_MAP } from "@/data/venue-map";
 import { GameEventBridge } from "@/game/event-bridge";
 import { liveQuestStore } from "@/lib/quest/live-store";
 import { useQuest } from "@/lib/quest/use-quest";
@@ -23,36 +25,32 @@ import type { Venue } from "@/types/venue";
 type GameStatus = "loading" | "ready" | "error";
 
 const BOOT_TIMEOUT_MS = 15000;
-const JOIN_PROMPT_STORAGE_KEY = "genm:quest:join-prompt-dismissed";
+const GUIDE_STORAGE_KEY = "genm:explore:guide:v1";
+const SPAWN_MOVE_THRESHOLD = 28;
 
-function hasDismissedJoinPrompt(): boolean {
+function hasSeenGuide(): boolean {
   if (typeof window === "undefined") {
-    return false;
+    return true;
   }
 
   try {
-    return window.sessionStorage.getItem(JOIN_PROMPT_STORAGE_KEY) === "1";
+    return window.localStorage.getItem(GUIDE_STORAGE_KEY) === "1";
   } catch {
-    return false;
-  }
-}
-
-function rememberJoinPromptDismissed(): void {
-  try {
-    window.sessionStorage.setItem(JOIN_PROMPT_STORAGE_KEY, "1");
-  } catch {
-    // Session storage can be blocked; the in-memory state still works.
+    return true;
   }
 }
 
 export function GameCanvas({
   focusVenueId = null,
+  overlayOpen = false,
 }: {
   focusVenueId?: string | null;
+  overlayOpen?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   const bridgeRef = useRef<GameEventBridge | null>(null);
+  const hasMovedRef = useRef(false);
   const [status, setStatus] = useState<GameStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -69,8 +67,12 @@ export function GameCanvas({
   const [directoryOpen, setDirectoryOpen] = useState(false);
   const [questPanelOpen, setQuestPanelOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  const [joinDismissed, setJoinDismissed] = useState(hasDismissedJoinPrompt);
+  const [hasMoved, setHasMoved] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [questNotice, setQuestNotice] = useState<string | null>(null);
+  const [questCelebration, setQuestCelebration] = useState<{
+    points: number;
+  } | null>(null);
   const [checkingInVenueId, setCheckingInVenueId] = useState<string | null>(
     null,
   );
@@ -101,6 +103,11 @@ export function GameCanvas({
     setPlayerPosition(null);
     setNavigationTarget(null);
     setDirectoryOpen(false);
+    hasMovedRef.current = false;
+    setHasMoved(false);
+    setQuestPanelOpen(false);
+    setJoinDialogOpen(false);
+    setQuestCelebration(null);
 
     const bootTimeout = window.setTimeout(() => {
       if (cancelled || ready) {
@@ -158,8 +165,24 @@ export function GameCanvas({
       }
     });
     const unsubscribePosition = bridge.on("player:position", ({ x, y }) => {
-      if (!cancelled) {
-        setPlayerPosition({ x, y });
+      if (cancelled) {
+        return;
+      }
+
+      setPlayerPosition({ x, y });
+
+      if (hasMovedRef.current) {
+        return;
+      }
+
+      const distance = Math.hypot(
+        x - VENUE_MAP.spawn.x,
+        y - VENUE_MAP.spawn.y,
+      );
+
+      if (distance > SPAWN_MOVE_THRESHOLD) {
+        hasMovedRef.current = true;
+        setHasMoved(true);
       }
     });
     const unsubscribeNavigation = bridge.on("navigation:state", (state) => {
@@ -193,19 +216,35 @@ export function GameCanvas({
             return;
           }
 
-          bridge.emit("quest:shell-result", {
-            shellId,
-            accepted: result.accepted,
-          });
-
           if (result.accepted) {
             const points = result.points + result.bonusPoints;
 
-            setQuestNotice(
-              result.bonusPoints > 0
-                ? `Full set! +${points} points`
-                : `Shell found! +${points} points`,
-            );
+            bridge.emit("quest:shell-result", {
+              shellId,
+              accepted: true,
+              points: result.points,
+              bonusPoints: result.bonusPoints,
+            });
+
+            if (result.bonusPoints > 0) {
+              setQuestCelebration({ points });
+              setQuestNotice(null);
+            } else {
+              setQuestNotice(`Shell found! +${points} points`);
+            }
+
+            try {
+              navigator.vibrate?.(
+                result.bonusPoints > 0 ? [20, 40, 20] : 12,
+              );
+            } catch {
+              // Haptics are optional.
+            }
+          } else {
+            bridge.emit("quest:shell-result", {
+              shellId,
+              accepted: false,
+            });
           }
         })();
       },
@@ -298,6 +337,35 @@ export function GameCanvas({
     return () => window.clearTimeout(timer);
   }, [questNotice]);
 
+  useEffect(() => {
+    if (!questCelebration) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setQuestCelebration(null), 4000);
+
+    return () => window.clearTimeout(timer);
+  }, [questCelebration]);
+
+  useEffect(() => {
+    if (status !== "ready" || hasSeenGuide()) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setGuideOpen(true), 0);
+
+    return () => window.clearTimeout(timer);
+  }, [status]);
+
+  useEffect(() => {
+    if (!overlayOpen && !questPanelOpen && !joinDialogOpen) {
+      return;
+    }
+
+    bridgeRef.current?.emit("navigation:cancel", {});
+    bridgeRef.current?.emit("input:move", { x: 0, y: 0 });
+  }, [joinDialogOpen, overlayOpen, questPanelOpen]);
+
   const collectedShellKey =
     quest.snapshot?.collectedShellIds.join("|") ?? "";
 
@@ -382,8 +450,6 @@ export function GameCanvas({
       const result = await liveQuestStore.join(name);
 
       if (result.ok) {
-        rememberJoinPromptDismissed();
-        setJoinDismissed(true);
         setJoinDialogOpen(false);
         setQuestNotice(`Welcome, ${result.value}. Find today's shells!`);
       }
@@ -394,9 +460,21 @@ export function GameCanvas({
   );
 
   const dismissJoin = useCallback(() => {
-    rememberJoinPromptDismissed();
-    setJoinDismissed(true);
     setJoinDialogOpen(false);
+  }, []);
+
+  const dismissGuide = useCallback(() => {
+    setGuideOpen(false);
+
+    try {
+      window.localStorage.setItem(GUIDE_STORAGE_KEY, "1");
+    } catch {
+      // Storage can be blocked; the guide is still dismissed for this session.
+    }
+  }, []);
+
+  const cancelNavigation = useCallback(() => {
+    bridgeRef.current?.emit("navigation:cancel", {});
   }, []);
 
   const openJoinDialog = useCallback(() => {
@@ -435,13 +513,12 @@ export function GameCanvas({
   }, [selectedVenueId, checkingInVenueId]);
 
   const showBottomControls =
-    status === "ready" && !selectedVenue && !directoryOpen;
-  const showJoinDialog =
-    joinDialogOpen ||
-    (status === "ready" &&
-      quest.ready &&
-      !quest.snapshot?.joined &&
-      !joinDismissed);
+    status === "ready" &&
+    !selectedVenue &&
+    !directoryOpen &&
+    !questPanelOpen &&
+    !joinDialogOpen;
+  const showJoinDialog = joinDialogOpen;
 
   return (
     <div className="absolute inset-0">
@@ -491,6 +568,13 @@ export function GameCanvas({
         <QuestHud snapshot={quest.snapshot} onOpen={openQuest} />
       )}
 
+      {status === "ready" &&
+        guideOpen &&
+        !joinDialogOpen &&
+        !selectedVenue &&
+        !directoryOpen &&
+        !questPanelOpen && <ExploreGuide onDismiss={dismissGuide} />}
+
       {status === "ready" && mapFallbackMessage && (
         <div className="pointer-events-none absolute inset-x-0 top-36 z-30 flex justify-center px-3 sm:top-32">
           <div className="pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-3 text-brand-deep shadow-lift">
@@ -535,9 +619,31 @@ export function GameCanvas({
       )}
 
       {status === "ready" &&
-        nearbyVenue &&
+        navigationTarget &&
         !selectedVenue &&
-        !directoryOpen && (
+        !directoryOpen &&
+        !questPanelOpen &&
+        !joinDialogOpen &&
+        !guideOpen && (
+          <button
+            type="button"
+            onClick={cancelNavigation}
+            className="pointer-events-auto absolute bottom-[calc(env(safe-area-inset-bottom)+13rem)] left-1/2 z-30 inline-flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[9px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime sm:bottom-6"
+          >
+            <X aria-hidden="true" className="size-3.5" />
+            Stop walking
+          </button>
+        )}
+
+      {status === "ready" &&
+        nearbyVenue &&
+        hasMoved &&
+        !selectedVenue &&
+        !directoryOpen &&
+        !navigationTarget &&
+        !questPanelOpen &&
+        !joinDialogOpen &&
+        !guideOpen && (
           <VenuePrompt venue={nearbyVenue} onOpen={openNearbyVenue} />
         )}
 
@@ -587,6 +693,34 @@ export function GameCanvas({
           onJoin={handleJoin}
           onDismiss={dismissJoin}
         />
+      )}
+
+      {questCelebration && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none fixed inset-0 z-40 grid place-items-center px-6"
+        >
+          <div className="quest-celebration-pop relative overflow-hidden rounded-[2rem] border border-lime/30 bg-brand-deep/95 px-7 py-5 text-center text-white shadow-lift backdrop-blur-md">
+            <span
+              aria-hidden="true"
+              className="absolute -top-10 left-1/2 size-28 -translate-x-1/2 rounded-full bg-lime/20 blur-2xl"
+            />
+            <Sparkles
+              aria-hidden="true"
+              className="relative mx-auto size-6 text-lime"
+            />
+            <p className="relative mt-2 font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+              Full set
+            </p>
+            <p className="relative mt-1 font-display text-3xl font-black text-cream">
+              +{questCelebration.points}
+            </p>
+            <p className="relative mt-1 text-[11px] text-white/65">
+              Every shell found today
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

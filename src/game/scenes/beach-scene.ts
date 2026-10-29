@@ -66,6 +66,7 @@ export class BeachScene extends Phaser.Scene {
   private escapeKey?: Phaser.Input.Keyboard.Key;
   private movement = new Phaser.Math.Vector2();
   private joystickMovement = new Phaser.Math.Vector2();
+  private velocity = new Phaser.Math.Vector2();
   private walkTime = 0;
   private reducedMotion = false;
   private mobileLayout = false;
@@ -218,20 +219,30 @@ export class BeachScene extends Phaser.Scene {
       }
     }
 
+    if (this.movement.lengthSq() > 0.0001) {
+      this.movement.normalize();
+    }
+
     if (this.joystickMovement.lengthSq() > 0.0001) {
       this.movement.add(this.joystickMovement);
+
+      // Keyboard input is normalized above; the joystick keeps its analog
+      // magnitude so a small tilt walks slowly instead of snapping to full
+      // speed. Clamp the combined vector to one.
+      if (this.movement.lengthSq() > 1) {
+        this.movement.normalize();
+      }
     }
 
     let moving = false;
 
     if (this.movement.lengthSq() > 0.0001) {
-      this.movement.normalize();
       this.cancelNavigation("cancelled");
       moving = this.moveDirect(step);
     } else if (this.path.length > 0) {
       moving = this.followPath(step);
     } else {
-      this.stopWalkAnimation();
+      this.stopDirectMovement(step);
     }
 
     this.updateNearbyVenue();
@@ -322,23 +333,24 @@ export class BeachScene extends Phaser.Scene {
 
       const { x, y } = venue.mapPosition;
       const color = VENUE_MARKER_COLORS[venue.category];
+      const markerDepth = y;
 
       this.add
         .circle(x, y + 2, 15, 0x1c1d3a, 0.22)
-        .setDepth(MARKER_DEPTH - 1);
+        .setDepth(markerDepth - 1);
 
       const ring = this.add
         .circle(x, y, 22)
         .setStrokeStyle(2, 0xffffff, 0.9)
         .setFillStyle(color, 0.16)
-        .setDepth(MARKER_DEPTH)
+        .setDepth(markerDepth)
         .setAlpha(0.3);
 
       this.add
         .circle(x, y, 13)
         .setStrokeStyle(2, 0xffffff, 0.95)
         .setFillStyle(color, 1)
-        .setDepth(MARKER_DEPTH + 1);
+        .setDepth(markerDepth + 1);
 
       this.add
         .text(x, y, venue.mapLabel, {
@@ -348,7 +360,7 @@ export class BeachScene extends Phaser.Scene {
           color: VENUE_MARKER_TEXT_COLORS[venue.category],
         })
         .setOrigin(0.5)
-        .setDepth(MARKER_DEPTH + 2);
+        .setDepth(markerDepth + 2);
 
       this.markerRings.set(venue.id, ring);
     }
@@ -362,11 +374,14 @@ export class BeachScene extends Phaser.Scene {
 
       const container = this.add
         .container(shell.x, shell.y)
-        .setDepth(shell.y + 4);
+        .setDepth(shell.y + 6);
       const shadow = this.add.ellipse(0, 10, 24, 9, 0x17343e, 0.16);
       const glow = this.add
-        .circle(0, 0, 19, 0xedf2b5, 0.14)
-        .setStrokeStyle(2, 0xf7f3e8, 0.55);
+        .circle(0, 0, 24, 0xedf2b5, 0.2)
+        .setStrokeStyle(2, 0xf7f3e8, 0.7);
+      const halo = this.add
+        .circle(0, 0, 30)
+        .setStrokeStyle(1, 0xedf2b5, 0.35);
       const shellGraphics = this.add.graphics();
 
       shellGraphics.fillStyle(0xf7f3e8, 1);
@@ -389,7 +404,7 @@ export class BeachScene extends Phaser.Scene {
       shellGraphics.fillStyle(0xc98b6b, 1);
       shellGraphics.fillCircle(0, 4, 2.5);
 
-      container.add([shadow, glow, shellGraphics]);
+      container.add([shadow, glow, halo, shellGraphics]);
       this.shellMarkers.set(shell.id, container);
 
       if (!this.reducedMotion) {
@@ -449,13 +464,28 @@ export class BeachScene extends Phaser.Scene {
   private handleShellResult = ({
     shellId,
     accepted,
+    points = 10,
+    bonusPoints = 0,
   }: {
     shellId: string;
     accepted: boolean;
+    points?: number;
+    bonusPoints?: number;
   }): void => {
     this.pendingShellIds.delete(shellId);
 
     if (accepted) {
+      const marker = this.shellMarkers.get(shellId);
+
+      if (marker) {
+        this.showShellCollectionFeedback(
+          marker.x,
+          marker.y,
+          points,
+          bonusPoints,
+        );
+      }
+
       this.removeShell(shellId);
       return;
     }
@@ -464,6 +494,70 @@ export class BeachScene extends Phaser.Scene {
     // steps away from the shell.
     this.blockedShellIds.add(shellId);
   };
+
+  private showShellCollectionFeedback(
+    x: number,
+    y: number,
+    points: number,
+    bonusPoints: number,
+  ): void {
+    const total = points + bonusPoints;
+    const label = this.add
+      .text(x, y - 18, `+${total}`, {
+        fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
+        fontSize: "16px",
+        fontStyle: "bold",
+        color: "#edf2b5",
+        stroke: "#2c2d6f",
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(MARKER_DEPTH + 20);
+
+    if (!this.reducedMotion) {
+      const ring = this.add
+        .circle(x, y, 10)
+        .setStrokeStyle(2, 0xedf2b5, 0.9)
+        .setDepth(MARKER_DEPTH + 19);
+
+      this.tweens.add({
+        targets: ring,
+        scale: 3,
+        alpha: 0,
+        duration: 520,
+        ease: "Cubic.easeOut",
+        onComplete: () => ring.destroy(),
+      });
+
+      for (let index = 0; index < 8; index += 1) {
+        const angle = (Math.PI * 2 * index) / 8 + Math.random() * 0.35;
+        const distance = 26 + Math.random() * 18;
+        const spark = this.add
+          .circle(x, y, 2.5, index % 2 === 0 ? 0xedf2b5 : 0xf7f3e8, 0.95)
+          .setDepth(MARKER_DEPTH + 21);
+
+        this.tweens.add({
+          targets: spark,
+          x: x + Math.cos(angle) * distance,
+          y: y + Math.sin(angle) * distance,
+          alpha: 0,
+          scale: 0.2,
+          duration: 520 + Math.random() * 180,
+          ease: "Cubic.easeOut",
+          onComplete: () => spark.destroy(),
+        });
+      }
+    }
+
+    this.tweens.add({
+      targets: label,
+      y: y - 58,
+      alpha: 0,
+      duration: 950,
+      ease: "Cubic.easeOut",
+      onComplete: () => label.destroy(),
+    });
+  }
 
   private removeShell(shellId: string): void {
     const marker = this.shellMarkers.get(shellId);
@@ -581,6 +675,7 @@ export class BeachScene extends Phaser.Scene {
       });
 
       if (point) {
+        this.velocity.set(0, 0);
         this.player.setPosition(point.x, point.y);
         this.player.setDepth(point.y);
         this.cameras.main.centerOn(point.x, point.y);
@@ -754,6 +849,7 @@ export class BeachScene extends Phaser.Scene {
     }
 
     this.cancelNavigation("cancelled");
+    this.velocity.set(0, 0);
     this.path = path;
     this.pathIndex = 1;
     this.destination = goal;
@@ -843,17 +939,62 @@ export class BeachScene extends Phaser.Scene {
     }
 
     const speed = this.getPlayerSpeed();
+    const targetX = this.movement.x * speed;
+    const targetY = this.movement.y * speed;
+    const response = 1 - Math.exp(-18 * step);
+
+    this.velocity.x = Phaser.Math.Linear(this.velocity.x, targetX, response);
+    this.velocity.y = Phaser.Math.Linear(this.velocity.y, targetY, response);
+
+    if (this.velocity.lengthSq() < 4) {
+      this.velocity.set(0, 0);
+      this.stopWalkAnimation();
+      return false;
+    }
+
     const moved = this.moveBy(
-      this.movement.x * speed * step,
-      this.movement.y * speed * step,
+      this.velocity.x * step,
+      this.velocity.y * step,
       step,
     );
 
     if (!moved) {
+      this.velocity.set(0, 0);
       this.stopWalkAnimation();
     }
 
     return moved;
+  }
+
+  /** Glides to a stop after the joystick or keyboard is released. */
+  private stopDirectMovement(step: number): void {
+    if (!this.player || this.velocity.lengthSq() < 4) {
+      this.velocity.set(0, 0);
+      this.stopWalkAnimation();
+      return;
+    }
+
+    const response = 1 - Math.exp(-24 * step);
+
+    this.velocity.x = Phaser.Math.Linear(this.velocity.x, 0, response);
+    this.velocity.y = Phaser.Math.Linear(this.velocity.y, 0, response);
+
+    if (this.velocity.lengthSq() < 4) {
+      this.velocity.set(0, 0);
+      this.stopWalkAnimation();
+      return;
+    }
+
+    const moved = this.moveBy(
+      this.velocity.x * step,
+      this.velocity.y * step,
+      step,
+    );
+
+    if (!moved) {
+      this.velocity.set(0, 0);
+      this.stopWalkAnimation();
+    }
   }
 
   /**

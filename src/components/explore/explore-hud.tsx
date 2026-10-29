@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { LeaderboardOverlay } from "@/components/explore/leaderboard-overlay";
 
@@ -95,21 +95,27 @@ function ControlsContent({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export function ExploreHud() {
-  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
-
+export function ExploreHud({
+  leaderboardOpen,
+  onOpenLeaderboard,
+  onCloseLeaderboard,
+}: {
+  leaderboardOpen: boolean;
+  onOpenLeaderboard: () => void;
+  onCloseLeaderboard: () => void;
+}) {
   return (
     <>
       <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:p-5 sm:pt-[max(1.25rem,env(safe-area-inset-top))]">
-        <div className="pointer-events-auto flex items-center gap-2.5 rounded-2xl border border-white/15 bg-brand-deep/85 p-1.5 pr-1.5 text-white shadow-lift backdrop-blur-md sm:p-2 sm:pr-4">
+        <div className="pointer-events-auto flex items-center gap-2.5 rounded-2xl border border-white/15 bg-brand-deep/85 p-1.5 text-white shadow-lift backdrop-blur-md lg:p-2 lg:pr-4">
           <Link
             href="/"
             aria-label="Back to the GEN M home page"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime sm:size-11"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             <Home aria-hidden="true" className="size-4" />
           </Link>
-          <div className="hidden min-w-0 sm:block">
+          <div className="hidden min-w-0 lg:block">
             <Image
               src="/images/genm-logo.png"
               alt="GEN M"
@@ -126,15 +132,15 @@ export function ExploreHud() {
         <div className="pointer-events-auto flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setLeaderboardOpen(true)}
+            onClick={onOpenLeaderboard}
             aria-label="Open the Beach Quest leaderboard"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             <Trophy aria-hidden="true" className="size-3.5" />
             <span className="hidden sm:inline">Leaderboard</span>
           </button>
 
-          <details className="group relative lg:hidden">
+          <details className="group relative">
             <summary
               aria-label="Explorer controls and help"
               className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-white/20 bg-brand-deep/85 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [&::-webkit-details-marker]:hidden"
@@ -150,26 +156,10 @@ export function ExploreHud() {
               <ControlsContent compact />
             </div>
           </details>
-
-          <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-brand-deep/75 px-3 py-2 font-display text-[9px] font-bold tracking-[0.16em] text-white/75 uppercase shadow-lift backdrop-blur-md lg:flex">
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-lime" />
-            Venue map
-            <span className="text-white/30">/</span>
-            Tap to walk
-          </div>
         </div>
       </header>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden items-end justify-start gap-4 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:flex">
-        <section className="pointer-events-auto max-w-sm rounded-2xl border border-white/15 bg-brand-deep/85 p-4 text-white shadow-lift backdrop-blur-md">
-          <ControlsContent />
-        </section>
-      </div>
-
-      <LeaderboardOverlay
-        open={leaderboardOpen}
-        onClose={() => setLeaderboardOpen(false)}
-      />
+      <LeaderboardOverlay open={leaderboardOpen} onClose={onCloseLeaderboard} />
     </>
   );
 }
