@@ -1,5 +1,12 @@
 import Phaser from "phaser";
 
+import {
+  AVATAR_ASSETS,
+  AVATAR_DISPLAY_HEIGHT,
+  AVATAR_TEXTURES,
+  getAvatarFacing,
+  type AvatarFacing,
+} from "@/game/avatar";
 import { VENUES, VENUES_BY_ID } from "@/data/venues";
 import {
   VENUE_MAP,
@@ -49,6 +56,8 @@ type NavigationReason = "arrived" | "cancelled" | "unreachable";
 export class BeachScene extends Phaser.Scene {
   private player?: Phaser.GameObjects.Container;
   private character?: Phaser.GameObjects.Container;
+  private avatar?: Phaser.GameObjects.Image;
+  private avatarFacing: AvatarFacing = "down";
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys?: MovementKeys;
   private interactKey?: Phaser.Input.Keyboard.Key;
@@ -102,6 +111,9 @@ export class BeachScene extends Phaser.Scene {
 
   preload(): void {
     this.load.image(MAP_TEXTURE_KEY, VENUE_MAP.image.src);
+    this.load.image(AVATAR_TEXTURES.down, AVATAR_ASSETS.down);
+    this.load.image(AVATAR_TEXTURES.up, AVATAR_ASSETS.up);
+    this.load.image(AVATAR_TEXTURES.right, AVATAR_ASSETS.right);
   }
 
   create(): void {
@@ -793,6 +805,7 @@ export class BeachScene extends Phaser.Scene {
           obstacles: VENUE_MAP.obstacles,
         })
       ) {
+        this.updateAvatarFacing(dx, dy);
         this.player.setPosition(waypoint.x, waypoint.y);
         this.player.setDepth(waypoint.y);
       }
@@ -854,6 +867,8 @@ export class BeachScene extends Phaser.Scene {
     const bounds = VENUE_MAP.playableBounds;
     const radius = VENUE_MAP.player.radius;
     const obstacles = VENUE_MAP.obstacles;
+    const startX = this.player.x;
+    const startY = this.player.y;
     let moved = false;
 
     const nextX = Phaser.Math.Clamp(
@@ -898,6 +913,10 @@ export class BeachScene extends Phaser.Scene {
 
     if (moved) {
       this.player.setDepth(this.player.y);
+      this.updateAvatarFacing(
+        this.player.x - startX,
+        this.player.y - startY,
+      );
       this.animateWalk(step);
     }
 
@@ -1113,6 +1132,55 @@ export class BeachScene extends Phaser.Scene {
       .setFillStyle(0xedf2b5, 0.08);
     const shadow = this.add.ellipse(0, 20, 42, 16, 0x173b35, 0.2);
     const character = this.add.container(0, 0);
+    const hasAvatarTextures = Object.values(AVATAR_TEXTURES).every((key) =>
+      this.textures.exists(key),
+    );
+
+    if (hasAvatarTextures) {
+      const avatar = this.add
+        .image(0, 0, AVATAR_TEXTURES.down)
+        .setOrigin(0.5, 1);
+      this.avatar = avatar;
+      this.avatarFacing = "down";
+      this.applyAvatarFacing("down", true);
+      character.add(avatar);
+    } else {
+      character.add(this.createFallbackAvatar());
+    }
+
+    player.add([halo, shadow, character]);
+
+    this.player = player;
+    this.character = character;
+  }
+
+  private applyAvatarFacing(facing: AvatarFacing, force = false): void {
+    if (!this.avatar || (!force && facing === this.avatarFacing)) {
+      return;
+    }
+
+    this.avatarFacing = facing;
+    const textureKey =
+      facing === "left" ? AVATAR_TEXTURES.right : AVATAR_TEXTURES[facing];
+    const source = this.textures
+      .get(textureKey)
+      .getSourceImage() as { height: number };
+
+    this.avatar.setTexture(textureKey);
+    this.avatar.setOrigin(0.5, 1);
+    this.avatar.setFlipX(facing === "left");
+    this.avatar.setScale(AVATAR_DISPLAY_HEIGHT / source.height);
+  }
+
+  private updateAvatarFacing(dx: number, dy: number): void {
+    const facing = getAvatarFacing(dx, dy);
+
+    if (facing) {
+      this.applyAvatarFacing(facing);
+    }
+  }
+
+  private createFallbackAvatar(): Phaser.GameObjects.Graphics {
     const graphics = this.add.graphics();
 
     graphics.fillStyle(0x2f4858, 1);
@@ -1136,11 +1204,7 @@ export class BeachScene extends Phaser.Scene {
     graphics.fillStyle(0xe2c58b, 1);
     graphics.fillRect(-10, -61, 20, 4);
 
-    character.add(graphics);
-    player.add([halo, shadow, character]);
-
-    this.player = player;
-    this.character = character;
+    return graphics;
   }
 
   private setupInput(): void {

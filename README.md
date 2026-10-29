@@ -191,8 +191,14 @@ src/lib/quest/   local-first quest store, sync layer, period rotation, name rule
 src/lib/supabase/ browser client and anonymous session bootstrap
 src/types/       shared domain and search-param types
 supabase/        SQL migration for tables, seeds, RPCs, RLS, and grants
-public/images/   final map artwork and GEN M wordmark
+public/images/   final map artwork, GEN M wordmark, and avatar views
 ```
+
+- The player avatar uses three supplied views in `public/images/assets/`:
+  `avatar_up` (back), `avatar_down` (front), and `avatar_right` (side; left
+  movement mirrors it). The runtime loads 320px-tall WebP derivatives, while the
+  source PNGs stay in the same folder. Height and facing rules live in
+  `src/game/avatar.ts`.
 
 - Phaser is imported dynamically inside a client component, never during server
   render.
