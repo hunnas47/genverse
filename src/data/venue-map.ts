@@ -53,7 +53,8 @@ export const VENUE_MAP: VenueMapConfig = {
   // Bottom 900 includes Beach Road and the roadside green path.
   playableBounds: { x: 18, y: 225, width: 1431, height: 675 },
   player: { radius: 18, speed: 240 },
-  spawn: { x: 675, y: 770 },
+  // Centred on the entrance walkway and the paths.png route through the gate.
+  spawn: { x: 658, y: 770 },
   obstacles: [
     // S1 Freedom Square (paths.png component 1).
     { kind: "rect", x: 52, y: 242, width: 220, height: 459 },
@@ -116,9 +117,10 @@ export const VENUE_MAP: VenueMapConfig = {
     // Registration (component 29).
     { kind: "rect", x: 545, y: 678, width: 69, height: 58 },
 
-    // Entrance gateway pillars.
-    { kind: "rect", x: 630, y: 730, width: 18, height: 50 },
-    { kind: "rect", x: 702, y: 730, width: 18, height: 50 },
+    // Entrance gateway side walls. Keep the full walkway between the teal
+    // columns open; the old inset rectangles blocked the left half of the gate.
+    { kind: "rect", x: 604, y: 730, width: 14, height: 50 },
+    { kind: "rect", x: 694, y: 730, width: 14, height: 50 },
 
     // Bottom-left building that enters the road-level playable strip
     // (component 31). The bottom-right building (component 32) starts below

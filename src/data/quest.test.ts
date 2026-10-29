@@ -93,6 +93,18 @@ describe("venue map anchors", () => {
     }
   });
 
+  it("spawns on the entrance walkway", () => {
+    const walkable = canOccupyPosition({
+      x: VENUE_MAP.spawn.x,
+      y: VENUE_MAP.spawn.y,
+      radius: VENUE_MAP.player.radius,
+      bounds: VENUE_MAP.playableBounds,
+      obstacles: VENUE_MAP.obstacles,
+    });
+
+    expect(walkable).toBe(true);
+  });
+
   it("keeps the playable bounds inside the world image", () => {
     const { x, y, width, height } = VENUE_MAP.playableBounds;
 
@@ -110,6 +122,9 @@ describe("venue map anchors", () => {
       [1000, 880],
       [1400, 880],
       [675, 800],
+      [640, 760],
+      [660, 760],
+      [675, 760],
       [675, 720],
       [700, 600],
       [550, 600],
