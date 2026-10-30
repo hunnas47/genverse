@@ -5,7 +5,7 @@ import { ExplorePageContent } from "@/components/explore/explore-page-content";
 import type { SearchParams } from "@/types/search";
 
 export const metadata: Metadata = {
-  title: "Beach Explorer | GEN M",
+  title: "Genverse Explorer",
   description:
     "Walk around the GEN M venue map, open venue details, and see the official session programme.",
 };

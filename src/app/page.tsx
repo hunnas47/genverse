@@ -34,7 +34,7 @@ import type { Session } from "@/types/session";
 import type { Venue } from "@/types/venue";
 
 export const metadata: Metadata = {
-  title: "GEN M Explorer | Beach venue & programme",
+  title: "GENVerse | GEN M Explorer",
   description:
     "Explore the GEN M beach venue, find every stage, and browse the official session programme.",
 };

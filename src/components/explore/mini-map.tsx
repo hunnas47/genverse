@@ -257,7 +257,7 @@ export function MapDrawer({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
-              Beach map
+              Genverse Explorer
             </p>
             <h2 id={titleId} className="mt-1 text-xl leading-tight font-medium">
               Find your way

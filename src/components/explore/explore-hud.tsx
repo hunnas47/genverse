@@ -107,7 +107,7 @@ export function ExploreHud({
                 className="h-7 w-auto"
               />
               <p className="mt-1 font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
-                Beach Explorer
+                Genverse Explorer
               </p>
             </div>
           </div>

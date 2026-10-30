@@ -3,6 +3,7 @@
 import { Move, Sparkles, Stamp } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import { Credit } from "@/components/site/credit";
 import type { QuestNameResult } from "@/types/quest";
 
 const FOCUSABLE =
@@ -221,6 +222,11 @@ export function QuestJoinDialog({
         <p className="mt-2 text-center text-xs leading-relaxed text-brand-deep/60">
           Names can use letters, numbers, spaces, apostrophes, or hyphens.
         </p>
+
+        <Credit
+          className="mt-4 border-t border-brand-deep/10 pt-3 text-center text-brand-deep/60"
+          linkClassName="text-brand-deep hover:text-brand"
+        />
       </div>
     </div>
   );

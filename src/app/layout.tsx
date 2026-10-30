@@ -62,7 +62,7 @@ const anekMalayalam = Anek_Malayalam({
 });
 
 export const metadata: Metadata = {
-  title: "GEN M Explorer | Beach venue & programme",
+  title: "GENVerse | GEN M Explorer",
   description:
     "Explore the GEN M beach venue, find every stage, and browse the official session programme.",
 };
