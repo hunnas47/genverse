@@ -338,7 +338,7 @@
 
   .venue-prompt {
     right: auto;
-    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    bottom: calc(env(safe-area-inset-bottom) + 8.5rem);
     left: 50%;
     transform: translateX(-50%);
   }

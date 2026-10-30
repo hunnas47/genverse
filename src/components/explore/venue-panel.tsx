@@ -123,13 +123,13 @@ export const VenuePanel = memo(function VenuePanel({
             />
             <div className="quest-stamp-slam relative grid size-36 place-items-center rounded-full border-[3px] border-brand-deep bg-lime text-brand-deep shadow-[0_20px_60px_rgba(28,29,58,0.45)] sm:size-44">
               <span className="absolute inset-2 rounded-full border border-brand-deep/35" />
-              <span className="font-display text-[9px] font-bold tracking-[0.3em] uppercase">
+              <span className="font-display text-[10px] font-bold tracking-[0.3em] uppercase">
                 GEN M
               </span>
               <span className="mt-0.5 font-display text-2xl font-black tracking-[0.06em] uppercase sm:text-3xl">
                 Stamped
               </span>
-              <span className="mt-0.5 inline-flex items-center gap-1 font-display text-[9px] font-bold tracking-[0.14em] uppercase">
+              <span className="mt-0.5 inline-flex items-center gap-1 font-display text-[10px] font-bold tracking-[0.14em] uppercase">
                 <Check aria-hidden="true" className="size-3" />
                 {venue.mapLabel} · +25 pts
               </span>
@@ -138,7 +138,7 @@ export const VenuePanel = memo(function VenuePanel({
         </div>
       )}
 
-      <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[min(70dvh,32rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-brand-deep/15 bg-cream p-5 text-brand-deep shadow-lift sm:inset-x-auto sm:top-24 sm:right-5 sm:bottom-auto sm:max-h-[calc(100dvh-12rem)] sm:w-[400px] sm:p-6">
+      <div className="pointer-events-auto absolute inset-x-3 bottom-3 max-h-[min(70dvh,32rem)] overflow-y-auto overscroll-contain rounded-[2rem] border border-brand-deep/15 bg-cream p-5 text-brand-deep shadow-lift sm:inset-x-auto sm:top-24 sm:right-5 sm:bottom-auto sm:max-h-[calc(100dvh-7rem)] sm:w-[400px] sm:p-6">
         <div
           aria-hidden="true"
           className="mx-auto mb-4 h-1 w-10 rounded-full bg-brand-deep/20 sm:hidden"
@@ -189,7 +189,7 @@ export const VenuePanel = memo(function VenuePanel({
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 font-display text-[9px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
+                <p className="flex items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
                   <Sparkles aria-hidden="true" className="size-3" />
                   Beach Quest
                 </p>
@@ -211,7 +211,7 @@ export const VenuePanel = memo(function VenuePanel({
                 disabled={checkedIn || checkInPending}
                 aria-busy={checkInPending || undefined}
                 className={cn(
-                  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[9px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
+                  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
                   checkedIn
                     ? "bg-brand-deep text-lime"
                     : checkInPending
@@ -241,7 +241,7 @@ export const VenuePanel = memo(function VenuePanel({
 
         {activeDays && (
           <div className="mt-4">
-            <p className="font-display text-[9px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
+            <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
               Programme days
             </p>
             <p className="mt-1 text-sm text-brand-deep/80">{activeDays}</p>
@@ -249,14 +249,14 @@ export const VenuePanel = memo(function VenuePanel({
         )}
 
         {venue.note && (
-          <p className="mt-4 rounded-2xl border border-brand/20 bg-brand/5 px-3.5 py-2.5 text-[11px] leading-relaxed text-brand-deep/70">
+          <p className="mt-4 rounded-2xl border border-brand/20 bg-brand/5 px-3.5 py-2.5 text-xs leading-relaxed text-brand-deep/75">
             {venue.note}
           </p>
         )}
 
         <div className="mt-5 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-[9px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
+            <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
               Sessions
             </p>
             {sessions.length > 0 && (
@@ -292,7 +292,7 @@ export const VenuePanel = memo(function VenuePanel({
                             href={`/sessions?session=${session.id}`}
                             className="group -mx-2 block rounded-xl px-2 py-1.5 transition hover:bg-brand-deep/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
                           >
-                            <span className="block font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
+                            <span className="block font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
                               {formatSessionTimeRange(session)}
                             </span>
                             <span
@@ -304,7 +304,7 @@ export const VenuePanel = memo(function VenuePanel({
                               {session.title}
                             </span>
                             {speakers.length > 0 && (
-                              <span className="mt-0.5 block truncate text-[10px] text-brand-deep/70">
+                              <span className="mt-0.5 block truncate text-[11px] text-brand-deep/70">
                                 {summary}
                                 {remaining > 0 ? ` +${remaining} more` : ""}
                               </span>

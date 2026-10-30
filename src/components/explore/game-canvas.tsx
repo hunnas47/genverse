@@ -5,8 +5,12 @@ import { Sparkles, X } from "lucide-react";
 import type Phaser from "phaser";
 
 import { ExploreGuide } from "@/components/explore/explore-guide";
-import { MiniMap } from "@/components/explore/mini-map";
-import { QuestHud } from "@/components/explore/quest-hud";
+import { ExploreHud } from "@/components/explore/explore-hud";
+import {
+  MapButton,
+  MapDrawer,
+  MiniMap,
+} from "@/components/explore/mini-map";
 import { QuestJoinDialog } from "@/components/explore/quest-join-dialog";
 import { QuestPanel } from "@/components/explore/quest-panel";
 import { VenueDirectory } from "@/components/explore/venue-directory";
@@ -42,10 +46,8 @@ function hasSeenGuide(): boolean {
 
 export function GameCanvas({
   focusVenueId = null,
-  overlayOpen = false,
 }: {
   focusVenueId?: string | null;
-  overlayOpen?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
@@ -65,6 +67,8 @@ export function GameCanvas({
   );
   const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
   const [directoryOpen, setDirectoryOpen] = useState(false);
+  const [mapDrawerOpen, setMapDrawerOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [questPanelOpen, setQuestPanelOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
@@ -103,6 +107,8 @@ export function GameCanvas({
     setPlayerPosition(null);
     setNavigationTarget(null);
     setDirectoryOpen(false);
+    setMapDrawerOpen(false);
+    setLeaderboardOpen(false);
     hasMovedRef.current = false;
     setHasMoved(false);
     setQuestPanelOpen(false);
@@ -358,13 +364,18 @@ export function GameCanvas({
   }, [status]);
 
   useEffect(() => {
-    if (!overlayOpen && !questPanelOpen && !joinDialogOpen) {
+    if (
+      !leaderboardOpen &&
+      !mapDrawerOpen &&
+      !questPanelOpen &&
+      !joinDialogOpen
+    ) {
       return;
     }
 
     bridgeRef.current?.emit("navigation:cancel", {});
     bridgeRef.current?.emit("input:move", { x: 0, y: 0 });
-  }, [joinDialogOpen, overlayOpen, questPanelOpen]);
+  }, [joinDialogOpen, leaderboardOpen, mapDrawerOpen, questPanelOpen]);
 
   const collectedShellKey =
     quest.snapshot?.collectedShellIds.join("|") ?? "";
@@ -409,6 +420,7 @@ export function GameCanvas({
   }, []);
 
   const navigateToPoint = useCallback((point: MapPoint) => {
+    setMapDrawerOpen(false);
     hostRef.current?.focus();
     bridgeRef.current?.emit("navigation:goto", {
       target: { kind: "point", ...point },
@@ -437,11 +449,27 @@ export function GameCanvas({
 
   const openDirectory = useCallback(() => {
     bridgeRef.current?.emit("navigation:cancel", {});
+    setMapDrawerOpen(false);
     setDirectoryOpen(true);
   }, []);
 
   const closeDirectory = useCallback(() => {
     setDirectoryOpen(false);
+    hostRef.current?.focus();
+  }, []);
+
+  const openMapDrawer = useCallback(() => {
+    bridgeRef.current?.emit("navigation:cancel", {});
+    setSelectedVenueId(null);
+    setDirectoryOpen(false);
+    setQuestPanelOpen(false);
+    setJoinDialogOpen(false);
+    setGuideOpen(false);
+    setMapDrawerOpen(true);
+  }, []);
+
+  const closeMapDrawer = useCallback(() => {
+    setMapDrawerOpen(false);
     hostRef.current?.focus();
   }, []);
 
@@ -482,17 +510,33 @@ export function GameCanvas({
     setJoinDialogOpen(true);
   }, []);
 
-  const openQuest = useCallback(() => {
-    if (!quest.snapshot?.joined) {
-      setJoinDialogOpen(true);
-      return;
-    }
-
+  const openProfile = useCallback(() => {
+    bridgeRef.current?.emit("navigation:cancel", {});
+    setSelectedVenueId(null);
+    setDirectoryOpen(false);
+    setMapDrawerOpen(false);
+    setGuideOpen(false);
     setQuestPanelOpen(true);
-  }, [quest.snapshot?.joined]);
+  }, []);
 
   const closeQuestPanel = useCallback(() => {
     setQuestPanelOpen(false);
+    hostRef.current?.focus();
+  }, []);
+
+  const openLeaderboard = useCallback(() => {
+    bridgeRef.current?.emit("navigation:cancel", {});
+    setSelectedVenueId(null);
+    setDirectoryOpen(false);
+    setMapDrawerOpen(false);
+    setQuestPanelOpen(false);
+    setJoinDialogOpen(false);
+    setGuideOpen(false);
+    setLeaderboardOpen(true);
+  }, []);
+
+  const closeLeaderboard = useCallback(() => {
+    setLeaderboardOpen(false);
     hostRef.current?.focus();
   }, []);
 
@@ -516,6 +560,8 @@ export function GameCanvas({
     status === "ready" &&
     !selectedVenue &&
     !directoryOpen &&
+    !mapDrawerOpen &&
+    !leaderboardOpen &&
     !questPanelOpen &&
     !joinDialogOpen;
   const showJoinDialog = joinDialogOpen;
@@ -545,7 +591,7 @@ export function GameCanvas({
               <button
                 type="button"
                 onClick={retry}
-                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-brand-deep px-4 py-2 font-display text-[11px] font-bold tracking-[0.1em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 Try again
               </button>
@@ -556,7 +602,7 @@ export function GameCanvas({
                 aria-hidden="true"
                 className="size-8 rounded-full border-2 border-lime/25 border-t-lime motion-safe:animate-spin"
               />
-              <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
                 Preparing the beach
               </p>
             </div>
@@ -564,9 +610,13 @@ export function GameCanvas({
         </div>
       )}
 
-      {status === "ready" && quest.snapshot && (
-        <QuestHud snapshot={quest.snapshot} onOpen={openQuest} />
-      )}
+      <ExploreHud
+        snapshot={quest.snapshot}
+        leaderboardOpen={leaderboardOpen}
+        onOpenProfile={openProfile}
+        onOpenLeaderboard={openLeaderboard}
+        onCloseLeaderboard={closeLeaderboard}
+      />
 
       {status === "ready" &&
         guideOpen &&
@@ -608,27 +658,42 @@ export function GameCanvas({
             onMove={handleJoystickMove}
             className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-20 lg:hidden"
           />
+          <MapButton
+            onClick={openMapDrawer}
+            className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 z-20 lg:hidden"
+          />
           <MiniMap
             playerPosition={playerPosition}
             target={navigationTarget}
             onNavigate={navigateToPoint}
             onOpenDirectory={openDirectory}
-            className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 z-20"
+            className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 z-20 hidden lg:block"
           />
         </>
       )}
+
+      <MapDrawer
+        open={mapDrawerOpen}
+        playerPosition={playerPosition}
+        target={navigationTarget}
+        onNavigate={navigateToPoint}
+        onOpenDirectory={openDirectory}
+        onClose={closeMapDrawer}
+      />
 
       {status === "ready" &&
         navigationTarget &&
         !selectedVenue &&
         !directoryOpen &&
+        !mapDrawerOpen &&
+        !leaderboardOpen &&
         !questPanelOpen &&
         !joinDialogOpen &&
         !guideOpen && (
           <button
             type="button"
             onClick={cancelNavigation}
-            className="pointer-events-auto absolute bottom-[calc(env(safe-area-inset-bottom)+13rem)] left-1/2 z-30 inline-flex min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[9px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime sm:bottom-6"
+            className="pointer-events-auto absolute bottom-6 left-1/2 z-30 hidden min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime lg:inline-flex"
           >
             <X aria-hidden="true" className="size-3.5" />
             Stop walking
@@ -640,6 +705,8 @@ export function GameCanvas({
         hasMoved &&
         !selectedVenue &&
         !directoryOpen &&
+        !mapDrawerOpen &&
+        !leaderboardOpen &&
         !navigationTarget &&
         !questPanelOpen &&
         !joinDialogOpen &&
@@ -677,7 +744,7 @@ export function GameCanvas({
         </div>
       )}
 
-      {status === "ready" && quest.snapshot && questPanelOpen && (
+      {quest.snapshot && questPanelOpen && (
         <QuestPanel
           snapshot={quest.snapshot}
           sync={quest.sync}
@@ -710,13 +777,13 @@ export function GameCanvas({
               aria-hidden="true"
               className="relative mx-auto size-6 text-lime"
             />
-            <p className="relative mt-2 font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+            <p className="relative mt-2 font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
               Full set
             </p>
             <p className="relative mt-1 font-display text-3xl font-black text-cream">
               +{questCelebration.points}
             </p>
-            <p className="relative mt-1 text-[11px] text-white/65">
+            <p className="relative mt-1 text-xs text-white/75">
               Every shell found today
             </p>
           </div>

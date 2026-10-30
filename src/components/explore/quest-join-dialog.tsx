@@ -121,7 +121,7 @@ export function QuestJoinDialog({
         aria-labelledby={titleId}
         className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-[2rem] border border-brand-deep/15 bg-cream p-6 text-brand-deep shadow-lift sm:p-7"
       >
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-deep px-3 py-1.5 font-display text-[9px] font-bold tracking-[0.16em] text-lime uppercase">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-deep px-3 py-1.5 font-display text-xs font-bold tracking-[0.16em] text-lime uppercase">
           <Sparkles aria-hidden="true" className="size-3" />
           Beach Quest
         </span>
@@ -136,7 +136,7 @@ export function QuestJoinDialog({
         </p>
 
         {!isRenaming && (
-          <ul className="quest-join-steps mt-4 grid gap-2 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-3 text-[11px] leading-relaxed text-brand-deep/75">
+          <ul className="quest-join-steps mt-4 grid gap-2 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-3 text-xs leading-relaxed text-brand-deep/75">
             <li className="flex items-start gap-2">
               <Move
                 aria-hidden="true"
@@ -164,7 +164,7 @@ export function QuestJoinDialog({
         <form onSubmit={handleSubmit} className="mt-5">
           <label
             htmlFor="quest-display-name"
-            className="font-display text-[10px] font-bold tracking-[0.14em] text-brand-deep/70 uppercase"
+            className="font-display text-xs font-bold tracking-[0.14em] text-brand-deep/70 uppercase"
           >
             Display name
           </label>
@@ -200,7 +200,7 @@ export function QuestJoinDialog({
           <button
             type="submit"
             disabled={pending}
-            className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand-deep px-5 py-3 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep disabled:cursor-wait disabled:bg-brand-deep/70"
+            className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand-deep px-5 py-3 font-display text-xs font-bold tracking-[0.12em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep disabled:cursor-wait disabled:bg-brand-deep/70"
           >
             {pending
               ? "Joining…"
@@ -213,12 +213,12 @@ export function QuestJoinDialog({
         <button
           type="button"
           onClick={onDismiss}
-          className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-full px-4 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep/70 uppercase transition hover:bg-brand-deep/5 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+          className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-full px-4 py-2 font-display text-xs font-bold tracking-[0.1em] text-brand-deep/70 uppercase transition hover:bg-brand-deep/5 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
         >
           Explore first
         </button>
 
-        <p className="mt-2 text-center text-[10px] leading-relaxed text-brand-deep/60">
+        <p className="mt-2 text-center text-xs leading-relaxed text-brand-deep/60">
           Names can use letters, numbers, spaces, apostrophes, or hyphens.
         </p>
       </div>

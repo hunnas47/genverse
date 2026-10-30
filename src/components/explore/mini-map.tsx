@@ -1,15 +1,19 @@
 "use client";
 
-import { ChevronDown, List, Map as MapIcon } from "lucide-react";
-import { useState, type MouseEvent as ReactMouseEvent } from "react";
+import { List, Map as MapIcon, X } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 
 import { VENUES } from "@/data/venues";
-import {
-  VENUE_MAP,
-  VENUE_MARKER_COLORS,
-} from "@/data/venue-map";
+import { VENUE_MAP, VENUE_MARKER_COLORS } from "@/data/venue-map";
 import { cn } from "@/lib/utils";
 import type { MapPoint } from "@/types/map";
+
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function toCssColor(value: number): string {
   return `#${value.toString(16).padStart(6, "0")}`;
@@ -33,8 +37,6 @@ export function MiniMap({
   onOpenDirectory: () => void;
   className?: string;
 }) {
-  const [expanded, setExpanded] = useState(true);
-
   const handleMapClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     if (event.detail === 0) {
       onOpenDirectory();
@@ -68,99 +70,236 @@ export function MiniMap({
         className,
       )}
     >
-      {expanded ? (
-        <button
-          type="button"
-          onClick={handleMapClick}
-          aria-label="Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. Your position is marked in lime."
-          className="relative block w-full overflow-hidden rounded-xl border border-white/20 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-          style={{
-            aspectRatio: `${VENUE_MAP.world.width} / ${VENUE_MAP.world.height}`,
-            backgroundImage: `url("${VENUE_MAP.image.src}")`,
-            backgroundSize: "100% 100%",
-          }}
-        >
-          {VENUES.map((venue) => {
-            if (!venue.mapPosition) {
-              return null;
-            }
+      <button
+        type="button"
+        onClick={handleMapClick}
+        aria-label="Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. Your position is marked in lime."
+        className="relative block w-full overflow-hidden rounded-xl border border-white/20 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        style={{
+          aspectRatio: `${VENUE_MAP.world.width} / ${VENUE_MAP.world.height}`,
+          backgroundImage: `url("${VENUE_MAP.image.src}")`,
+          backgroundSize: "100% 100%",
+        }}
+      >
+        {VENUES.map((venue) => {
+          if (!venue.mapPosition) {
+            return null;
+          }
 
-            return (
-              <span
-                key={venue.id}
-                aria-hidden="true"
-                className="absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/85 shadow-sm"
-                style={{
-                  left: `${(venue.mapPosition.x / VENUE_MAP.world.width) * 100}%`,
-                  top: `${(venue.mapPosition.y / VENUE_MAP.world.height) * 100}%`,
-                  backgroundColor: toCssColor(
-                    VENUE_MARKER_COLORS[venue.category],
-                  ),
-                }}
-              />
-            );
-          })}
-
-          {target && (
+          return (
             <span
-              data-testid="mini-map-target"
+              key={venue.id}
               aria-hidden="true"
-              className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-cream shadow"
+              className="absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/85 shadow-sm"
               style={{
-                left: `${(target.x / VENUE_MAP.world.width) * 100}%`,
-                top: `${(target.y / VENUE_MAP.world.height) * 100}%`,
+                left: `${(venue.mapPosition.x / VENUE_MAP.world.width) * 100}%`,
+                top: `${(venue.mapPosition.y / VENUE_MAP.world.height) * 100}%`,
+                backgroundColor: toCssColor(VENUE_MARKER_COLORS[venue.category]),
               }}
             />
-          )}
+          );
+        })}
 
-          {playerPosition && (
-            <span
-              data-testid="mini-map-player"
-              aria-hidden="true"
-              className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-lime shadow"
-              style={{
-                left: `${(playerPosition.x / VENUE_MAP.world.width) * 100}%`,
-                top: `${(playerPosition.y / VENUE_MAP.world.height) * 100}%`,
-              }}
-            />
-          )}
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-cream/10 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-        >
-          <MapIcon aria-hidden="true" className="size-3.5" />
-          Map
-        </button>
-      )}
-
-      <div className="mt-2 flex items-stretch gap-1.5">
-        <button
-          type="button"
-          onClick={onOpenDirectory}
-          className="flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl bg-lime px-1.5 py-2 font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-        >
-          <List aria-hidden="true" className="size-3.5 shrink-0" />
-          <span className="truncate">Directory</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setExpanded((value) => !value)}
-          aria-expanded={expanded}
-          aria-label={expanded ? "Collapse the mini map" : "Expand the mini map"}
-          className="grid size-11 shrink-0 place-items-center rounded-xl border border-white/20 bg-white/10 text-white/75 transition hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
-        >
-          <ChevronDown
+        {target && (
+          <span
+            data-testid="mini-map-target"
             aria-hidden="true"
-            className={cn(
-              "size-3.5 transition-transform",
-              !expanded && "rotate-180",
-            )}
+            className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-cream shadow"
+            style={{
+              left: `${(target.x / VENUE_MAP.world.width) * 100}%`,
+              top: `${(target.y / VENUE_MAP.world.height) * 100}%`,
+            }}
           />
-        </button>
-      </div>
+        )}
+
+        {playerPosition && (
+          <span
+            data-testid="mini-map-player"
+            aria-hidden="true"
+            className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-lime shadow"
+            style={{
+              left: `${(playerPosition.x / VENUE_MAP.world.width) * 100}%`,
+              top: `${(playerPosition.y / VENUE_MAP.world.height) * 100}%`,
+            }}
+          />
+        )}
+      </button>
+
+      <button
+        type="button"
+        onClick={onOpenDirectory}
+        className="mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-lime px-1.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+      >
+        <List aria-hidden="true" className="size-3.5 shrink-0" />
+        <span className="truncate">Directory</span>
+      </button>
     </section>
+  );
+}
+
+/** Small mobile-only entry point that replaces the always-open minimap. */
+export function MapButton({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Open the map and venue directory"
+      aria-haspopup="dialog"
+      title="Map and directory"
+      data-testid="map-button"
+      className={cn(
+        "pointer-events-auto grid size-11 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime",
+        className,
+      )}
+    >
+      <MapIcon aria-hidden="true" className="size-4" />
+    </button>
+  );
+}
+
+/** Bottom sheet used on phones so the map never sits on top of the game. */
+export function MapDrawer({
+  open,
+  playerPosition,
+  target,
+  onNavigate,
+  onOpenDirectory,
+  onClose,
+}: {
+  open: boolean;
+  playerPosition: MapPoint | null;
+  target: MapPoint | null;
+  onNavigate: (point: MapPoint) => void;
+  onOpenDirectory: () => void;
+  onClose: () => void;
+}) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const titleId = "explore-map-title";
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    closeRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const dialog = dialogRef.current;
+
+      if (!dialog) {
+        return;
+      }
+
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(FOCUSABLE),
+      ).filter((element) => element.offsetParent !== null);
+
+      if (focusable.length === 0) {
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-end justify-center bg-brand-deep/65 p-3 backdrop-blur-sm sm:items-center"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <section
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby="explore-map-description"
+        data-testid="map-drawer"
+        className="explore-map-drawer pointer-events-auto max-h-[min(88dvh,44rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-[2rem] border border-brand-deep/15 bg-cream p-4 text-brand-deep shadow-lift sm:p-5 [@media(max-height:520px)]:p-3"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
+              Beach map
+            </p>
+            <h2 id={titleId} className="mt-1 text-xl leading-tight font-medium">
+              Find your way
+            </h2>
+            <p
+              id="explore-map-description"
+              className="mt-1 text-xs leading-relaxed text-brand-deep/75"
+            >
+              Tap the map to walk there, or open the directory to choose a
+              venue.
+            </p>
+          </div>
+
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close the map"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-deep/10 text-brand-deep/70 transition hover:bg-brand-deep/15 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+          >
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        </div>
+
+        <div
+          className="mx-auto mt-4 w-full"
+          style={{ maxWidth: "min(100%, 60dvh)" }}
+        >
+          <MiniMap
+            playerPosition={playerPosition}
+            target={target}
+            onNavigate={onNavigate}
+            onOpenDirectory={onOpenDirectory}
+            className="w-full sm:w-full"
+          />
+        </div>
+
+        <p className="mt-3 text-[11px] leading-relaxed text-brand-deep/70 [@media(max-height:520px)]:hidden">
+          The lime dot is you. The dark dot is your walking target. Markers
+          match the coloured venue labels on the beach.
+        </p>
+      </section>
+    </div>
   );
 }

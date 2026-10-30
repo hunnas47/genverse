@@ -11,7 +11,7 @@ export function ExploreGuide({ onDismiss }: { onDismiss: () => void }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-display text-[9px] font-bold tracking-[0.22em] text-lime uppercase">
+          <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
             Quick start
           </p>
           <p className="mt-1 text-sm font-medium">Three ways to explore</p>
@@ -26,7 +26,7 @@ export function ExploreGuide({ onDismiss }: { onDismiss: () => void }) {
         </button>
       </div>
 
-      <ol className="mt-3 grid gap-2 text-[11px] leading-relaxed text-white/75">
+      <ol className="mt-3 grid gap-2 text-xs leading-relaxed text-white/80">
         <li className="flex items-start gap-2">
           <Move aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-lime" />
           Drag the joystick or tap the map to move.
@@ -50,7 +50,7 @@ export function ExploreGuide({ onDismiss }: { onDismiss: () => void }) {
       <button
         type="button"
         onClick={onDismiss}
-        className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-lime px-4 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-lime px-4 py-2 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
       >
         Start exploring
       </button>

@@ -104,7 +104,7 @@ export function VenueDirectory({
       >
         <div className="flex items-start justify-between gap-4 border-b border-brand-deep/10 p-5">
           <div>
-            <p className="font-display text-[9px] font-bold tracking-[0.24em] text-brand-deep/75 uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.24em] text-brand-deep/75 uppercase">
               Beach directory
             </p>
             <h2
@@ -144,7 +144,7 @@ export function VenueDirectory({
 
             return (
               <div key={category} className="mb-5 last:mb-0">
-                <h3 className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
+                <h3 className="font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
                   {CATEGORY_HEADINGS[category]}
                 </h3>
 
@@ -156,7 +156,7 @@ export function VenueDirectory({
                     return (
                       <li key={venue.id}>
                         <div className="flex items-center gap-3 rounded-2xl border border-brand-deep/10 bg-white/55 p-3">
-                          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-deep font-display text-[10px] font-bold text-lime">
+                          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-deep font-display text-[11px] font-bold text-lime">
                             {venue.mapLabel}
                           </span>
 
@@ -166,12 +166,12 @@ export function VenueDirectory({
                                 {venue.name}
                               </p>
                               {isNearby && (
-                                <span className="rounded-full bg-lime px-1.5 py-0.5 font-display text-[8px] font-bold tracking-[0.08em] text-brand-deep uppercase">
+                                <span className="rounded-full bg-lime px-1.5 py-0.5 font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep uppercase">
                                   Nearby
                                 </span>
                               )}
                             </div>
-                            <p className="mt-0.5 text-[10px] text-brand-deep/75">
+                            <p className="mt-0.5 text-[11px] text-brand-deep/75">
                               {VENUE_CATEGORY_LABELS[venue.category]}
                             </p>
                           </div>
@@ -181,7 +181,7 @@ export function VenueDirectory({
                             disabled={!canNavigate}
                             onClick={() => onNavigate(venue)}
                             className={cn(
-                              "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full px-3 py-2 font-display text-[9px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep",
+                              "inline-flex min-h-11 shrink-0 items-center justify-center rounded-full px-3 py-2 font-display text-[11px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep",
                               canNavigate
                                 ? isNearby
                                   ? "bg-lime text-brand-deep hover:bg-brand-deep hover:text-lime"
