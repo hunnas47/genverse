@@ -124,9 +124,23 @@ export function SiteFooter() {
           <p className="max-w-3xl">
             Session data is from the official GEN M programme.
           </p>
-          <p className="shrink-0 font-display text-[10px] font-semibold tracking-[0.18em] text-white/55 uppercase">
-            GEN M Explorer
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p>
+              Built with <span aria-hidden="true">❤️</span>
+              <span className="sr-only">love</span> by{" "}
+              <a
+                href="http://instagram.com/hadihunnas"
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-lime underline decoration-lime/40 underline-offset-2 transition hover:text-white hover:decoration-white/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+              >
+                hunnas
+              </a>
+            </p>
+            <p className="shrink-0 font-display text-[10px] font-semibold tracking-[0.18em] text-white/55 uppercase">
+              GEN M Explorer
+            </p>
+          </div>
         </div>
       </div>
     </footer>
