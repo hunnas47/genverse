@@ -320,15 +320,6 @@
   }
 }
 
-.explore-tour-spotlight {
-  transition:
-    left 220ms ease,
-    top 220ms ease,
-    width 220ms ease,
-    height 220ms ease,
-    border-radius 220ms ease;
-}
-
 @media (max-height: 520px) {
   .quest-join-steps {
     display: none;
@@ -357,9 +348,5 @@
   .quest-chip-pop,
   .quest-celebration-pop {
     animation: none;
-  }
-
-  .explore-tour-spotlight {
-    transition: none;
   }
 }

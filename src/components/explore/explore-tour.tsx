@@ -12,21 +12,24 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const DESKTOP_QUERY = "(min-width: 1024px)";
 
-type TourAnchor = string | null;
+type TourAnchor = string | readonly string[] | null;
 
 interface TourStep {
   id: string;
   eyebrow: string;
   title: string;
   body: string;
+  desktopBody?: string;
   note?: string;
   icon: LucideIcon;
   anchor: TourAnchor;
+  desktopAnchor?: TourAnchor;
 }
 
 const STEPS: readonly TourStep[] = [
@@ -34,7 +37,7 @@ const STEPS: readonly TourStep[] = [
     id: "welcome",
     eyebrow: "Welcome",
     title: "Meet your beach map",
-    body: "Walk the GEN M venue, find daily shells, and stamp venues as you explore.",
+    body: "Explore the GEN M beach map, find daily shells, and stamp venues as you go.",
     note: "This quick tour takes about 20 seconds.",
     icon: Compass,
     anchor: null,
@@ -44,16 +47,18 @@ const STEPS: readonly TourStep[] = [
     eyebrow: "Move",
     title: "Walk the beach",
     body: "Drag the joystick or tap anywhere on the map to walk there.",
+    desktopBody: "Tap or click anywhere on the map to walk there.",
     note: "On a keyboard: W A S D or the arrow keys.",
     icon: Move,
     anchor: '[data-tour="joystick"]',
+    desktopAnchor: null,
   },
   {
     id: "shells",
     eyebrow: "Collect",
     title: "Find glowing shells",
-    body: "Walk close to a glowing shell and it is collected automatically.",
-    note: "Your profile ring shows how many shells you have found today.",
+    body: "Walk close to a glowing shell on the map and it is collected automatically.",
+    note: "Your profile ring tracks today's finds.",
     icon: Sparkles,
     anchor: '[data-tour="profile"]',
   },
@@ -61,10 +66,13 @@ const STEPS: readonly TourStep[] = [
     id: "venues",
     eyebrow: "Check in",
     title: "Stamp your venue passport",
-    body: "Open the map, choose a venue, and tap check in for 25 points.",
-    note: "You can also tap a venue marker on the beach.",
+    body: "Open the map or tap a venue marker, then check in for 25 points.",
+    desktopBody:
+      "Open the directory or tap a venue marker, then check in for 25 points.",
+    note: "Each venue can be stamped once per day.",
     icon: Stamp,
-    anchor: '[data-tour="map"], [data-tour="minimap"]',
+    anchor: '[data-tour="map"]',
+    desktopAnchor: ['[data-tour="directory"]', '[data-tour="minimap"]'],
   },
   {
     id: "ready",
@@ -77,12 +85,15 @@ const STEPS: readonly TourStep[] = [
   },
 ];
 
+type Placement = "center" | "top" | "bottom" | "left" | "right";
+
 type Spotlight = {
   left: number;
   top: number;
   width: number;
   height: number;
   radius: number;
+  placement: Placement;
 };
 
 function isVisible(element: HTMLElement): boolean {
@@ -97,12 +108,43 @@ function isVisible(element: HTMLElement): boolean {
   );
 }
 
-function findAnchor(selector: string): HTMLElement | null {
-  const candidates = Array.from(
-    document.querySelectorAll<HTMLElement>(selector),
-  );
+function findAnchor(selector: string | readonly string[]): HTMLElement | null {
+  const selectors = typeof selector === "string" ? [selector] : selector;
 
-  return candidates.find(isVisible) ?? null;
+  for (const candidateSelector of selectors) {
+    const candidate = Array.from(
+      document.querySelectorAll<HTMLElement>(candidateSelector),
+    ).find(isVisible);
+
+    if (candidate) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function subscribeToDesktop(callback: () => void) {
+  const media = window.matchMedia(DESKTOP_QUERY);
+  media.addEventListener("change", callback);
+
+  return () => media.removeEventListener("change", callback);
+}
+
+function getDesktopSnapshot() {
+  return window.matchMedia(DESKTOP_QUERY).matches;
+}
+
+function getDesktopServerSnapshot() {
+  return false;
+}
+
+function useIsDesktop() {
+  return useSyncExternalStore(
+    subscribeToDesktop,
+    getDesktopSnapshot,
+    getDesktopServerSnapshot,
+  );
 }
 
 export function ExploreTour({ onClose }: { onClose: () => void }) {
@@ -110,11 +152,30 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
   const [spotlight, setSpotlight] = useState<Spotlight | null>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const primaryRef = useRef<HTMLButtonElement>(null);
+  const isDesktop = useIsDesktop();
   const step = STEPS[stepIndex];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === STEPS.length - 1;
   const titleId = "explore-tour-title";
   const descriptionId = "explore-tour-description";
+  const body = isDesktop && step.desktopBody ? step.desktopBody : step.body;
+  const note = step.note;
+  const anchor =
+    isDesktop && step.desktopAnchor !== undefined
+      ? step.desktopAnchor
+      : step.anchor;
+  const placement = spotlight?.placement ?? "center";
+  const isSidePlacement = placement === "left" || placement === "right";
+  const placementClass =
+    placement === "top"
+      ? "items-start justify-center"
+      : placement === "bottom"
+        ? "items-end justify-center"
+        : placement === "left"
+          ? "items-center justify-start"
+          : placement === "right"
+            ? "items-center justify-end"
+            : "items-center justify-center";
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -169,20 +230,36 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const update = () => {
-      if (!step.anchor) {
-        setSpotlight(null);
-        return;
-      }
-
-      const anchor = findAnchor(step.anchor);
-
       if (!anchor) {
         setSpotlight(null);
         return;
       }
 
-      const rect = anchor.getBoundingClientRect();
-      const padding = 10;
+      const target = findAnchor(anchor);
+
+      if (!target) {
+        setSpotlight(null);
+        return;
+      }
+
+      const rect = target.getBoundingClientRect();
+      const padding = 8;
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      let placement: Placement = "center";
+
+      if (window.innerWidth >= 1024) {
+        placement = "center";
+      } else if (
+        window.innerWidth > window.innerHeight &&
+        window.innerHeight < 520
+      ) {
+        placement = centerX < window.innerWidth / 2 ? "right" : "left";
+      } else if (centerY > window.innerHeight * 0.55) {
+        placement = "top";
+      } else if (centerY < window.innerHeight * 0.45) {
+        placement = "bottom";
+      }
 
       setSpotlight({
         left: rect.left - padding,
@@ -190,6 +267,7 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
         width: rect.width + padding * 2,
         height: rect.height + padding * 2,
         radius: Math.min(28, (rect.height + padding * 2) / 2),
+        placement,
       });
     };
 
@@ -203,7 +281,7 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
       window.clearTimeout(settleTimer);
       window.removeEventListener("resize", update);
     };
-  }, [step.anchor]);
+  }, [anchor]);
 
   const Icon = step.icon;
 
@@ -234,7 +312,9 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
         />
       )}
 
-      <div className="pointer-events-none absolute inset-0 z-[80] flex items-center justify-center p-3 sm:p-6">
+      <div
+        className={`pointer-events-none absolute inset-0 z-[80] flex p-3 sm:p-6 ${placementClass}`}
+      >
         <section
           ref={dialogRef}
           role="dialog"
@@ -242,6 +322,11 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
           aria-labelledby={titleId}
           aria-describedby={descriptionId}
           className="pointer-events-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-[2rem] border border-brand-deep/15 bg-cream p-5 text-brand-deep shadow-lift sm:p-7"
+          style={
+            isSidePlacement
+              ? { maxWidth: "min(28rem, calc(100vw - 10rem))" }
+              : undefined
+          }
         >
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -275,11 +360,11 @@ export function ExploreTour({ onClose }: { onClose: () => void }) {
                 id={descriptionId}
                 className="text-sm leading-relaxed text-brand-deep/80"
               >
-                {step.body}
+                {body}
               </p>
-              {step.note && (
+              {note && (
                 <p className="mt-1.5 text-[11px] leading-relaxed text-brand-deep/60">
-                  {step.note}
+                  {note}
                 </p>
               )}
             </div>

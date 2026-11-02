@@ -129,6 +129,7 @@ export function MiniMap({
       <button
         type="button"
         onClick={onOpenDirectory}
+        data-tour="directory"
         className="mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-lime px-1.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
       >
         <List aria-hidden="true" className="size-3.5 shrink-0" />
