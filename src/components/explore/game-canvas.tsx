@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import type Phaser from "phaser";
 
-import { ExploreGuide } from "@/components/explore/explore-guide";
 import { ExploreHud } from "@/components/explore/explore-hud";
+import { ExploreTour } from "@/components/explore/explore-tour";
 import {
   MapButton,
   MapDrawer,
@@ -29,18 +29,43 @@ import type { Venue } from "@/types/venue";
 type GameStatus = "loading" | "ready" | "error";
 
 const BOOT_TIMEOUT_MS = 15000;
-const GUIDE_STORAGE_KEY = "genm:explore:guide:v1";
+const TOUR_STORAGE_KEY = "genm:explore:tour:v1";
 const SPAWN_MOVE_THRESHOLD = 28;
+let tourSeenInMemory = false;
 
-function hasSeenGuide(): boolean {
-  if (typeof window === "undefined") {
+function hasSeenTour(): boolean {
+  if (typeof window === "undefined" || tourSeenInMemory) {
     return true;
   }
 
   try {
-    return window.localStorage.getItem(GUIDE_STORAGE_KEY) === "1";
+    if (window.localStorage.getItem(TOUR_STORAGE_KEY) === "1") {
+      return true;
+    }
   } catch {
-    return true;
+    // Fall through to session storage when local storage is blocked.
+  }
+
+  try {
+    return window.sessionStorage.getItem(TOUR_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markTourSeen(): void {
+  tourSeenInMemory = true;
+
+  try {
+    window.localStorage.setItem(TOUR_STORAGE_KEY, "1");
+  } catch {
+    // Storage can be blocked; session storage is the fallback.
+  }
+
+  try {
+    window.sessionStorage.setItem(TOUR_STORAGE_KEY, "1");
+  } catch {
+    // The tour still stays dismissed for this session.
   }
 }
 
@@ -72,7 +97,7 @@ export function GameCanvas({
   const [questPanelOpen, setQuestPanelOpen] = useState(false);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
-  const [guideOpen, setGuideOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [questNotice, setQuestNotice] = useState<string | null>(null);
   const [questCelebration, setQuestCelebration] = useState<{
     points: number;
@@ -354,11 +379,11 @@ export function GameCanvas({
   }, [questCelebration]);
 
   useEffect(() => {
-    if (status !== "ready" || hasSeenGuide()) {
+    if (status !== "ready" || hasSeenTour()) {
       return;
     }
 
-    const timer = window.setTimeout(() => setGuideOpen(true), 0);
+    const timer = window.setTimeout(() => setTourOpen(true), 350);
 
     return () => window.clearTimeout(timer);
   }, [status]);
@@ -368,14 +393,15 @@ export function GameCanvas({
       !leaderboardOpen &&
       !mapDrawerOpen &&
       !questPanelOpen &&
-      !joinDialogOpen
+      !joinDialogOpen &&
+      !tourOpen
     ) {
       return;
     }
 
     bridgeRef.current?.emit("navigation:cancel", {});
     bridgeRef.current?.emit("input:move", { x: 0, y: 0 });
-  }, [joinDialogOpen, leaderboardOpen, mapDrawerOpen, questPanelOpen]);
+  }, [joinDialogOpen, leaderboardOpen, mapDrawerOpen, questPanelOpen, tourOpen]);
 
   const collectedShellKey =
     quest.snapshot?.collectedShellIds.join("|") ?? "";
@@ -464,7 +490,7 @@ export function GameCanvas({
     setDirectoryOpen(false);
     setQuestPanelOpen(false);
     setJoinDialogOpen(false);
-    setGuideOpen(false);
+    setTourOpen(false);
     setMapDrawerOpen(true);
   }, []);
 
@@ -491,14 +517,10 @@ export function GameCanvas({
     setJoinDialogOpen(false);
   }, []);
 
-  const dismissGuide = useCallback(() => {
-    setGuideOpen(false);
-
-    try {
-      window.localStorage.setItem(GUIDE_STORAGE_KEY, "1");
-    } catch {
-      // Storage can be blocked; the guide is still dismissed for this session.
-    }
+  const finishTour = useCallback(() => {
+    setTourOpen(false);
+    markTourSeen();
+    hostRef.current?.focus();
   }, []);
 
   const cancelNavigation = useCallback(() => {
@@ -515,13 +537,24 @@ export function GameCanvas({
     setSelectedVenueId(null);
     setDirectoryOpen(false);
     setMapDrawerOpen(false);
-    setGuideOpen(false);
+    setTourOpen(false);
     setQuestPanelOpen(true);
   }, []);
 
   const closeQuestPanel = useCallback(() => {
     setQuestPanelOpen(false);
     hostRef.current?.focus();
+  }, []);
+
+  const replayTour = useCallback(() => {
+    bridgeRef.current?.emit("navigation:cancel", {});
+    setSelectedVenueId(null);
+    setDirectoryOpen(false);
+    setMapDrawerOpen(false);
+    setQuestPanelOpen(false);
+    setJoinDialogOpen(false);
+    setLeaderboardOpen(false);
+    setTourOpen(true);
   }, []);
 
   const openLeaderboard = useCallback(() => {
@@ -531,7 +564,7 @@ export function GameCanvas({
     setMapDrawerOpen(false);
     setQuestPanelOpen(false);
     setJoinDialogOpen(false);
-    setGuideOpen(false);
+    setTourOpen(false);
     setLeaderboardOpen(true);
   }, []);
 
@@ -619,11 +652,15 @@ export function GameCanvas({
       />
 
       {status === "ready" &&
-        guideOpen &&
+        tourOpen &&
         !joinDialogOpen &&
         !selectedVenue &&
         !directoryOpen &&
-        !questPanelOpen && <ExploreGuide onDismiss={dismissGuide} />}
+        !mapDrawerOpen &&
+        !leaderboardOpen &&
+        !questPanelOpen && (
+          <ExploreTour onClose={finishTour} />
+        )}
 
       {status === "ready" && mapFallbackMessage && (
         <div className="pointer-events-none absolute inset-x-0 top-36 z-30 flex justify-center px-3 sm:top-32">
@@ -656,6 +693,7 @@ export function GameCanvas({
         <>
           <VirtualJoystick
             onMove={handleJoystickMove}
+            paused={tourOpen}
             className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-20 lg:hidden"
           />
           <MapButton
@@ -689,7 +727,7 @@ export function GameCanvas({
         !leaderboardOpen &&
         !questPanelOpen &&
         !joinDialogOpen &&
-        !guideOpen && (
+        !tourOpen && (
           <button
             type="button"
             onClick={cancelNavigation}
@@ -710,7 +748,7 @@ export function GameCanvas({
         !navigationTarget &&
         !questPanelOpen &&
         !joinDialogOpen &&
-        !guideOpen && (
+        !tourOpen && (
           <VenuePrompt venue={nearbyVenue} onOpen={openNearbyVenue} />
         )}
 
@@ -750,6 +788,7 @@ export function GameCanvas({
           sync={quest.sync}
           onClose={closeQuestPanel}
           onJoinRequest={openJoinDialog}
+          onReplayTour={replayTour}
         />
       )}
 

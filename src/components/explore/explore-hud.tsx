@@ -34,6 +34,7 @@ function ProfileButton({
       aria-label={label}
       title={joined ? "Your profile" : "Join the Beach Quest"}
       data-testid="profile-button"
+      data-tour="profile"
       className="relative grid size-11 shrink-0 place-items-center rounded-full border border-white/25 bg-brand-deep/85 shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
     >
       <span aria-hidden="true" className="absolute inset-0 rounded-full bg-white/15" />

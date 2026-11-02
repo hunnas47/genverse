@@ -320,18 +320,16 @@
   }
 }
 
-@media (max-height: 520px) {
-  .explore-guide {
-    top: 50%;
-    right: auto;
-    bottom: auto;
-    left: 50%;
-    width: min(22rem, calc(100vw - 1.5rem));
-    max-height: calc(100dvh - 1.5rem);
-    overflow-y: auto;
-    transform: translate(-50%, -50%);
-  }
+.explore-tour-spotlight {
+  transition:
+    left 220ms ease,
+    top 220ms ease,
+    width 220ms ease,
+    height 220ms ease,
+    border-radius 220ms ease;
+}
 
+@media (max-height: 520px) {
   .quest-join-steps {
     display: none;
   }
@@ -359,5 +357,9 @@
   .quest-chip-pop,
   .quest-celebration-pop {
     animation: none;
+  }
+
+  .explore-tour-spotlight {
+    transition: none;
   }
 }

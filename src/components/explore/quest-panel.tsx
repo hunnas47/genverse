@@ -7,6 +7,7 @@ import {
   CircleHelp,
   Flame,
   MapPin,
+  RotateCcw,
   Sparkles,
   Trophy,
   X,
@@ -28,11 +29,13 @@ export function QuestPanel({
   sync,
   onClose,
   onJoinRequest,
+  onReplayTour,
 }: {
   snapshot: QuestSnapshot;
   sync: QuestSyncInfo;
   onClose: () => void;
   onJoinRequest: () => void;
+  onReplayTour: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = "quest-panel-title";
@@ -305,6 +308,14 @@ export function QuestPanel({
               On phones the joystick tucks away after a moment. Touch the Move
               control to bring it back.
             </p>
+            <button
+              type="button"
+              onClick={onReplayTour}
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-brand-deep/15 bg-white px-3 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep uppercase transition hover:border-brand-deep/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            >
+              <RotateCcw aria-hidden="true" className="size-3.5" />
+              Replay walkthrough
+            </button>
           </div>
         </details>
 

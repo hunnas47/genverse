@@ -53,15 +53,18 @@ function markJoystickSeen(): void {
 export function VirtualJoystick({
   onMove,
   className,
+  paused = false,
 }: {
   onMove: (x: number, y: number) => void;
   className?: string;
+  paused?: boolean;
 }) {
   const baseRef = useRef<HTMLDivElement>(null);
   const pointerIdRef = useRef<number | null>(null);
   const collapseTimerRef = useRef<number | null>(null);
   const [expanded, setExpanded] = useState(() => !hasSeenJoystick());
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const isExpanded = expanded || paused;
 
   const clearCollapseTimer = useCallback(() => {
     if (collapseTimerRef.current !== null) {
@@ -138,8 +141,12 @@ export function VirtualJoystick({
 
     window.addEventListener("blur", handleBlur);
 
-    if (!hasSeenJoystick()) {
+    if (paused) {
+      clearCollapseTimer();
+    } else if (!hasSeenJoystick()) {
       scheduleCollapse(FIRST_HIDE_DELAY_MS);
+    } else {
+      scheduleCollapse(IDLE_HIDE_DELAY_MS);
     }
 
     return () => {
@@ -148,7 +155,7 @@ export function VirtualJoystick({
       pointerIdRef.current = null;
       onMove(0, 0);
     };
-  }, [clearCollapseTimer, onMove, release, scheduleCollapse]);
+  }, [clearCollapseTimer, onMove, paused, release, scheduleCollapse]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) {
@@ -201,6 +208,7 @@ export function VirtualJoystick({
 
   return (
     <div
+      data-tour="joystick"
       className={cn(
         "pointer-events-auto flex touch-none flex-col items-center select-none",
         className,
@@ -210,7 +218,7 @@ export function VirtualJoystick({
         ref={baseRef}
         role="group"
         aria-label="Virtual joystick. Touch and drag to move. Release to stop."
-        data-expanded={expanded}
+        data-expanded={isExpanded}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -223,14 +231,14 @@ export function VirtualJoystick({
           aria-hidden="true"
           className={cn(
             "absolute inset-0 rounded-full border border-white/25 bg-brand-deep/80 shadow-lift backdrop-blur-md transition-opacity duration-300 motion-reduce:transition-none",
-            expanded ? "opacity-100" : "opacity-0",
+            isExpanded ? "opacity-100" : "opacity-0",
           )}
         />
         <span
           aria-hidden="true"
           className={cn(
             "absolute inset-2 rounded-full border border-white/10 transition-opacity duration-300 motion-reduce:transition-none",
-            expanded ? "opacity-100" : "opacity-0",
+            isExpanded ? "opacity-100" : "opacity-0",
           )}
         />
 
@@ -238,7 +246,7 @@ export function VirtualJoystick({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute top-1/2 left-1/2 grid place-items-center rounded-full border border-lime/40 bg-lime text-brand-deep shadow-lift transition-opacity duration-200 motion-reduce:transition-none",
-            expanded ? "opacity-100" : "opacity-0",
+            isExpanded ? "opacity-100" : "opacity-0",
           )}
           style={{
             width: THUMB_SIZE,
@@ -253,7 +261,7 @@ export function VirtualJoystick({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute top-1/2 left-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition-opacity duration-200 motion-reduce:transition-none",
-            expanded ? "opacity-0" : "opacity-100",
+            isExpanded ? "opacity-0" : "opacity-100",
           )}
         >
           <Move className="size-4" />
@@ -263,7 +271,7 @@ export function VirtualJoystick({
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 font-display text-[9px] font-bold tracking-[0.2em] text-white/60 uppercase transition-opacity duration-200 motion-reduce:transition-none",
-            expanded ? "opacity-100" : "opacity-0",
+            isExpanded ? "opacity-100" : "opacity-0",
           )}
         >
           Move

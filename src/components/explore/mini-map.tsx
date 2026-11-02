@@ -65,6 +65,7 @@ export function MiniMap({
 
   return (
     <section
+      data-tour="minimap"
       className={cn(
         "pointer-events-auto w-[148px] rounded-2xl border border-white/15 bg-brand-deep/85 p-2 text-white shadow-lift backdrop-blur-md sm:w-[184px]",
         className,
@@ -153,6 +154,7 @@ export function MapButton({
       aria-haspopup="dialog"
       title="Map and directory"
       data-testid="map-button"
+      data-tour="map"
       className={cn(
         "pointer-events-auto grid size-11 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime",
         className,
