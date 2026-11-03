@@ -39,6 +39,15 @@ const WAYPOINT_ARRIVAL_DISTANCE = 6;
 const GRID_CELL_SIZE = 20;
 const VENUE_TAP_RADIUS = 38;
 const SHELL_COLLECT_RADIUS = 44;
+const PROXIMITY_ALERT_TEXTURE = "icon-alert";
+const TAP_TARGET_TEXTURE = "icon-target";
+const PROXIMITY_ALERT_ASSET = "/images/ui/proximity-alert.webp";
+const TAP_TARGET_ASSET = "/images/ui/tap-target.webp";
+const PROXIMITY_ALERT_DISPLAY_SIZE = 36;
+const TAP_TARGET_DISPLAY_SIZE = 56;
+const PROXIMITY_ALERT_HEAD_OFFSET = AVATAR_DISPLAY_HEIGHT + 12;
+const PROXIMITY_ALERT_DEPTH = MARKER_DEPTH + 30;
+const TAP_TARGET_DEPTH = MARKER_DEPTH + 4;
 
 type MovementKeys = Record<
   "up" | "down" | "left" | "right",
@@ -73,6 +82,11 @@ export class BeachScene extends Phaser.Scene {
   private nearbyVenueId: string | null = null;
   private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
   private nearbyTween?: Phaser.Tweens.Tween;
+  private proximityAlert?: Phaser.GameObjects.Image;
+  private proximityAlertTween?: Phaser.Tweens.Tween;
+  private proximityAlertExitTween?: Phaser.Tweens.Tween;
+  private readonly proximityAlertBob = { offset: 0 };
+  private readonly tapTargets = new Set<Phaser.GameObjects.Image>();
 
   private readonly shellMarkers = new Map<
     string,
@@ -117,6 +131,8 @@ export class BeachScene extends Phaser.Scene {
     this.load.image(AVATAR_TEXTURES.down, AVATAR_ASSETS.down);
     this.load.image(AVATAR_TEXTURES.up, AVATAR_ASSETS.up);
     this.load.image(AVATAR_TEXTURES.right, AVATAR_ASSETS.right);
+    this.load.image(PROXIMITY_ALERT_TEXTURE, PROXIMITY_ALERT_ASSET);
+    this.load.image(TAP_TARGET_TEXTURE, TAP_TARGET_ASSET);
   }
 
   create(): void {
@@ -246,6 +262,7 @@ export class BeachScene extends Phaser.Scene {
     }
 
     this.updateNearbyVenue();
+    this.updateProximityAlert();
     this.updateNearbyShell();
     this.emitPlayerPosition(time, moving);
   }
@@ -611,6 +628,12 @@ export class BeachScene extends Phaser.Scene {
     this.nearbyVenueId = nearestVenueId;
     this.updateMarkerHighlights();
     this.bridge.emit("venue:nearby", { venueId: nearestVenueId });
+
+    if (nearestVenueId) {
+      this.showProximityAlert(this.player);
+    } else {
+      this.removeProximityAlert();
+    }
   }
 
   private updateMarkerHighlights(): void {
@@ -644,6 +667,173 @@ export class BeachScene extends Phaser.Scene {
       repeat: -1,
       ease: "Sine.easeInOut",
     });
+  }
+
+  private showProximityAlert(
+    player: Phaser.GameObjects.Container,
+  ): void {
+    if (!this.textures.exists(PROXIMITY_ALERT_TEXTURE)) {
+      return;
+    }
+
+    this.destroyProximityAlert();
+    this.proximityAlertBob.offset = 0;
+
+    const alert = this.add
+      .image(
+        player.x,
+        player.y - PROXIMITY_ALERT_HEAD_OFFSET,
+        PROXIMITY_ALERT_TEXTURE,
+      )
+      .setOrigin(0.5, 1)
+      .setDepth(PROXIMITY_ALERT_DEPTH)
+      .setScale(
+        this.getTextureScale(
+          PROXIMITY_ALERT_TEXTURE,
+          PROXIMITY_ALERT_DISPLAY_SIZE,
+        ),
+      );
+
+    this.proximityAlert = alert;
+
+    if (this.reducedMotion) {
+      return;
+    }
+
+    this.proximityAlertTween = this.tweens.add({
+      targets: this.proximityAlertBob,
+      offset: 6,
+      duration: 700,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.easeInOut",
+    });
+  }
+
+  private removeProximityAlert(): void {
+    const alert = this.proximityAlert;
+
+    if (!alert || this.proximityAlertExitTween) {
+      return;
+    }
+
+    this.proximityAlertTween?.stop();
+    this.proximityAlertTween = undefined;
+    this.proximityAlertBob.offset = 0;
+
+    if (this.reducedMotion) {
+      this.destroyProximityAlert();
+      return;
+    }
+
+    const exitScale = alert.scaleX * 0.35;
+
+    this.proximityAlertExitTween = this.tweens.add({
+      targets: alert,
+      scaleX: exitScale,
+      scaleY: exitScale,
+      alpha: 0,
+      duration: 180,
+      ease: "Cubic.easeIn",
+      onComplete: () => {
+        this.proximityAlertExitTween = undefined;
+
+        if (this.proximityAlert === alert) {
+          this.proximityAlert = undefined;
+        }
+
+        alert.destroy();
+      },
+    });
+  }
+
+  private destroyProximityAlert(): void {
+    this.proximityAlertTween?.stop();
+    this.proximityAlertTween = undefined;
+    this.proximityAlertExitTween?.stop();
+    this.proximityAlertExitTween = undefined;
+    this.proximityAlert?.destroy();
+    this.proximityAlert = undefined;
+    this.proximityAlertBob.offset = 0;
+  }
+
+  /**
+   * The alert tracks the player's head on both axes. The vertical bob is kept
+   * in a separate offset object so following the player does not fight the
+   * looping tween.
+   */
+  private updateProximityAlert(): void {
+    if (!this.player || !this.proximityAlert) {
+      return;
+    }
+
+    this.proximityAlert.x = this.player.x;
+    this.proximityAlert.y =
+      this.player.y -
+      PROXIMITY_ALERT_HEAD_OFFSET -
+      this.proximityAlertBob.offset;
+  }
+
+  private spawnTapTarget(x: number, y: number): void {
+    if (!this.textures.exists(TAP_TARGET_TEXTURE)) {
+      return;
+    }
+
+    const baseScale = this.getTextureScale(
+      TAP_TARGET_TEXTURE,
+      TAP_TARGET_DISPLAY_SIZE,
+    );
+    const target = this.add
+      .image(x, y, TAP_TARGET_TEXTURE)
+      .setOrigin(0.5)
+      .setDepth(TAP_TARGET_DEPTH)
+      .setScale(baseScale);
+
+    this.tapTargets.add(target);
+
+    if (this.reducedMotion) {
+      this.tweens.add({
+        targets: target,
+        alpha: 0,
+        duration: 400,
+        ease: "Cubic.easeOut",
+        onComplete: () => {
+          this.tapTargets.delete(target);
+          target.destroy();
+        },
+      });
+      return;
+    }
+
+    this.tweens.add({
+      targets: target,
+      scaleX: baseScale * 1.8,
+      scaleY: baseScale * 1.8,
+      alpha: 0,
+      duration: 400,
+      ease: "Cubic.easeOut",
+      onComplete: () => {
+        this.tapTargets.delete(target);
+        target.destroy();
+      },
+    });
+  }
+
+  private destroyTapTargets(): void {
+    for (const target of this.tapTargets) {
+      this.tweens.killTweensOf(target);
+      target.destroy();
+    }
+
+    this.tapTargets.clear();
+  }
+
+  private getTextureScale(textureKey: string, displaySize: number): number {
+    const source = this.textures
+      .get(textureKey)
+      .getSourceImage() as { width: number; height: number };
+
+    return displaySize / Math.max(source.width, source.height, 1);
   }
 
   /**
@@ -849,6 +1039,7 @@ export class BeachScene extends Phaser.Scene {
     }
 
     this.cancelNavigation("cancelled");
+    this.spawnTapTarget(goal.x, goal.y);
     this.velocity.set(0, 0);
     this.path = path;
     this.pathIndex = 1;
@@ -1495,6 +1686,8 @@ export class BeachScene extends Phaser.Scene {
     this.unsubscribeQuestState?.();
     this.unsubscribeQuestState = undefined;
     this.clearNavigationState();
+    this.destroyProximityAlert();
+    this.destroyTapTargets();
     this.nearbyTween?.stop();
     this.nearbyTween = undefined;
     this.markerRings.clear();
