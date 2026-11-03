@@ -22,6 +22,8 @@ export interface Venue {
   activeDays?: string[];
   category: VenueCategory;
   officialUrl?: string;
+  /** Official registration page, shown at the registration point. */
+  registrationUrl?: string;
   /** Null when the official location is not yet published. */
   mapPosition: VenueMapPosition | null;
   verification: VenueVerification;

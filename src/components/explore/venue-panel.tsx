@@ -180,6 +180,27 @@ export const VenuePanel = memo(function VenuePanel({
           </p>
         )}
 
+        {venue.registrationUrl && (
+          <div className="mt-4 rounded-2xl border border-brand-deep/15 bg-brand-deep p-4 text-cream shadow-soft">
+            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-lime uppercase">
+              GEN M registration
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-cream/80">
+              Not registered yet? Complete your registration on the official
+              GEN M site.
+            </p>
+            <a
+              href={venue.registrationUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-lime px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            >
+              Register at genm.in
+              <ArrowUpRight aria-hidden="true" className="size-3.5" />
+            </a>
+          </div>
+        )}
+
         {venue.mapPosition && (
           <div
             className={cn(

@@ -158,6 +158,8 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "R",
     description: "Registration point on the beach map.",
     category: "facility",
+    // Supplied by the event owner; this is the official registration page.
+    registrationUrl: "https://www.genm.in/register",
     mapPosition: { x: 580, y: 707, interactionRadius: 100 },
     verification: "supplied-map",
   },

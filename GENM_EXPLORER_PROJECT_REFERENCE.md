@@ -127,7 +127,7 @@ Official venue data was verified from `https://www.genm.in/venues` on 2026-10-24
 | A3 | Edu Expo | — | Map label, provisional |
 | S | Photo Booth | — | Map label, provisional |
 | O | GEN M Office | — | Map label, provisional |
-| R | Registration | — | Map label, provisional |
+| R | Registration | — | Map label, provisional; links to official registration |
 | E | Entrance | — | Map label, provisional |
 | P | Parking | — | Map label, provisional |
 | B | Edu Booths | — | Map label, provisional |
@@ -197,7 +197,7 @@ The graphic identifies seven primary stages, S1–S7. Other facilities and expo 
 - Backend/database without a demonstrated need.
 - Full offline support beyond sensible caching.
 - Push notifications.
-- Payments or event registration.
+- Payments or in-app event registration. Linking out to the official registration page is allowed.
 
 Session bookmarking may be added if straightforward, but must not delay the playable map and programme integration.
 
