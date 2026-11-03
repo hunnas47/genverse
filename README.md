@@ -75,6 +75,8 @@ public/images/   map artwork, wordmark, and avatar views
 ## Data notes
 
 Venue details and the programme come from the official GEN M sources. The
+current official programme publishes 53 sessions; speaker names are not
+published on the source page, so speaker fields stay empty until they are. The
 programme is bundled at build time, so rebuild after changing session data. Map
 anchors and collision footprints are approximate to the supplied artwork, not
 official coordinates.

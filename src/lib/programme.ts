@@ -103,8 +103,9 @@ function validateProgramme(): void {
       session.verification === "official",
       `session must be marked official: ${session.id}`,
     );
+    // Most sessions link to /sessions/<slug>; Balavedi Kids Zone links to /balavedi.
     invariant(
-      session.officialUrl.startsWith("https://www.genm.in/sessions/"),
+      session.officialUrl.startsWith("https://www.genm.in/"),
       `invalid official URL in ${session.id}`,
     );
 

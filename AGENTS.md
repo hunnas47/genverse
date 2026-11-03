@@ -58,7 +58,7 @@ itself still needs a manual pass on `/explore` at phone and desktop widths.
 
 - Never invent venues, sessions, speakers, times, or links. Use only user-supplied or verifiably official data; unknown stays missing/`TBD`.
 - `src/data/venues.ts`: S1–S7 are `verification: "official"` (checked against genm.in/venues). Map-only labels (`A1`, `A3`, `B`, `C`, `S`, `O`, `R`, `E`, `P`) are `verification: "supplied-map"` and provisional. There is deliberately no `A2` venue.
-- `src/data/sessions.json` and `speakers.json` hold the official programme (60 sessions, 182 speakers; 9 sessions have no published speakers). Metadata lives in `src/data/programme.ts` (`PROGRAMME_VERIFIED_AT`, `PROGRAMME_NOTICE`).
+- `src/data/sessions.json` and `speakers.json` hold the current official programme (53 sessions across three days; the official source currently publishes no speaker names). Metadata lives in `src/data/programme.ts` (`PROGRAMME_VERIFIED_AT`, `PROGRAMME_NOTICE`).
 - `src/lib/programme.ts` validates day, time, venue, speaker, role, status, and URL references at module load, so bad data fails `npm run build`. Keep validation intact when editing fixtures, and update the verified date and notice.
 - All programme times are Asia/Kolkata; day IDs are `nov-13`, `nov-14`, `nov-15`.
 - Programme data is bundled at build time; a deployment must be rebuilt to pick up changes.

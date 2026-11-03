@@ -21,7 +21,7 @@ import type { SearchParams } from "@/types/search";
 export const metadata: Metadata = {
   title: "Programme | GEN M Explorer",
   description:
-    "Browse the official GEN M session programme by day, venue, and speaker, then locate each venue on the beach map.",
+    "Browse the official GEN M session programme by day and venue, then locate each venue on the beach map.",
 };
 
 function SessionsLoading() {
@@ -46,10 +46,12 @@ export default function SessionsPage({
 
   const stats = [
     { value: SESSIONS.length, label: "sessions" },
-    { value: SPEAKERS.length, label: "speakers" },
+    ...(SPEAKERS.length > 0
+      ? [{ value: SPEAKERS.length, label: "speakers" }]
+      : []),
     { value: stageCount, label: "stages" },
     { value: mapMarkerCount, label: "map markers" },
-  ] as const;
+  ];
 
   return (
     <main className="min-h-dvh overflow-hidden bg-brand text-white">
@@ -74,9 +76,9 @@ export default function SessionsPage({
               Programme
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
-              Browse every official session by day, venue, or speaker. Open a
-              session for the full speaker list, then locate its venue on the
-              beach map.
+              Browse every official session by day or venue, then search titles,
+              descriptions, and talks. Open a session for its overview, talks,
+              and official source link, then locate its venue on the beach map.
             </p>
           </div>
 

@@ -14,25 +14,25 @@ import {
 } from "@/lib/programme";
 import type { Session } from "@/types/session";
 
-function speakerSummary(session: Session): string {
+function sessionSummary(session: Session): string | null {
   const speakers = getSessionSpeakers(session);
 
-  if (speakers.length === 0) {
-    return "Speakers to be announced.";
+  if (speakers.length > 0) {
+    const names = speakers
+      .slice(0, 3)
+      .map((speaker) =>
+        speaker.sessionRole
+          ? `${speaker.name} (${speaker.sessionRole})`
+          : speaker.name,
+      );
+    const remaining = speakers.length - names.length;
+
+    return remaining > 0
+      ? `${names.join(", ")} +${remaining} more`
+      : names.join(", ");
   }
 
-  const names = speakers
-    .slice(0, 3)
-    .map((speaker) =>
-      speaker.sessionRole
-        ? `${speaker.name} (${speaker.sessionRole})`
-        : speaker.name,
-    );
-  const remaining = speakers.length - names.length;
-
-  return remaining > 0
-    ? `${names.join(", ")} +${remaining} more`
-    : names.join(", ");
+  return session.description ?? null;
 }
 
 export function SessionCard({
@@ -45,6 +45,7 @@ export function SessionCard({
   const [expanded, setExpanded] = useState(defaultOpen);
   const venue = VENUES_BY_ID.get(session.venueId) ?? null;
   const speakers = getSessionSpeakers(session);
+  const summary = sessionSummary(session);
   const titleId = `session-title-${session.id}`;
   const detailsId = `session-details-${session.id}`;
   const hasMapPosition = Boolean(venue?.mapPosition);
@@ -98,9 +99,11 @@ export function SessionCard({
             {formatSessionTimeRange(session)}
           </p>
 
-          <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-brand-deep/75">
-            {speakerSummary(session)}
-          </p>
+          {summary && (
+            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-brand-deep/75">
+              {summary}
+            </p>
+          )}
         </div>
 
         <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -152,11 +155,11 @@ export function SessionCard({
             </p>
           )}
 
-          <div>
-            <h4 className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
-              Speakers
-            </h4>
-            {speakers.length > 0 ? (
+          {speakers.length > 0 && (
+            <div>
+              <h4 className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
+                Speakers
+              </h4>
               <ul className="mt-2 space-y-2.5">
                 {speakers.map((speaker) => (
                   <li key={speaker.id} className="text-sm text-brand-deep/80">
@@ -176,12 +179,8 @@ export function SessionCard({
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="mt-2 text-sm text-brand-deep/75">
-                Speakers to be announced.
-              </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {session.talks.length > 0 && (
             <div>
@@ -228,7 +227,7 @@ export function SessionCard({
               rel="noreferrer"
               className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
-              Official session page
+              Official page
               <ArrowUpRight aria-hidden="true" className="size-3.5" />
             </a>
             <span className="text-[10px] leading-relaxed text-brand-deep/70">

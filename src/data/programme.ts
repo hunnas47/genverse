@@ -3,14 +3,13 @@ import type { ProgrammeDay } from "@/types/session";
 /**
  * Official programme metadata.
  *
- * The session and speaker fixtures were extracted from the public GEN M
- * programme on https://www.genm.in/sessions and cross-checked against the
- * individual venue pages on 2026-10-25. The site labels the current programme
- * as the final programme.
+ * The session fixtures were extracted from the public GEN M programme on
+ * https://www.genm.in/sessions on 2026-11-03. The site currently publishes 53
+ * sessions across three days and does not publish speaker names.
  */
 export const PROGRAMME_SOURCE = "https://www.genm.in/sessions";
-export const PROGRAMME_VERIFIED_AT = "2026-10-25";
-export const PROGRAMME_NOTICE = "Final programme";
+export const PROGRAMME_VERIFIED_AT = "2026-11-03";
+export const PROGRAMME_NOTICE = "Current official programme";
 
 export const PROGRAMME_DAYS: readonly ProgrammeDay[] = [
   {

@@ -3,28 +3,16 @@
     "id": "2026-nov-13-opening-opening",
     "dayId": "nov-13",
     "day": "2026-11-13",
-    "venueId": "a1",
+    "venueId": "s2",
     "startTime": "17:00",
     "endTime": "18:30",
-    "title": "GEN M EXPO INAUGURATION",
-    "speakerIds": [
-      "mk-raghavan",
-      "jimmy-joseph",
-      "ms-madhavi-kutty-ias",
-      "adv-faisal-babu",
-      "adv-k-jayanth",
-      "ap-abdussamad-sahib",
-      "marakkarutty-c",
-      "a-asgarali-sahib",
-      "mt-abdussamad-sullami",
-      "abdushukoor-swalahi"
-    ],
+    "title": "INAUGURATION",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-13-opening-opening",
-    "verification": "official",
-    "subtitle": "INAUGURATION"
+    "verification": "official"
   },
   {
     "id": "2026-nov-13-s2-gen-z",
@@ -34,43 +22,33 @@
     "startTime": "19:00",
     "endTime": "21:00",
     "title": "GEN Z REACTING!",
-    "speakerIds": [
-      "wasif",
-      "hadi-hunnas",
-      "hamza",
-      "irfan",
-      "dr-musthafa-thanveer"
-    ],
+    "subtitle": "Islam in the Age of Superintelligence",
+    "description": "Muslim Gen Z Reacting: The Age of Superintelligence and Its Circus",
+    "speakerIds": [],
     "roles": {},
     "talks": [
       {
-        "title": "RELIGION: AGAINST HUMANITY?",
-        "speakerId": "wasif"
+        "title": "RELIGION: AGAINST HUMANITY?"
       },
       {
-        "title": "WHEN HUMANITY LOST ITS COMPASS",
-        "speakerId": "hadi-hunnas"
+        "title": "WHEN HUMANITY LOST ITS COMPASS"
       },
       {
-        "title": "WHAT MAKES A GENERATION RISE?",
-        "speakerId": "hamza"
+        "title": "WHAT MAKES A GENERATION RISE?"
       },
       {
         "title": "WHO GETS TO DEFINE THE HUMAN?"
       },
       {
-        "title": "WHEN INTELLIGENCE BECOMES SUPER",
-        "speakerId": "irfan"
+        "title": "WHEN INTELLIGENCE BECOMES SUPER"
       },
       {
-        "title": "Islam, Humanity and the Future of Gen Z",
-        "speakerId": "dr-musthafa-thanveer"
+        "title": "Islam, Humanity and the Future of Gen Z"
       }
     ],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-13-s2-gen-z",
-    "verification": "official",
-    "subtitle": "Islam in the Age of Superintelligence"
+    "verification": "official"
   },
   {
     "id": "2026-nov-14-s2-renaissance",
@@ -79,18 +57,10 @@
     "venueId": "s2",
     "startTime": "10:00",
     "endTime": "11:00",
-    "title": "കേരള മുസ്‌ലിം നവോത്ഥാന ചരിത്ര വായന",
-    "speakerIds": [
-      "ishaqali-kallikandi",
-      "abdurahman-mangad",
-      "sadad-abdusamad",
-      "tp-ashraf-ali",
-      "yahya-kalikav"
-    ],
-    "roles": {
-      "tp-ashraf-ali": "Guest",
-      "yahya-kalikav": "Moderator"
-    },
+    "title": "Kerala Muslim Renaissance: A Historical Reading",
+    "description": "The social, educational, and religious conditions. Major challenges faced by the Muslim community, Pioneers of the Muslim Renaissance, institutions, publications, and organizations. The Changes, NewGen to Next",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-renaissance",
@@ -103,13 +73,10 @@
     "venueId": "s3",
     "startTime": "10:00",
     "endTime": "11:00",
-    "title": "ഹദീസ്; അജയ്യം അന്യൂനം",
-    "speakerIds": [
-      "asif-islahi"
-    ],
-    "roles": {
-      "asif-islahi": "Moderator"
-    },
+    "title": "Salah: The Path to Spiritual Purity and Personal Transformation",
+    "description": "Salah as a fundamental act of worship in Islam,The importance of physical cleanliness. Qur’anic teaching that Salah restrains indecency and wrongdoing.Khushoo and Azkars. Niyyath to Salam in Teaching of Prophet Muhammad ﷺ",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s3-hadith",
@@ -122,16 +89,9 @@
     "venueId": "s5",
     "startTime": "10:00",
     "endTime": "11:00",
-    "title": "ഫെമിനിസം, സർവ്വ മത സത്യവാദം: വ്യാജവാദങ്ങളുടെ നിർമിതി",
-    "speakerIds": [
-      "adil-atheef",
-      "dr-mishal-saleem",
-      "dr-ashique-shajahan",
-      "suhail-kalleri"
-    ],
-    "roles": {
-      "suhail-kalleri": "Moderator"
-    },
+    "title": "Feminism and the “All Religions Are Equally True” Claim: Examining the Arguments",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-feminism",
@@ -143,15 +103,15 @@
     "day": "2026-11-14",
     "venueId": "s6",
     "startTime": "10:00",
-    "endTime": "15:00",
-    "title": "Balavedi Gathering",
+    "endTime": "17:00",
+    "title": "Balavedi Kids Zone",
+    "subtitle": "Where little minds grow with big values.",
     "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s6-balavedi",
-    "verification": "official",
-    "subtitle": "Madrasa Kids"
+    "officialUrl": "https://www.genm.in/balavedi",
+    "verification": "official"
   },
   {
     "id": "2026-nov-14-s7-culture",
@@ -161,10 +121,9 @@
     "startTime": "10:00",
     "endTime": "11:30",
     "title": "സംസ്കാരം; വിശുദ്ധിയും വിവേകവും",
-    "speakerIds": [
-      "hafiz-rahman-puthur",
-      "faisal-babu-salafi"
-    ],
+    "subtitle": "Culture: Purity and Wisdom",
+    "description": "Tazkiyah: Purifying the Heart and Transforming the Self · Islamic Character: From Faith to Everyday Conduct · The Light of Wisdom: Faith, Knowledge and Critical Thinking",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -178,16 +137,10 @@
     "venueId": "s2",
     "startTime": "11:00",
     "endTime": "12:00",
-    "title": "മലയാളകരയിലെ ഖുർആൻ പരിഭാഷകൾ",
-    "speakerIds": [
-      "tp-abdurazaq-baqawi",
-      "kv-abdulatheef-moulavi",
-      "dr-tk-yousuf",
-      "anas-madani"
-    ],
-    "roles": {
-      "anas-madani": "Moderator"
-    },
+    "title": "Translations of the Holy Qur’an in the Malayalam-Speaking Region",
+    "description": "The History, Major milestones, Scholars, translators, and institutions that contributed, Mayinkutty Elaya, Vakkom Moulavi, K. M. Moulavi, Cheriyamundam Abdul Hameed Madani, Kunjumuhammad Parappur, C. N. Ahmed Moulavi, Sheikh Muhammad Karakunnu etc",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-translations",
@@ -200,12 +153,9 @@
     "venueId": "s3",
     "startTime": "11:00",
     "endTime": "12:00",
-    "title": "ഫിഖ്ഹ്: വിജ്ഞാനത്തിന്റെ ആഴക്കടൽ",
-    "speakerIds": [
-      "pp-muhammad-madani",
-      "km-faizy-tariyod",
-      "vahab-swalahi-vayalar"
-    ],
+    "title": "Fiqh: Deepening Understanding, Guiding Life",
+    "description": "Understanding Fiqh and Sharee’a. Primary sources.The Richness of Islamic Jurisprudence. Al Mazahib and Ikhtilafaath. Fiqh and Everyday Life. Fatawa; Answers to religious questions in the digital age. Prominent Fuqaha (Islamic jurists and scholars)",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -220,16 +170,8 @@
     "startTime": "11:00",
     "endTime": "12:00",
     "title": "ഇസ്‌ലാഹീ പ്രസ്ഥാനം എഴുതിപ്പണിത 50 വർഷങ്ങൾ",
-    "speakerIds": [
-      "ekm-pannoor",
-      "rahmatullah-swalahi",
-      "dr-jamsheer-farooqi",
-      "rasheed-olavanna",
-      "shamal-madani"
-    ],
-    "roles": {
-      "shamal-madani": "Moderator"
-    },
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-islahi",
@@ -243,10 +185,9 @@
     "startTime": "11:30",
     "endTime": "13:00",
     "title": "ബന്ധങ്ങൾ; വിലയറിഞ്ഞാൽ വിലപിക്കില്ല",
-    "speakerIds": [
-      "abdunnasar-farooqi",
-      "midhul-mansoor"
-    ],
+    "subtitle": "Relationships: Value Them Before You Regret Them",
+    "description": "Family: The Shelter of Love and Care · Friendship: Choose Companions Who Guide You Right · The Ethics of Relationships: Forgiveness, Compassion and Reconciliation",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -260,15 +201,10 @@
     "venueId": "s2",
     "startTime": "12:00",
     "endTime": "13:00",
-    "title": "സൂഫിസം: വ്യതിയാന കക്ഷികളുടെ കപടസൗന്ദര്യം",
-    "speakerIds": [
-      "unais-pappinassery",
-      "shareef-vavoor",
-      "vajid-ansari"
-    ],
-    "roles": {
-      "vajid-ansari": "Moderator"
-    },
+    "title": "Sufism – The Deceptive Charm of Deviant Groups",
+    "description": "The meaning, origins, and history.Sufism in Kerala. What is Spirituality, Tawassul, Istighatha, liberal sufism, Rumi, Ibn Arabi etc",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-sufism",
@@ -281,11 +217,9 @@
     "venueId": "s3",
     "startTime": "12:00",
     "endTime": "13:00",
-    "title": "നബി ചരിത്രം: എഴുത്ത് വായന",
-    "speakerIds": [
-      "prof-muhammad-kuttasery",
-      "dr-pp-abdul-haque"
-    ],
+    "title": "Seerah of the Prophet ﷺ: Writing and Reading",
+    "description": "Importance of Seerah, Moving beyond dates and events, The Sources and Major Works, Sīrat Ibn Hishām, Al-Sīrah al-Nabawiyyah by Ibn Kathir and Al-Raḥīq al-Makhtūm.Writing Seerah: Scholarship and Creativity. Malayalam Seerah Literature and Its Legacy. Seerah in the Digital Age. Podcasts, videos, e-books, social media and digital storytelling.",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -300,28 +234,11 @@
     "startTime": "12:00",
     "endTime": "13:00",
     "title": "Reward Students Session",
-    "speakerIds": [
-      "jaleel-parappangadi"
-    ],
-    "roles": {},
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-reward",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s5-girls-1",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s5",
-    "startTime": "13:00",
-    "endTime": "14:00",
-    "title": "Girls Sessions",
     "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-girls-1",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-reward",
     "verification": "official"
   },
   {
@@ -332,16 +249,9 @@
     "startTime": "14:00",
     "endTime": "15:00",
     "title": "Careers 2040: Preparing for Jobs That Don’t Exist Yet",
-    "speakerIds": [
-      "muhammad-ameer",
-      "ap-jawahar-sadath",
-      "najeeb-kanthapuram",
-      "naseeb-randathani"
-    ],
-    "roles": {
-      "najeeb-kanthapuram": "Guest",
-      "naseeb-randathani": "Moderator"
-    },
+    "description": "Future Skills, Artificial Intelligence, and Career Readiness for the Next Generation. How AI, robotics, automation, and emerging technologies will transform employment.Changing Job Market, Digital literacy, data analysis, AI literacy, cybersecurity, and computational thinking,Preparing Kerala’s Students for Global Opportunities",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-careers",
@@ -354,14 +264,10 @@
     "venueId": "s3",
     "startTime": "14:00",
     "endTime": "15:00",
-    "title": "നമസ്കാരം; വിശുദ്ധിയുടെ താക്കോൽ",
-    "speakerIds": [
-      "moideen-koya-madani",
-      "farhan-swalahi"
-    ],
-    "roles": {
-      "farhan-swalahi": "Moderator"
-    },
+    "title": "Hadith: Authenticity, Preservation and Enduring Authority",
+    "description": "Hadith in understanding Islam alongside the Qur’an. The Prophet’s ﷺ words, actions & approvals, Earliest Muslim generations. Swahaba Thabih reportings, Understanding Isnād, Rijal, Mathn, Usool, Great Hadith Scholars and Their Legacy. Moving from memorisation to understanding, reflection and practice",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s3-prayer",
@@ -374,7 +280,8 @@
     "venueId": "s5",
     "startTime": "14:00",
     "endTime": "15:00",
-    "title": "Girls Sessions",
+    "title": "BEYOND THE PAGES; The Literary Room",
+    "description": "Literature, Reading, Writing, Books, Philosophy, Perspectives, Experiences",
     "speakerIds": [],
     "roles": {},
     "talks": [],
@@ -388,12 +295,10 @@
     "day": "2026-11-14",
     "venueId": "s7",
     "startTime": "14:00",
-    "endTime": "15:30",
+    "endTime": "15:00",
     "title": "മതമറിയുന്ന കൗമാരം; ധാർമികം, ധൈഷണികം",
-    "speakerIds": [
-      "ansab-swabahi",
-      "ashraf-chettippadi"
-    ],
+    "subtitle": "Faith-Aware Adolescence: Moral Integrity and Intellectual Maturity",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -407,17 +312,10 @@
     "venueId": "s2",
     "startTime": "15:00",
     "endTime": "16:00",
-    "title": "മുഹമ്മദ് അബ്ദുറഹ്മാൻ സാഹിബും ഇ. മൊയ്തു മൗലവിയും",
-    "speakerIds": [
-      "dr-abdul-haseeb-madani",
-      "adv-danish",
-      "noushad-ali",
-      "adv-afsal-yoosuf"
-    ],
-    "roles": {
-      "noushad-ali": "Guest",
-      "adv-afsal-yoosuf": "Moderator"
-    },
+    "title": "Muhammad Abdur Rahman Sahib and E. Moidu Moulavi: Pioneers of Kerala’s Muslim Renaissance",
+    "description": "Malabar during the early 20th century. Life and Vision, Qur’anic knowledge, freedom movement and intellectual awakening.newspapers, publications, and public speeches. Legacy for the Gen Z",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-abdurahman",
@@ -430,11 +328,9 @@
     "venueId": "s3",
     "startTime": "15:00",
     "endTime": "16:00",
-    "title": "പ്രബോധനം: പ്രവാചക മാതൃക",
-    "speakerIds": [
-      "dr-nm-muhammad-ali-ansari",
-      "musthafa-banglore"
-    ],
+    "title": "Prophetic Da‘wah: Wisdom, Mercy and Meaningful Engagement",
+    "description": "An invitation to faith, truth, goodness and human flourishing.inviting people with wisdom and good instruction, personal conduct, credibility,Challenges of Modern Campuses, Digital Da‘wah: Opportunities and Responsibilities",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -448,7 +344,8 @@
     "venueId": "s5",
     "startTime": "15:00",
     "endTime": "16:00",
-    "title": "Girls Sessions",
+    "title": "THE BUSINESSWOMEN : From Vision To Venture",
+    "description": "Business, Entity, Barriers, Ideas, Small scale and Large Scale businesses, Impact, Motherhood and business, Challenges, Experiences",
     "speakerIds": [],
     "roles": {},
     "talks": [],
@@ -457,44 +354,18 @@
     "verification": "official"
   },
   {
-    "id": "2026-nov-14-s6-madrasa",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s6",
-    "startTime": "15:00",
-    "endTime": "16:00",
-    "title": "Reimagining Madrasa Education for the Next Generation",
-    "speakerIds": [
-      "dr-pma-wahab",
-      "rafeeq-kodiyathoor",
-      "shameem-swalahi",
-      "labeeb-siyamkandam",
-      "muhammad-musthafa-wasithwi"
-    ],
-    "roles": {
-      "muhammad-musthafa-wasithwi": "Moderator"
-    },
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s6-madrasa",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s7-taqwa",
+    "id": "2026-nov-14-s7-vakkom",
     "dayId": "nov-14",
     "day": "2026-11-14",
     "venueId": "s7",
-    "startTime": "15:30",
-    "endTime": "17:00",
-    "title": "തഖ്‌വ; രക്ഷയാണ് വാഗ്ദാനം",
-    "speakerIds": [
-      "abdurahiman-farooqi",
-      "jamsheedali-salafi"
-    ],
+    "startTime": "15:00",
+    "endTime": "16:00",
+    "title": "വക്കം മൗലവി തജ്ദീദ് എഴുത്തുകൾ",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s7-taqwa",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s7-vakkom",
     "verification": "official"
   },
   {
@@ -504,17 +375,10 @@
     "venueId": "s2",
     "startTime": "16:00",
     "endTime": "17:00",
-    "title": "ന്യൂനപക്ഷ രാഷ്ട്രീയം: പിറവിയും പ്രയാണവും",
-    "speakerIds": [
-      "mc-ibrahim-vatakara",
-      "ck-zubair",
-      "munavarli-thangal",
-      "nasim-rahman"
-    ],
-    "roles": {
-      "munavarli-thangal": "Guest",
-      "nasim-rahman": "Moderator"
-    },
+    "title": "Minority Politics in Kerala – Origins, Evolution and Future Directions",
+    "description": "Minorities in Kerala and the wider Indian context. colonial rule, social reform, and democratic movements, Muslim Political Representation,Constitutional guarantees: equality, religious freedom, and minority educational and cultural rights. representation in Parliament, the State Assembly, local self-government, and public institutions. The challenges",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-minority-politics",
@@ -527,35 +391,13 @@
     "venueId": "s3",
     "startTime": "16:00",
     "endTime": "17:00",
-    "title": "മതരാഷ്ട്ര വാദം; അകവും പുറവും",
-    "speakerIds": [
-      "salish-vatanappally",
-      "asif-ali-tvm"
-    ],
-    "roles": {
-      "asif-ali-tvm": "Moderator"
-    },
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s3-religious-state",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s4-vakkom",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s4",
-    "startTime": "16:00",
-    "endTime": "16:30",
-    "title": "വക്കം മൗലവി തജ്ദീദ് എഴുത്തുകൾ",
-    "speakerIds": [
-      "saeed-taliyil",
-      "hilal"
-    ],
+    "title": "Religious Nationalism: Ideology, Politics and Reality",
+    "description": "Examine organisations and ideological movements in both Muslim and non-Muslim contexts. Origins, aims, internal diversity and relationships with democracy, citizenship and the role of religion in the state. Hakimiyyath, Hindutva vs Democracy",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s4-vakkom",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s3-religious-state",
     "verification": "official"
   },
   {
@@ -565,37 +407,28 @@
     "venueId": "s5",
     "startTime": "16:00",
     "endTime": "17:00",
-    "title": "നന്മയുടെ നിർദരികൾ",
-    "speakerIds": [
-      "saleel-tanalur",
-      "dr-shareef-koppilan",
-      "dr-saleem-parambilpeedika",
-      "aman-al-furqan",
-      "mihraj-jbu"
-    ],
+    "title": "FINDING ISLAM: The call that changed her",
+    "description": "Discovering truth, Islam, Struggles, Transformation, Culture, Experiences",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-songs",
-    "verification": "official",
-    "description": "Old Mappila Songs, Islahi Songs, Story Narration; A Blended Mood"
+    "verification": "official"
   },
   {
-    "id": "2026-nov-14-s4-makthi",
+    "id": "2026-nov-14-s7-makthi",
     "dayId": "nov-14",
     "day": "2026-11-14",
-    "venueId": "s4",
-    "startTime": "16:30",
+    "venueId": "s7",
+    "startTime": "16:00",
     "endTime": "17:00",
     "title": "മക്തി തങ്ങൾ: അക്ഷരങ്ങളുടെ തുടക്കം",
-    "speakerIds": [
-      "pa-rasheed",
-      "bareer-aslam"
-    ],
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s4-makthi",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s7-makthi",
     "verification": "official"
   },
   {
@@ -605,52 +438,13 @@
     "venueId": "s2",
     "startTime": "17:00",
     "endTime": "18:00",
-    "title": "സയണിസം മാനവികതയ്ക്ക് ഭീഷണി",
-    "speakerIds": [
-      "pj-vincent",
-      "prof-arif-zain",
-      "dr-amjad-ameen"
-    ],
-    "roles": {
-      "dr-amjad-ameen": "Moderator"
-    },
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-zionism",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s3-ikhwanism",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s3",
-    "startTime": "17:00",
-    "endTime": "18:00",
-    "title": "ഇഖ്‌വാനിസം; വിത്തും വേരും",
-    "speakerIds": [
-      "musabbah-cherucode"
-    ],
-    "roles": {
-      "musabbah-cherucode": "Moderator"
-    },
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s3-ikhwanism",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s4-alumni",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s4",
-    "startTime": "17:00",
-    "endTime": "18:00",
-    "title": "MSM Alumni Gather",
+    "title": "Zionism and the Challenge to Humanity",
+    "description": "Origins and Ideology,Jewish nationalism, the establishment of Israel in 1948,Differences between Zionism, Judaism, Jewish identity, The 1948 Nakba.Occupation of Palestinian territories.Gaza and the Humanitarian Genocide",
     "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s4-alumni",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-zionism",
     "verification": "official"
   },
   {
@@ -660,17 +454,9 @@
     "venueId": "s5",
     "startTime": "17:00",
     "endTime": "18:00",
-    "title": "ദിശ പകർന്ന വൈജ്ഞാനിക സമുച്ചയങ്ങൾ",
-    "speakerIds": [
-      "prof-nv-abdurahiman",
-      "av-abdullah",
-      "mk-abdurahman-bava",
-      "babu-sett",
-      "prof-abdul-azeez",
-      "dr-basheer-mancheri",
-      "prof-saeed",
-      "pk-muhammad-ali-parisons"
-    ],
+    "title": "നന്മയുടെ നിർദരികൾ",
+    "description": "Nasheeds, Mappila Songs, Islahi Songs, Story Narration; A Blended Mood",
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -685,10 +471,7 @@
     "startTime": "17:00",
     "endTime": "18:00",
     "title": "മരണം മുതൽ ഖബർ വരെ",
-    "speakerIds": [
-      "shoukath-ali-ansari",
-      "shameer-swalahi"
-    ],
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
@@ -703,37 +486,11 @@
     "startTime": "18:45",
     "endTime": "19:10",
     "title": "ഖുർആൻ പാരായണം: അനുഭവം, ആസ്വാദനം",
-    "speakerIds": [
-      "ഹ-ഫ-സ-ന-ഫൽ-സ-വല-ഹ",
-      "ജ-ന-ദ",
-      "munavvir-swalahi",
-      "nihal-vadakkan",
-      "aleef",
-      "fayis",
-      "aflah"
-    ],
+    "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-recitation",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s4-poetry",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s4",
-    "startTime": "18:45",
-    "endTime": "19:30",
-    "title": "തൂലികയിൽ പിറന്ന നന്മയുടെ ഈരടികൾ",
-    "speakerIds": [
-      "hussain-kakkad",
-      "dr-shareef-koppilan"
-    ],
-    "roles": {},
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s4-poetry",
     "verification": "official"
   },
   {
@@ -743,42 +500,27 @@
     "venueId": "s5",
     "startTime": "18:45",
     "endTime": "19:30",
-    "title": "അഡിക്ഷനകളുടെ ക്ഷുഭിത കൗമാരങ്ങൾ: പ്രതിരോധം , പരിഹാരം",
-    "speakerIds": [
-      "dr-haydarali-kalliyath",
-      "jaleel-mamankara",
-      "vh-musthafa-swalahi"
-    ],
-    "roles": {
-      "vh-musthafa-swalahi": "Moderator"
-    },
+    "title": "അഡിക്ഷനകളുടെ ക്ഷുഭിത കൗമാരങ്ങൾ: പ്രതിരോധം, പരിഹാരം",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-addiction",
     "verification": "official"
   },
   {
-    "id": "2026-nov-14-s7-health",
+    "id": "2026-nov-14-s7-taqwa",
     "dayId": "nov-14",
     "day": "2026-11-14",
     "venueId": "s7",
-    "startTime": "19:00",
+    "startTime": "18:45",
     "endTime": "20:00",
-    "title": "ഹെൽത്തി ജെൻ-സി with IMB",
-    "speakerIds": [
-      "dr-zulfikar-ali",
-      "dr-noufal-basheer",
-      "dr-kabeer",
-      "dr-ummer",
-      "dr-afsal",
-      "dr-sajjad"
-    ],
-    "roles": {
-      "dr-sajjad": "Moderator"
-    },
+    "title": "തഖ്‌വ; രക്ഷയാണ് വാഗ്ദാനം",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s7-health",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s7-taqwa",
     "verification": "official"
   },
   {
@@ -788,17 +530,10 @@
     "venueId": "s2",
     "startTime": "19:10",
     "endTime": "20:00",
-    "title": "ലിബറലിസം: സ്വർണ്ണം പൂശിയ ചങ്ങലകൾ",
-    "speakerIds": [
-      "mm-akbar",
-      "shareef-sagar",
-      "aseem-thennala",
-      "muhsin-velimukku",
-      "shibily-muhammad"
-    ],
-    "roles": {
-      "shibily-muhammad": "Moderator"
-    },
+    "title": "Liberalism; The Illusion of Freedom",
+    "description": "Foundations of liberalism, Individualism vs Family and Community.Morality and Religious Values. Media, Digital Culture and the Illusion of Choice. Modern Ideologies. Role and Responsibilities of Muslim students",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s2-liberalism",
@@ -810,57 +545,13 @@
     "day": "2026-11-14",
     "venueId": "s5",
     "startTime": "19:30",
-    "endTime": "20:00",
-    "title": "Content Creation: Brain Rot-ന്റെ കാലത്തെ ഉത്തരവാദിത്വങ്ങൾ",
-    "speakerIds": [
-      "amajd-edavanna",
-      "ali-ansam-mukthar",
-      "ihsan-trissur"
-    ],
-    "roles": {
-      "ihsan-trissur": "Moderator"
-    },
+    "endTime": "20:30",
+    "title": "തൗഹീദ്; ഇസ്‌ലാമിന്റെ അടിത്തറ",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-content",
-    "verification": "official"
-  },
-  {
-    "id": "2026-nov-14-s5-education",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s5",
-    "startTime": "20:00",
-    "endTime": "20:30",
-    "title": "Education or Indoctrination?",
-    "speakerIds": [
-      "prof-abid-up",
-      "prof-nasar",
-      "vaseel"
-    ],
-    "roles": {},
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s5-education",
-    "verification": "official",
-    "subtitle": "Classrooms in Crisis: Why Kerala Must Rethink Education"
-  },
-  {
-    "id": "2026-nov-14-s7-evening",
-    "dayId": "nov-14",
-    "day": "2026-11-14",
-    "venueId": "s7",
-    "startTime": "20:00",
-    "endTime": "21:00",
-    "title": "Session details to be announced",
-    "speakerIds": [
-      "shahid-muslim-farooqi",
-      "ali-shakir-munderi"
-    ],
-    "roles": {},
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-14-s7-evening",
     "verification": "official"
   },
   {
@@ -870,15 +561,10 @@
     "venueId": "s2",
     "startTime": "10:00",
     "endTime": "11:00",
-    "title": "തൗഹീദ്; ഇസ്‌ലാമിൻ്റെ അടിത്തറ",
-    "speakerIds": [
-      "saleem-sullami",
-      "muneer-madani",
-      "sharfudheen-sullami"
-    ],
-    "roles": {
-      "sharfudheen-sullami": "Moderator"
-    },
+    "title": "Content Creation: Responsibilities in the Age of Brain Rot",
+    "description": "“Brain rot” means in today’s digital culture.Creating content that informs, educates, inspires and benefits society, excessive short-form videos, endless scrolling, memes and low-quality content.fact-checking before publishing. AI, Deepfakes and Digital Ethics, Economy: Views vs Values. Campus Creators: Gen Z Influencers. From Viral Content to Valuable Content",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s2-tawheed",
@@ -891,14 +577,10 @@
     "venueId": "s3",
     "startTime": "10:00",
     "endTime": "11:00",
-    "title": "പ്രമാണങ്ങൾ; സലഫുകളാണ് മാതൃക",
-    "speakerIds": [
-      "usman-mishkathi",
-      "ali-salafi-kasaragode"
-    ],
-    "roles": {
-      "ali-salafi-kasaragode": "Moderator"
-    },
+    "title": "Following the Evidence: Understanding of the Salaf",
+    "description": "Islamic Sources, Qur’an and authentic Sunnah, Who Are the Salaf?, The importance of context, Arabic language, Hadith. The Salaf and Contemporary Challenges.",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s3-salaf",
@@ -910,8 +592,9 @@
     "day": "2026-11-15",
     "venueId": "s5",
     "startTime": "10:00",
-    "endTime": "15:30",
-    "title": "Girls Sessions",
+    "endTime": "11:00",
+    "title": "IDEOLOGIES UNVEILED : Spirituality, Feminism, and Liberal Thought",
+    "description": "Feminism, Liberalism, Sufism, Atheism, Impact, Destruction to Society, Ideology Base, Core Propaganda, Experiences",
     "speakerIds": [],
     "roles": {},
     "talks": [],
@@ -925,31 +608,36 @@
     "day": "2026-11-15",
     "venueId": "s6",
     "startTime": "10:00",
-    "endTime": "15:00",
-    "title": "Balavedi Gathering",
+    "endTime": "13:00",
+    "title": "Balavedi Kids Zone",
+    "subtitle": "Where little minds grow with big values.",
     "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s6-balavedi",
-    "verification": "official",
-    "subtitle": "Madrasa Kids"
+    "officialUrl": "https://www.genm.in/balavedi",
+    "verification": "official"
   },
   {
-    "id": "2026-nov-15-s7-dunya",
+    "id": "2026-nov-15-s7-two-worlds",
     "dayId": "nov-15",
     "day": "2026-11-15",
     "venueId": "s7",
     "startTime": "10:00",
     "endTime": "11:00",
-    "title": "ദുനിയാവ്; പെയ്തൊഴിയുന്ന മഴ മാത്രം!",
-    "speakerIds": [
-      "shahid-muslim-farooqi"
-    ],
+    "title": "യാഥാർത്ഥ്യമറിയേണ്ട ഇരുലോകങ്ങള്‍",
+    "speakerIds": [],
     "roles": {},
-    "talks": [],
+    "talks": [
+      {
+        "title": "ദുനിയാവ്; പെയ്തൊഴിയുന്ന മഴ മാത്രം!"
+      },
+      {
+        "title": "ആഖിറം; ശാശ്വതമാണ് ജീവിതം"
+      }
+    ],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-dunya",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-two-worlds",
     "verification": "official"
   },
   {
@@ -959,17 +647,10 @@
     "venueId": "s2",
     "startTime": "11:00",
     "endTime": "12:00",
-    "title": "ഇന്ത്യൻ മുസ്‌ലിംകൾ: പ്രതീക്ഷയുടെ പൊൻകിരണങ്ങൾ",
-    "speakerIds": [
-      "adv-haris-beeran",
-      "salahudheen-madani",
-      "shibu-meeran-myl",
-      "jasir-randathani",
-      "abdul-hadi"
-    ],
-    "roles": {
-      "abdul-hadi": "Moderator"
-    },
+    "title": "Indian Muslims: Challenges, Resilience and Rays of Hope",
+    "description": "Contributions of Indian Muslims to the freedom struggle, education, literature, science, culture and nation-building.Contemporary Challenges and Realities.The role of Muslim students in shaping India's future.",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s2-indian-muslims",
@@ -982,32 +663,44 @@
     "venueId": "s3",
     "startTime": "11:00",
     "endTime": "12:00",
-    "title": "ശിആയിസം; ഇസ്ലാമാണ് ശത്രു!",
-    "speakerIds": [
-      "naseerudheen-rahmani",
-      "amjad-ansari"
-    ],
-    "roles": {
-      "amjad-ansari": "Moderator"
-    },
+    "title": "Shi‘ism: “Islam Is the Enemy!”",
+    "description": "Origins and historical development,Imamate,Thaqiyyath.  religious authority, Hadith traditions, Stepping to Kerala Campuses",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s3-shiism",
     "verification": "official"
   },
   {
-    "id": "2026-nov-15-s7-hereafter",
+    "id": "2026-nov-15-s5-girls-2",
+    "dayId": "nov-15",
+    "day": "2026-11-15",
+    "venueId": "s5",
+    "startTime": "11:00",
+    "endTime": "12:00",
+    "title": "ESSENCE OF WOMENHOOD : The Many Chapters of Her",
+    "description": "Motherhood, Parenthood, Daughter Life, as a Partner, Responsibilities, Pregnancy, Multi-Tasking, it's Biology, It's Psychology, Home Maker, Working Women, Experiences",
+    "speakerIds": [],
+    "roles": {},
+    "talks": [],
+    "status": "scheduled",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s5-girls-2",
+    "verification": "official"
+  },
+  {
+    "id": "2026-nov-15-s7-knowledge",
     "dayId": "nov-15",
     "day": "2026-11-15",
     "venueId": "s7",
     "startTime": "11:00",
     "endTime": "12:00",
-    "title": "ആഖിറം; ശാശ്വതജീവിതം !",
+    "title": "ദിശ പകർന്ന വൈജ്ഞാനിക സമുച്ചയങ്ങൾ",
     "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-hereafter",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-knowledge",
     "verification": "official"
   },
   {
@@ -1017,18 +710,10 @@
     "venueId": "s2",
     "startTime": "12:00",
     "endTime": "13:00",
-    "title": "ഇസ്‌ലാമോഫോബിയ: വിവേകമാണ് വഴികാട്ടേണ്ടത്",
-    "speakerIds": [
-      "babu-raj-bhagavat",
-      "yuhanon-meletius",
-      "dr-shihab-thodupuzha",
-      "vt-balram",
-      "fahad-bin-rasheed"
-    ],
-    "roles": {
-      "vt-balram": "Guest",
-      "fahad-bin-rasheed": "Moderator"
-    },
+    "title": "Media, Islamophobia and the Power of Critical Thinking",
+    "description": "Headlines, Selective reporting, framing and repeated stereotypes.The spread of misleading videos, edited clips, fake news and communal rumours.impact of Islamophobic narratives,Freedom of expression,The role of journalists, content creators, educators and institutions.fact-checking and ethical journalism.",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s2-islamophobia",
@@ -1041,32 +726,44 @@
     "venueId": "s3",
     "startTime": "12:00",
     "endTime": "13:00",
-    "title": "അറിയാം, അധിവാദങ്ങ്ളുടെ അതിപ്രസരം!",
-    "speakerIds": [
-      "sa-ad-el-deen-swalahi",
-      "nabeel-sharafi"
-    ],
-    "roles": {
-      "nabeel-sharafi": "Moderator"
-    },
+    "title": "The Excess of Extreme Views: Faith, Reason and Critical Inquiry",
+    "description": "Knowledge vs. Extremism, Evidence and Authentic Scholarship. Blind Following; Thaqleed",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s3-extremism",
     "verification": "official"
   },
   {
-    "id": "2026-nov-15-s7-stop",
+    "id": "2026-nov-15-s5-girls-3",
+    "dayId": "nov-15",
+    "day": "2026-11-15",
+    "venueId": "s5",
+    "startTime": "12:00",
+    "endTime": "13:00",
+    "title": "WOMEN IN POWER : Her Voice in Politics",
+    "description": "Politics, Feminine Power, Barriers, Knowledge, Current Affairs, Governance, Experiences",
+    "speakerIds": [],
+    "roles": {},
+    "talks": [],
+    "status": "scheduled",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s5-girls-3",
+    "verification": "official"
+  },
+  {
+    "id": "2026-nov-15-s7-halal-future",
     "dayId": "nov-15",
     "day": "2026-11-15",
     "venueId": "s7",
     "startTime": "12:00",
     "endTime": "13:00",
-    "title": "അവസാനിപ്പിക്കുക അരുതായ്മകൾ",
+    "title": "The Halal Future: Startups, AI & the Next Economy",
     "speakerIds": [],
     "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-stop",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-halal-future",
     "verification": "official"
   },
   {
@@ -1076,45 +773,44 @@
     "venueId": "s2",
     "startTime": "14:00",
     "endTime": "15:00",
-    "title": "മുഹമ്മദ് നബി; മാനുഷ്യകത്തിൻ്റെ റോള്‍ മോഡല്‍",
-    "speakerIds": [
-      "kp-ramanunni",
-      "jouhar-ayanikode",
-      "mk-muneer",
-      "mushtaq-ahmed-swalahi"
-    ],
-    "roles": {
-      "mk-muneer": "Guest",
-      "mushtaq-ahmed-swalahi": "Moderator"
-    },
+    "title": "Muhammad ﷺ: A Timeless Model of Mercy, Character and Human Excellence",
+    "description": "A Universal Model, Messenger, Teacher, Leader, Family member and Social reformer. Character, Honesty and Trustworthiness, Writing and Thinkings About prophet in malayalam. Follow of Sunnah.",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s2-role-model",
     "verification": "official"
   },
   {
-    "id": "2026-nov-15-s7-student-politics",
+    "id": "2026-nov-15-s5-girls-4",
+    "dayId": "nov-15",
+    "day": "2026-11-15",
+    "venueId": "s5",
+    "startTime": "14:00",
+    "endTime": "15:00",
+    "title": "PURITY & PRACTICE : Your Questions Answered",
+    "description": "Health, Purity, Janaba, Haidh, Nifas, Cleanliness, Ibada, Doubt Clearance",
+    "speakerIds": [],
+    "roles": {},
+    "talks": [],
+    "status": "scheduled",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s5-girls-4",
+    "verification": "official"
+  },
+  {
+    "id": "2026-nov-15-s7-health",
     "dayId": "nov-15",
     "day": "2026-11-15",
     "venueId": "s7",
     "startTime": "14:00",
     "endTime": "15:00",
-    "title": "കാലമറിയുന്ന വിദ്യാർത്ഥി രാഷ്ട്രീയം",
-    "speakerIds": [
-      "ahmed-saju",
-      "aloxsius-ksu",
-      "sharafu-pilakkal-msf",
-      "sanu-sfi",
-      "pk-navas",
-      "fahad-vatakara-msf"
-    ],
-    "roles": {
-      "pk-navas": "Guest",
-      "fahad-vatakara-msf": "Moderator"
-    },
+    "title": "ഹെൽത്തി ജെൻ-സി with IMB",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-student-politics",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-health",
     "verification": "official"
   },
   {
@@ -1125,22 +821,13 @@
     "startTime": "15:00",
     "endTime": "16:00",
     "title": "Halal Wealth: Islamic Finance for a Changing World",
-    "speakerIds": [
-      "prof-nv-zakriya",
-      "noor-sait",
-      "vk-zakariya-dubai",
-      "pma-sameer",
-      "navas-swalahi-ottappalam"
-    ],
-    "roles": {
-      "pma-sameer": "Guest",
-      "navas-swalahi-ottappalam": "Moderator"
-    },
+    "description": "Wealth With Purpose: Understanding Islamic principles of earning & spending/Riba, Risk & Responsibility: Navigating modern financial traps/The Digital Gold Rush: Bitcoin, crypto & blockchain from an Islamic lens. Fintech, digital payments, crowdfunding and emerging financial models.New questions raised by cryptocurrency, AI-driven finance and global investment.",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s2-halal-wealth",
-    "verification": "official",
-    "description": "Wealth With Purpose: Understanding Islamic principles of earning & spending; Riba, Risk & Responsibility: Navigating modern financial traps; The Digital Gold Rush: Bitcoin, crypto & blockchain from an Islamic lens."
+    "verification": "official"
   },
   {
     "id": "2026-nov-15-s6-madrasa",
@@ -1150,116 +837,27 @@
     "startTime": "15:00",
     "endTime": "16:00",
     "title": "Reimagining Madrasa Education for the Next Generation",
-    "speakerIds": [
-      "dr-pma-wahab",
-      "rafeeq-kodiyathoor",
-      "shameem-swalahi",
-      "labeeb-siyamkandam",
-      "muhammad-musthafa-wasithwi"
-    ],
-    "roles": {
-      "muhammad-musthafa-wasithwi": "Moderator"
-    },
+    "description": "KNM Madrasa Education Yesterday-Today-Tomorrow, Curriculum for a Changing World. Hi-tech and Digital Madrasas. Teachers as Mentors and Role Models. Online, Offline Modes",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
     "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s6-madrasa",
     "verification": "official"
   },
   {
-    "id": "2026-nov-15-s7-halal-future",
+    "id": "2026-nov-15-s7-student-politics",
     "dayId": "nov-15",
     "day": "2026-11-15",
     "venueId": "s7",
     "startTime": "15:00",
     "endTime": "16:00",
-    "title": "The Halal Future: Startups, AI & the Next Economy",
-    "speakerIds": [
-      "pc-musthafa",
-      "saheer-stories",
-      "dirsha-kalliyath",
-      "atheef-abdurahiman"
-    ],
-    "roles": {
-      "atheef-abdurahiman": "Moderator"
-    },
+    "title": "കാലമറിയുന്ന വിദ്യാർത്ഥി രാഷ്ട്രീയം",
+    "speakerIds": [],
+    "roles": {},
     "talks": [],
     "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-halal-future",
+    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s7-student-politics",
     "verification": "official"
-  },
-  {
-    "id": "2026-nov-15-s1-conference",
-    "dayId": "nov-15",
-    "day": "2026-11-15",
-    "venueId": "s1",
-    "startTime": "16:00",
-    "endTime": "18:00",
-    "title": "Mega Muslim Students Conference",
-    "speakerIds": [
-      "tp-abdullakkoya-madani",
-      "vd-satheeshan",
-      "imam-asgarali-mahdi-assalafi",
-      "pk-kunhalikkutty",
-      "adv-praveen-kumar",
-      "pp-unneenkutty-moulavi",
-      "dr-hussain-madavoor",
-      "noor-muhammed-noorsha",
-      "jamsheed-irivetty",
-      "dr-suhfi-imran",
-      "dr-shafeeq-hassan"
-    ],
-    "roles": {},
-    "talks": [],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s1-conference",
-    "verification": "official",
-    "subtitle": "Inaugural Session"
-  },
-  {
-    "id": "2026-nov-15-s1-closing",
-    "dayId": "nov-15",
-    "day": "2026-11-15",
-    "venueId": "s1",
-    "startTime": "18:30",
-    "endTime": "20:30",
-    "title": "Closing Talks",
-    "speakerIds": [
-      "dr-ai-abdul-majeed-swalahi",
-      "haneef-kayakkodi",
-      "zubair-peediyekkal",
-      "ansar-nanminda",
-      "ahmad-anas-moulavi"
-    ],
-    "roles": {},
-    "talks": [
-      {
-        "title": "മിതത്വം ഇസ്ലാമിൻറെ സൗന്ദര്യം",
-        "speakerId": "dr-ai-abdul-majeed-swalahi"
-      },
-      {
-        "title": "വിശ്വാസ വിശുദ്ധി; വിദ്യാർത്ഥി കാലം",
-        "speakerId": "haneef-kayakkodi"
-      },
-      {
-        "title": "മുഹമ്മദ് നബി; മാനവ മൂല്യങ്ങളുടെ നേർസാക്ഷി",
-        "speakerId": "zubair-peediyekkal"
-      },
-      {
-        "title": "സംസ്കാരവും പുതുതലമുറയും",
-        "speakerId": "ansar-nanminda"
-      },
-      {
-        "title": "Beyond Gen M (ഇസ്ലാമിൻറെ പുതുതലമുറ)",
-        "speakerId": "ahmad-anas-moulavi"
-      },
-      {
-        "title": "പ്രമേയ വിശദീകരണം: തിരിച്ചറിവിൻറെ പുതുകാലം",
-        "attribution": "MSM Representative"
-      }
-    ],
-    "status": "scheduled",
-    "officialUrl": "https://www.genm.in/sessions/2026-nov-15-s1-closing",
-    "verification": "official",
-    "description": "പ്രമേയ വിശദീകരണം: തിരിച്ചറിവിൻറെ പുതുകാലം — MSM Representative"
   }
 ]

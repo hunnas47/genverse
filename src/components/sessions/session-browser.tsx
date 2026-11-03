@@ -6,7 +6,6 @@ import { SessionCard } from "@/components/sessions/session-card";
 import { VENUES, VENUES_BY_ID } from "@/data/venues";
 import {
   formatDayShort,
-  getSessionSpeakers,
   groupSessionsByDay,
   PROGRAMME_DAYS,
   SESSIONS,
@@ -72,9 +71,6 @@ export function SessionBrowser({
       }
 
       const venue = VENUES_BY_ID.get(session.venueId);
-      const speakers = getSessionSpeakers(session)
-        .map((speaker) => speaker.name)
-        .join(" ");
       const talks = session.talks.map((talk) => talk.title).join(" ");
       const haystack = [
         session.id,
@@ -83,7 +79,6 @@ export function SessionBrowser({
         session.description,
         venue?.name,
         venue?.mapLabel,
-        speakers,
         talks,
       ]
         .filter(Boolean)
@@ -198,7 +193,7 @@ export function SessionBrowser({
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Session, speaker, or venue"
+                  placeholder="Session, talk, or venue"
                   suppressHydrationWarning
                   className="min-h-11 w-full rounded-2xl border border-brand-deep/15 bg-cream py-2 pr-3 pl-10 text-sm text-brand-deep shadow-sm transition placeholder:text-brand-deep/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
                 />

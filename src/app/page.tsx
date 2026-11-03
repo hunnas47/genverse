@@ -53,11 +53,15 @@ const stats = [
     label: "Sessions",
     note: "Official programme",
   },
-  {
-    value: `${SPEAKERS.length}`,
-    label: "Speakers",
-    note: "Across all sessions",
-  },
+  ...(SPEAKERS.length > 0
+    ? [
+        {
+          value: `${SPEAKERS.length}`,
+          label: "Speakers",
+          note: "Across all sessions",
+        },
+      ]
+    : []),
   {
     value: `${stageVenues.length}`,
     label: "Stages",
@@ -68,7 +72,7 @@ const stats = [
     label: "Map markers",
     note: "Stages, expo & facilities",
   },
-] as const;
+];
 
 const features = [
   {
@@ -81,13 +85,13 @@ const features = [
     icon: CalendarDays,
     title: "Official programme",
     description:
-      "Every session with its time, venue, speakers, and official source link.",
+      "Every session with its time, venue, overview, and official source link.",
   },
   {
     icon: Search,
     title: "Find anything",
     description:
-      "Filter by day, venue, or speaker, then search titles and speaker names.",
+      "Filter by day or venue, then search titles, descriptions, and talks.",
   },
   {
     icon: Waves,
@@ -101,8 +105,7 @@ const planCards = [
   {
     icon: CalendarDays,
     title: "Official programme",
-    description:
-      "Browse all 60 sessions, open speaker details, and link each session back to its venue.",
+    description: `Browse all ${SESSIONS.length} sessions, open session details, and link each session back to its venue.`,
     href: "/sessions",
     label: "Open programme",
   },
@@ -125,8 +128,7 @@ const planCards = [
   {
     icon: Sparkles,
     title: "Source-checked",
-    description:
-      "Programme data was verified against the official GEN M site on 25 Oct 2026.",
+    description: `Programme data was verified against the official GEN M site on ${formatProgrammeVerifiedDate()}.`,
     href: PROGRAMME_SOURCE,
     label: "Official source",
     external: true,
@@ -145,24 +147,25 @@ function mapObjectPosition(venue: Venue): string | undefined {
   )}%`;
 }
 
-function speakerSummary(session: Session): string {
+function sessionSummary(session: Session): string | null {
   const speakers = getSessionSpeakers(session);
 
-  if (speakers.length === 0) {
-    return "Speakers to be announced.";
+  if (speakers.length > 0) {
+    const names = speakers.slice(0, 2).map((speaker) => speaker.name);
+    const remaining = speakers.length - names.length;
+
+    return remaining > 0
+      ? `${names.join(", ")} +${remaining} more`
+      : names.join(", ");
   }
 
-  const names = speakers.slice(0, 2).map((speaker) => speaker.name);
-  const remaining = speakers.length - names.length;
-
-  return remaining > 0
-    ? `${names.join(", ")} +${remaining} more`
-    : names.join(", ");
+  return session.description ?? null;
 }
 
 function ProgrammePreviewCard({ session }: { session: Session }) {
   const venue = VENUES_BY_ID.get(session.venueId);
   const day = PROGRAMME_DAYS.find((item) => item.id === session.dayId);
+  const summary = sessionSummary(session);
 
   return (
     <Link
@@ -191,9 +194,11 @@ function ProgrammePreviewCard({ session }: { session: Session }) {
       <p className="mt-4 font-display text-xs font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
         {formatSessionTimeRange(session)}
       </p>
-      <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-brand-deep/75">
-        {speakerSummary(session)}
-      </p>
+      {summary && (
+        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-brand-deep/75">
+          {summary}
+        </p>
+      )}
 
       <span className="mt-auto inline-flex items-center gap-1.5 pt-5 font-display text-[10px] font-bold tracking-[0.14em] uppercase">
         View session
@@ -324,7 +329,9 @@ export default function Home() {
                 {formatProgrammeVerifiedDate()}
               </span>
               <span>{SESSIONS.length} sessions</span>
-              <span>{SPEAKERS.length} speakers</span>
+              {SPEAKERS.length > 0 && (
+                <span>{SPEAKERS.length} speakers</span>
+              )}
             </div>
           </div>
 
@@ -444,7 +451,11 @@ export default function Home() {
             </p>
           </div>
 
-          <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+          <dl
+            className={`mt-10 grid grid-cols-2 gap-3 sm:gap-4 ${
+              stats.length === 4 ? "sm:grid-cols-4" : "sm:grid-cols-3"
+            }`}
+          >
             {stats.map((stat) => (
               <div
                 key={stat.label}
@@ -535,7 +546,7 @@ export default function Home() {
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
                 Three days, {SESSIONS.length} sessions, one beach. Open a session
-                for speakers, talks, and the official source link.
+                for its overview, talks, and the official source link.
               </p>
             </div>
             <ActionLink href="/sessions">
