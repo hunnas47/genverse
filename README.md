@@ -35,8 +35,8 @@ Open <http://localhost:3000>.
 
 The map and programme work without a backend. To enable the shared quest and
 leaderboard, create a Supabase project, turn on **Anonymous Sign-Ins**, and run
-`supabase/migrations/20261028100000_beach_quest.sql` in the SQL editor. Then add
-these values to `.env.local`:
+the SQL files in `supabase/migrations/` in filename order. Then add these values
+to `.env.local`:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co

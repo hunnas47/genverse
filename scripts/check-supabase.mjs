@@ -42,7 +42,7 @@ if (authError) {
       `get_leaderboard (anonymous): failed (${board.error.message})`,
     );
     console.error(
-      "If the function is missing, apply supabase/migrations/20261028100000_beach_quest.sql in the Supabase SQL editor.",
+      "If the function is missing, apply the SQL files in supabase/migrations/ in filename order in the Supabase SQL editor.",
     );
   } else {
     console.log(
@@ -60,7 +60,7 @@ const state = await supabase.rpc("get_my_quest_state");
 if (state.error) {
   console.log(`get_my_quest_state: not ready (${state.error.message})`);
   console.log(
-    "Apply supabase/migrations/20261028100000_beach_quest.sql in the Supabase SQL editor.",
+    "Apply the SQL files in supabase/migrations/ in filename order in the Supabase SQL editor.",
   );
   process.exit(0);
 }
