@@ -13,6 +13,13 @@ export interface VenueMapPosition {
   interactionRadius: number;
 }
 
+export interface VenueExternalLink {
+  url: string;
+  title: string;
+  description?: string;
+  label: string;
+}
+
 export interface Venue {
   id: string;
   name: string;
@@ -24,6 +31,8 @@ export interface Venue {
   officialUrl?: string;
   /** Official registration page, shown at the registration point. */
   registrationUrl?: string;
+  /** Optional companion experience linked from the venue panel. */
+  externalLink?: VenueExternalLink;
   /** Null when the official location is not yet published. */
   mapPosition: VenueMapPosition | null;
   verification: VenueVerification;

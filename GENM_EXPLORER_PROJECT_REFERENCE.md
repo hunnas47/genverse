@@ -125,7 +125,7 @@ Official venue data was verified from `https://www.genm.in/venues` on 2026-10-24
 | A1 | Lost City Expo | — | Map label, provisional |
 | A2 | Herverse area label | — | Not a separate venue; associated with S5 |
 | A3 | Edu Expo | — | Map label, provisional |
-| S | Photo Booth | — | Map label, provisional |
+| S | Photo Booth | — | Map label, provisional; links to GEN M asset studio |
 | O | GEN M Office | — | Map label, provisional |
 | R | Registration | — | Map label, provisional; links to official registration |
 | E | Entrance | — | Map label, provisional |

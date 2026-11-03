@@ -201,6 +201,28 @@ export const VenuePanel = memo(function VenuePanel({
           </div>
         )}
 
+        {venue.externalLink && (
+          <div className="mt-4 rounded-2xl border border-brand/20 bg-brand/5 p-4">
+            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
+              {venue.externalLink.title}
+            </p>
+            {venue.externalLink.description && (
+              <p className="mt-1.5 text-sm leading-relaxed text-brand-deep/75">
+                {venue.externalLink.description}
+              </p>
+            )}
+            <a
+              href={venue.externalLink.url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            >
+              {venue.externalLink.label}
+              <ArrowUpRight aria-hidden="true" className="size-3.5" />
+            </a>
+          </div>
+        )}
+
         {venue.mapPosition && (
           <div
             className={cn(

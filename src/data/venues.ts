@@ -140,6 +140,14 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "S",
     description: "Photo booth on the beach map.",
     category: "facility",
+    // Supplied by the event owner; opens the GEN M custom asset studio.
+    externalLink: {
+      url: "https://genm-asset.vercel.app/",
+      title: "Custom photo booth",
+      description:
+        "Create custom photos, videos, and wallpapers for GEN M.",
+      label: "Open photo booth",
+    },
     mapPosition: { x: 696, y: 270, interactionRadius: 100 },
     verification: "supplied-map",
   },
