@@ -275,23 +275,17 @@ export const VenuePanel = memo(function VenuePanel({
           </p>
         )}
 
-        <div className="mt-5 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
-              Sessions
-            </p>
-            {sessions.length > 0 && (
+        {sessions.length > 0 && (
+          <div className="mt-5 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
+                Sessions
+              </p>
               <span className="font-display text-[10px] font-bold text-brand-deep/70">
                 {sessions.length}
               </span>
-            )}
-          </div>
+            </div>
 
-          {sessions.length === 0 ? (
-            <p className="mt-1 text-xs leading-relaxed text-brand-deep/75">
-              No sessions are listed for this venue.
-            </p>
-          ) : (
             <div className="mt-2 space-y-4">
               {sessionGroups.map((group) => (
                 <div key={group.day.id}>
@@ -346,8 +340,8 @@ export const VenuePanel = memo(function VenuePanel({
                 <ArrowUpRight aria-hidden="true" className="size-3.5" />
               </Link>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {venue.officialUrl && (
           <a
