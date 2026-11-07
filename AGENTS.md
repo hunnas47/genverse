@@ -31,6 +31,7 @@ npm run lint         # ESLint
 npx tsc --noEmit     # type-check (no npm script)
 npm test             # Vitest quest, SQL, and rule tests
 npm run check:supabase # remote auth and quest RPC smoke check
+npm run load:supabase  # read-only leaderboard load test (--mode players writes)
 npm run build        # production build (Turbopack; also runs TypeScript)
 npm start            # serve the build
 ```
@@ -52,7 +53,7 @@ itself still needs a manual pass on `/explore` at phone and desktop widths.
 - Assets: map art and wordmark in `public/images/`; avatar views in `public/images/assets/` (`avatar_up` = back, `avatar_down` = front, `avatar_right` = side; left mirrors right). The runtime uses 320px-tall WebP derivatives, while the source PNGs stay alongside them. Avatar height and facing rules live in `src/game/avatar.ts`; fonts in `src/app/fonts/`. Tailwind font utilities: `font-sans`/`font-heading` = Neoverse Sans, `font-display` = FKL Dhikk, `font-malayalam` = Anek Malayalam.
 - Beach Quest is local-first: `src/lib/quest/store.ts` owns scoring, idempotency, cooldowns, and `localStorage` (`genm:quest:v1`); `src/lib/quest/live-store.ts` adds the Supabase session, cached server state, offline queue (`genm:quest:queue:v1`), and optimistic pending points. `src/lib/quest/period.ts` owns the Asia/Kolkata day and shell-set rotation. UI and Phaser only call the live store; don't add a parallel scoring path. The server is authoritative once reachable, while the local store keeps the map usable offline.
 - Shell finds and results cross the Phaser/React boundary through `quest:shell-found` / `quest:shell-result` in `GameEventMap`; `quest:sync-state` removes shells that the shared state already has. Collection is proximity-based; don't add a parallel interact-key path.
-- The shared backend is Supabase Free (Postgres, anonymous auth, SECURITY DEFINER RPCs, RLS) in `supabase/migrations/20261028100000_beach_quest.sql`. The browser uses only `NEXT_PUBLIC_SUPABASE_URL` and the publishable/anon key; never add the service-role key. The shared layer is an async leaderboard plus a five-minute presence count, not live positional multiplayer. Don't add another service without a verified data need.
+- The shared backend is Supabase Free (Postgres, anonymous auth, SECURITY DEFINER RPCs, RLS) in `supabase/migrations/` (`20261028100000_beach_quest.sql` for the schema, `20261108000000_fair_play.sql` for the tie-break, `too_fast` speed flags, blocked names, and the organiser-only `quest_admin` schema). Shell and venue coordinates are mirrored in SQL for the speed check; `src/data/quest-sql.test.ts` fails on drift. The browser uses only `NEXT_PUBLIC_SUPABASE_URL` and the publishable/anon key; never add the service-role key. The shared layer is an async leaderboard plus a five-minute presence count, not live positional multiplayer. Don't add another service without a verified data need.
 
 ## Data provenance (hard rules)
 

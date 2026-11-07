@@ -269,6 +269,176 @@ describe("Beach Quest SQL migration", () => {
     ]);
   });
 
+  it("breaks leaderboard ties by who reached the score first", async () => {
+    const period = await today();
+
+    await createUser(USER_ONE);
+    await createUser(USER_TWO);
+    await asUser(USER_ONE);
+    await callRpc("join_quest", "Zoya");
+    await asUser(USER_TWO);
+    await callRpc("join_quest", "Aarav");
+
+    // Same points; Zoya got there 30 seconds before Aarav.
+    for (const [userId, secondsAgo] of [
+      [USER_ONE, 60],
+      [USER_TWO, 30],
+    ] as const) {
+      await db.query(
+        `insert into public.quest_events
+          (player_id, kind, ref, period_id, points, created_at)
+         values ($1, 'checkin', 's1', $2, 25, now() - make_interval(secs => $3))`,
+        [userId, period, secondsAgo],
+      );
+    }
+
+    const board = await db.query<{ rank: number; display_name: string }>(
+      "select rank::integer, display_name from public.get_leaderboard('daily', 10)",
+    );
+
+    expect(board.rows).toEqual([
+      { rank: 1, display_name: "Zoya" },
+      { rank: 2, display_name: "Aarav" },
+    ]);
+  });
+
+  it("flags impossible walking speed without rejecting the action", async () => {
+    const period = await today();
+
+    await createUser(USER_ONE);
+    await asUser(USER_ONE);
+
+    // S1 (far left) to S5 (far right) is ~980 px beyond both radii: not
+    // walkable in the milliseconds between these two calls.
+    await callRpc("check_in_venue", "s1");
+    expect(await callRpc("check_in_venue", "s5")).toMatchObject({
+      accepted: true,
+      points: 25,
+    });
+
+    await createUser(USER_TWO);
+    await asUser(USER_TWO);
+    await db.query("insert into public.players (id) values ($1)", [USER_TWO]);
+    await db.query(
+      `insert into public.quest_events
+        (player_id, kind, ref, period_id, points, created_at)
+       values ($1, 'checkin', 's1', $2, 25, now() - interval '60 seconds')`,
+      [USER_TWO, period],
+    );
+    await callRpc("check_in_venue", "s5");
+
+    const flags = await db.query<{ player_id: string; too_fast: boolean }>(
+      `select player_id, too_fast from public.quest_events
+       where ref = 's5' order by player_id`,
+    );
+
+    expect(flags.rows).toEqual([
+      { player_id: USER_ONE, too_fast: true },
+      { player_id: USER_TWO, too_fast: false },
+    ]);
+
+    const review = await db.query<{ player_id: string; too_fast: number }>(
+      "select player_id, too_fast from quest_admin.review order by player_id",
+    );
+
+    expect(review.rows).toEqual([
+      { player_id: USER_ONE, too_fast: 1 },
+      { player_id: USER_TWO, too_fast: 0 },
+    ]);
+  });
+
+  it("rejects blocked names but not real names that contain them", async () => {
+    await createUser(USER_ONE);
+    await asUser(USER_ONE);
+
+    for (const name of [
+      "F.u.c.k",
+      "Sh1t Happens",
+      "big ass",
+      "Thayoli",
+      "myre",
+      "GEN M Official",
+      "മൈരൻ",
+    ]) {
+      expect(await callRpc("join_quest", name), name).toMatchObject({
+        ok: false,
+        reason: "invalid-name",
+      });
+    }
+
+    for (const name of [
+      "Ashita",
+      "Hassan",
+      "Kunnamkulam Kid",
+      "Siriporn",
+      "Hitchcock",
+      "Pooram Fan",
+      "അനഘ",
+    ]) {
+      expect(await callRpc("join_quest", name), name).toMatchObject({
+        ok: true,
+      });
+    }
+
+    await db.query("select quest_admin.block_term('Badword')");
+    expect(await callRpc("join_quest", "Mr Badwords")).toMatchObject({
+      ok: false,
+      reason: "invalid-name",
+    });
+  });
+
+  it("lets organisers hide players and clear names", async () => {
+    await createUser(USER_ONE);
+    await asUser(USER_ONE);
+    await callRpc("join_quest", "Noor");
+    await callRpc("check_in_venue", "s1");
+
+    const hidden = await db.query<{ n: number }>(
+      "select quest_admin.hide_player('noor') as n",
+    );
+    expect(hidden.rows[0].n).toBe(1);
+    expect(
+      (await db.query("select * from public.get_leaderboard('daily', 10)")).rows,
+    ).toEqual([]);
+
+    await db.query("select quest_admin.unhide_player('Noor')");
+    await db.query("select quest_admin.clear_name('Noor')");
+
+    const state = await callRpc<{
+      player: { display_name: string };
+      today_points: number;
+    }>("get_my_quest_state");
+    expect(state.player.display_name).toBe("");
+    expect(state.today_points).toBe(25);
+
+    await createUser(USER_TWO);
+    await asUser(USER_TWO);
+    expect(await callRpc("join_quest", "Noor")).toMatchObject({ ok: true });
+  });
+
+  it("keeps organiser tools and the blocked list away from API roles", async () => {
+    const privileges = await db.query<Record<string, boolean>>(`
+      select
+        has_schema_privilege('anon', 'quest_admin', 'usage') as anon_admin,
+        has_schema_privilege('authenticated', 'quest_admin', 'usage') as auth_admin,
+        has_table_privilege('anon', 'public.quest_blocked_terms', 'select') as anon_terms,
+        has_function_privilege('anon', 'public.quest_name_is_blocked(text)', 'execute') as anon_check,
+        has_function_privilege(
+          'authenticated',
+          'public.quest_is_too_fast(uuid, date, smallint, text, text)',
+          'execute'
+        ) as auth_speed
+    `);
+
+    expect(privileges.rows[0]).toEqual({
+      anon_admin: false,
+      auth_admin: false,
+      anon_terms: false,
+      anon_check: false,
+      auth_speed: false,
+    });
+  });
+
   it("counts consecutive active days and presence", async () => {
     const shells = await activeShellIds();
     const period = await today();

@@ -96,4 +96,50 @@ describe("Beach Quest SQL seeds", () => {
       VENUES.filter((venue) => venue.mapPosition).map((venue) => venue.id),
     );
   });
+
+  it("matches the shell and venue coordinates used by the speed check", () => {
+    const shellCoords = blockBetween(
+      sql,
+      "update public.quest_shells as s",
+      "as c(shell_id, x, y)",
+    );
+    const shellRows = [
+      ...shellCoords.matchAll(/\('([^']+)',\s*(\d+),\s*(\d+)\)/g),
+    ].map((match) => ({ id: match[1], x: Number(match[2]), y: Number(match[3]) }));
+
+    expect(shellRows).toEqual(
+      SHELL_SETS.flatMap((set) =>
+        set.shells.map((shell) => ({ id: shell.id, x: shell.x, y: shell.y })),
+      ),
+    );
+
+    const venueCoords = blockBetween(
+      sql,
+      "update public.quest_venues as v",
+      "as c(venue_id, x, y, reach)",
+    );
+    const venueRows = [
+      ...venueCoords.matchAll(/\('([^']+)',\s*(\d+),\s*(\d+),\s*(\d+)\)/g),
+    ].map((match) => ({
+      id: match[1],
+      x: Number(match[2]),
+      y: Number(match[3]),
+      reach: Number(match[4]),
+    }));
+
+    expect(venueRows).toEqual(
+      VENUES.flatMap((venue) =>
+        venue.mapPosition
+          ? [
+              {
+                id: venue.id,
+                x: venue.mapPosition.x,
+                y: venue.mapPosition.y,
+                reach: venue.mapPosition.interactionRadius,
+              },
+            ]
+          : [],
+      ),
+    );
+  });
 });
