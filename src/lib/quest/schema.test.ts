@@ -69,6 +69,12 @@ beforeAll(async () => {
     $$;
     create role anon;
     create role authenticated;
+    -- Supabase grants API roles these on everything new in public; mirror it
+    -- so the permission tests see the same defaults as the real project.
+    alter default privileges in schema public
+      grant execute on functions to anon, authenticated;
+    alter default privileges in schema public
+      grant all on tables to anon, authenticated;
   `);
 
   await db.exec(SQL);
@@ -427,7 +433,23 @@ describe("Beach Quest SQL migration", () => {
           'authenticated',
           'public.quest_is_too_fast(uuid, date, smallint, text, text)',
           'execute'
-        ) as auth_speed
+        ) as auth_speed,
+        has_function_privilege(
+          'anon',
+          'public.quest_point(smallint, text, text)',
+          'execute'
+        ) as anon_point,
+        has_function_privilege('anon', 'public.quest_today()', 'execute') as anon_today,
+        has_function_privilege(
+          'authenticated',
+          'public.quest_streak(date[], date)',
+          'execute'
+        ) as auth_streak,
+        has_function_privilege(
+          'authenticated',
+          'public.collect_shell(text)',
+          'execute'
+        ) as auth_collect
     `);
 
     expect(privileges.rows[0]).toEqual({
@@ -436,6 +458,11 @@ describe("Beach Quest SQL migration", () => {
       anon_terms: false,
       anon_check: false,
       auth_speed: false,
+      anon_point: false,
+      anon_today: false,
+      auth_streak: false,
+      // Public RPCs stay callable.
+      auth_collect: true,
     });
   });
 
