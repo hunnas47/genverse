@@ -8,16 +8,12 @@ import {
 } from "react";
 
 import { VENUES } from "@/data/venues";
-import { VENUE_MAP, VENUE_MARKER_COLORS } from "@/data/venue-map";
+import { VENUE_MAP, getVenueAccent } from "@/data/venue-map";
 import { cn } from "@/lib/utils";
 import type { MapPoint } from "@/types/map";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-function toCssColor(value: number): string {
-  return `#${value.toString(16).padStart(6, "0")}`;
-}
 
 /**
  * Compact overview of the venue map. Pointer clicks become walk-to-point
@@ -70,7 +66,7 @@ export function MiniMap({
     <section
       data-tour="minimap"
       className={cn(
-        "pointer-events-auto w-[148px] rounded-2xl border border-white/15 bg-brand-deep/85 p-2 text-white shadow-lift backdrop-blur-md sm:w-[184px]",
+        "pointer-events-auto w-[148px] rounded-2xl border border-white/20 bg-brand-deep/55 p-1.5 text-white shadow-soft ring-1 ring-black/5 backdrop-blur-xl backdrop-saturate-150 sm:w-[184px]",
         className,
       )}
     >
@@ -78,7 +74,7 @@ export function MiniMap({
         type="button"
         onClick={handleMapClick}
         aria-label={`Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. You are the navy dot with a lime ring${shells.length > 0 ? `; ${shells.length} shells left to find are lime dots` : ""}.`}
-        className="relative block w-full overflow-hidden rounded-xl border border-white/20 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        className="relative block w-full overflow-hidden rounded-xl border border-white/25 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
         style={{
           aspectRatio: `${VENUE_MAP.world.width} / ${VENUE_MAP.world.height}`,
           backgroundImage: `url("${VENUE_MAP.image.previewSrc}")`,
@@ -98,7 +94,7 @@ export function MiniMap({
               style={{
                 left: `${(venue.mapPosition.x / VENUE_MAP.world.width) * 100}%`,
                 top: `${(venue.mapPosition.y / VENUE_MAP.world.height) * 100}%`,
-                backgroundColor: toCssColor(VENUE_MARKER_COLORS[venue.category]),
+                backgroundColor: getVenueAccent(venue).css,
               }}
             />
           );
@@ -145,7 +141,7 @@ export function MiniMap({
         type="button"
         onClick={onOpenDirectory}
         data-tour="directory"
-        className="mt-2 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-lime px-1.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+        className="mt-1.5 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-lime/45 px-1.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:border-lime hover:bg-lime hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
       >
         <List aria-hidden="true" className="size-3.5 shrink-0" />
         <span className="truncate">Directory</span>

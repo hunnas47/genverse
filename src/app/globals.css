@@ -34,6 +34,9 @@
   --color-coral: var(--coral);
   --color-sky: var(--sky);
   --color-ink: var(--ink);
+  --color-gold: var(--gold);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
 
   --font-sans: var(--font-neoverse);
   --font-heading: var(--font-neoverse);
@@ -76,6 +79,10 @@
   --coral: #f2b6a0;
   --sky: #a9d6e5;
   --ink: #1c1d3a;
+  /* Leaderboard medals. */
+  --gold: #f4cf5d;
+  --silver: #d3d7ea;
+  --bronze: #e0a77c;
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -176,6 +183,10 @@
     animation: genm-float 10s ease-in-out infinite;
   }
 
+  .map-drift {
+    animation: genm-map-drift 28s ease-in-out infinite alternate;
+  }
+
   .grain {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
     background-size: 160px 160px;
@@ -222,6 +233,15 @@
   }
   to {
     transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes genm-map-drift {
+  from {
+    transform: scale(1.06) translate3d(1.5%, 1%, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(-2%, -1.5%, 0);
   }
 }
 
@@ -341,6 +361,7 @@
   .marquee-track,
   .float-slow,
   .float-slower,
+  .map-drift,
   .quest-stamp-slam,
   .quest-stamp-ring,
   .quest-stamp-glow,

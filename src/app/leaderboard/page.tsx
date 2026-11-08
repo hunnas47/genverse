@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
           </p>
 
           <div className="mt-8">
-            <LeaderboardBoard />
+            <LeaderboardBoard showPodium />
           </div>
         </div>
       </section>

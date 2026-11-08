@@ -14,7 +14,7 @@ import { ActionLink } from "@/components/site/action-link";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 import { WaveDivider } from "@/components/site/wave-divider";
-import { VENUE_MAP } from "@/data/venue-map";
+import { VENUE_MAP, getVenueAccent } from "@/data/venue-map";
 import { VENUES } from "@/data/venues";
 import {
   formatDayShort,
@@ -30,6 +30,7 @@ import {
   pageMetadata,
   SITE_NAME,
 } from "@/lib/site";
+import { cn } from "@/lib/utils";
 import { formatActiveDays } from "@/lib/venues";
 import type { Venue } from "@/types/venue";
 
@@ -52,6 +53,18 @@ const alsoOnMap = VENUES.filter(
     (venue.category === "stage" || venue.category === "expo"),
 );
 const unmappedStages = stageVenues.filter((venue) => !venue.mapPosition);
+// Stages pinned on the hero map; the first two also show on phones.
+const heroPins = ["s2", "s4", "s1", "s3", "s5"].flatMap((id) => {
+  const venue = VENUES.find((item) => item.id === id);
+  return venue?.mapPosition ? [{ ...venue, mapPosition: venue.mapPosition }] : [];
+});
+
+function mapPointStyle(point: { x: number; y: number }) {
+  return {
+    left: `${((point.x / VENUE_MAP.image.width) * 100).toFixed(2)}%`,
+    top: `${((point.y / VENUE_MAP.image.height) * 100).toFixed(2)}%`,
+  };
+}
 
 function mapObjectPosition(venue: Venue): string | undefined {
   if (!venue.mapPosition) {
@@ -77,7 +90,7 @@ function VenuePreviewCard({ venue }: { venue: Venue }) {
       <div className="relative aspect-[4/3] overflow-hidden">
         <div
           aria-hidden="true"
-          className="absolute inset-0 transition duration-700 motion-safe:group-hover:scale-105"
+          className="absolute inset-0 transition duration-700 motion-safe:group-hover:scale-110 motion-safe:group-focus-visible:scale-110"
           style={{
             backgroundImage: `url('${VENUE_MAP.image.src}')`,
             backgroundPosition: objectPosition,
@@ -85,8 +98,11 @@ function VenuePreviewCard({ venue }: { venue: Venue }) {
             backgroundSize: "240% auto",
           }}
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(44,45,111,0.08)_0%,rgba(44,45,111,0.86)_100%)]" />
-        <span className="absolute top-3 left-3 rounded-full border border-white/20 bg-brand-deep/80 px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase backdrop-blur">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(44,45,111,0.55)_0%,rgba(44,45,111,0)_32%,rgba(44,45,111,0.08)_55%,rgba(44,45,111,0.86)_100%)]" />
+        <span
+          className="absolute top-3 left-3 rounded-full border border-white/40 px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase shadow-lg"
+          style={{ backgroundColor: getVenueAccent(venue).css }}
+        >
           {venue.mapLabel}
         </span>
         <span className="absolute right-3 bottom-3 rounded-full bg-lime px-2.5 py-1 font-display text-[9px] font-bold tracking-[0.12em] text-brand-deep uppercase">
@@ -148,14 +164,14 @@ export default function Home() {
 
         <SiteHeader />
 
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pt-8 pb-14 sm:gap-12 sm:px-6 sm:pt-12 sm:pb-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:px-8 lg:pt-16 lg:pb-28">
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pt-8 pb-14 sm:gap-12 sm:px-6 sm:pt-12 sm:pb-20 lg:grid-cols-[1fr_1fr] lg:items-center lg:px-8 lg:pt-16 lg:pb-28">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-display text-[10px] font-semibold tracking-[0.18em] text-lime uppercase">
               <MapPin aria-hidden="true" className="size-3.5" />
               13–15 November 2026 · Kozhikode Beach
             </p>
 
-            <h1 className="mt-6 max-w-4xl text-balance text-[clamp(3.2rem,7.4vw,6.4rem)] leading-[0.94] font-medium tracking-[-0.02em] text-cream">
+            <h1 className="mt-6 max-w-4xl text-balance text-[clamp(3.2rem,7.4vw,6.4rem)] lg:text-[clamp(3.6rem,5.8vw,6rem)] leading-[0.94] font-medium tracking-[-0.02em] text-cream">
               Find your way around the{" "}
               <span className="text-lime">confluence.</span>
             </h1>
@@ -189,39 +205,52 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-brand/35 p-2 shadow-lift">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.6rem]">
-                <Image
-                  src={VENUE_MAP.image.src}
-                  alt="Detailed GEN M beach venue map"
-                  fill
-                  sizes="(min-width: 1024px) 45vw, 100vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(44,45,111,0.12)_0%,rgba(44,45,111,0.56)_100%)]" />
-                <div className="grain absolute inset-0 opacity-[0.08]" />
+          <div className="relative mx-auto w-full max-w-xl lg:-mr-6 lg:max-w-none xl:-mr-12">
+            {/* A slight tilt and a slow drift make the map the hero, not a
+                thumbnail. Both settle when hovered and stop for reduced motion. */}
+            <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-brand/35 p-2 shadow-[0_40px_120px_-40px_rgba(0,0,0,0.65)] transition duration-700 lg:rotate-[1.5deg] lg:hover:rotate-0 motion-reduce:transition-none">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.6rem] lg:aspect-[5/4]">
+                {/* The layer keeps the artwork's own aspect ratio, so pins can
+                    use real map coordinates; it is height-fitted, which covers
+                    the 4:3 and 5:4 frames. */}
+                <div className="map-drift absolute top-1/2 left-1/2 aspect-[1467/1072] h-full -translate-x-1/2 -translate-y-1/2">
+                  <Image
+                    src={VENUE_MAP.image.src}
+                    alt="Detailed GEN M beach venue map"
+                    fill
+                    sizes="(min-width: 1024px) 60vw, 120vw"
+                    className="object-cover"
+                  />
+                  {heroPins.map((venue, index) => (
+                    <span
+                      key={venue.id}
+                      className={cn(
+                        "absolute -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/30 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-cream uppercase shadow-lg backdrop-blur",
+                        index < 2 ? "inline-flex" : "hidden sm:inline-flex",
+                      )}
+                      style={mapPointStyle(venue.mapPosition)}
+                    >
+                      <span
+                        className="size-2 rounded-full ring-1 ring-white/70"
+                        style={{ backgroundColor: getVenueAccent(venue).css }}
+                      />
+                      {venue.mapLabel}
+                    </span>
+                  ))}
 
-                <span className="absolute top-[42%] left-[10%] inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur">
-                  <span className="size-1.5 rounded-full bg-lime" /> S1
-                </span>
-                <span className="absolute top-[49%] left-[27%] hidden items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur sm:inline-flex">
-                  <span className="size-1.5 rounded-full bg-lime" /> S2
-                </span>
-                <span className="absolute top-[36%] left-[63%] hidden items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur md:inline-flex">
-                  <span className="size-1.5 rounded-full bg-lime" /> S3
-                </span>
-                <span className="absolute top-[54%] left-[88%] inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lg backdrop-blur">
-                  <span className="size-1.5 rounded-full bg-lime" /> S5
-                </span>
-
-                <span className="absolute bottom-[29%] left-[46%] inline-flex items-center gap-2 rounded-full bg-lime px-2.5 py-1.5 font-display text-[9px] font-bold tracking-[0.1em] text-brand-deep uppercase shadow-lg">
-                  <span className="relative flex size-2">
-                    <span className="absolute inline-flex size-full rounded-full bg-brand-deep/50 motion-safe:animate-ping" />
-                    <span className="relative inline-flex size-2 rounded-full bg-brand-deep" />
+                  <span
+                    className="absolute inline-flex -translate-x-1/2 -translate-y-[230%] items-center gap-2 rounded-full bg-lime px-2.5 py-1.5 font-display text-[9px] font-bold tracking-[0.1em] text-brand-deep uppercase shadow-lg"
+                    style={mapPointStyle(VENUE_MAP.spawn)}
+                  >
+                    <span className="relative flex size-2">
+                      <span className="absolute inline-flex size-full rounded-full bg-brand-deep/50 motion-safe:animate-ping" />
+                      <span className="relative inline-flex size-2 rounded-full bg-brand-deep" />
+                    </span>
+                    You are here
                   </span>
-                  You are here
-                </span>
+                </div>
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(44,45,111,0.12)_0%,rgba(44,45,111,0.56)_100%)]" />
+                <div className="grain absolute inset-0 opacity-[0.08]" />
 
                 <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/15 bg-brand-deep/85 p-4 backdrop-blur-md sm:inset-x-4 sm:bottom-4">
                   <div className="flex items-center justify-between gap-3">
@@ -234,9 +263,6 @@ export default function Home() {
                   </div>
                   <p className="mt-1.5 text-sm font-medium text-white">
                     Every stage, expo, and facility in one place.
-                  </p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-white/55">
-                    Open the map to walk the beach and open venue details.
                   </p>
                   <Link
                     href="/explore"

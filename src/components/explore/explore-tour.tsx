@@ -240,28 +240,46 @@ export function ExploreTour({
 
       <section
         aria-label="Getting started"
-        className="pointer-events-auto w-full max-w-sm rounded-3xl border border-brand-deep/15 bg-cream/95 p-3 text-brand-deep shadow-lift backdrop-blur-md"
+        className="pointer-events-auto w-full max-w-[22rem] rounded-2xl border border-brand-deep/15 bg-cream/95 p-2.5 text-brand-deep shadow-lift backdrop-blur-md sm:max-w-sm sm:rounded-3xl sm:p-3"
       >
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2.5 sm:gap-3">
           <span
             className={cn(
-              "grid size-10 shrink-0 place-items-center rounded-2xl",
+              "grid size-8 shrink-0 place-items-center rounded-xl sm:size-10 sm:rounded-2xl",
               isDone ? "bg-lime text-brand-deep" : "bg-brand-deep text-lime",
             )}
           >
-            <Icon aria-hidden="true" className="size-5" />
+            <Icon aria-hidden="true" className="size-4 sm:size-5" />
           </span>
 
           <div className="min-w-0 flex-1" aria-live="polite">
-            <p className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/60 uppercase">
-              {isDone
-                ? "Getting started · Done"
-                : `Getting started · ${stepIndex + 1} of ${TASK_COUNT}`}
+            <p className="flex items-center gap-2 font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/60 uppercase">
+              <span>
+                {isDone
+                  ? "Getting started · Done"
+                  : `Getting started · ${stepIndex + 1} of ${TASK_COUNT}`}
+              </span>
+              {/* Phones get progress dots instead of the chip row. */}
+              <span aria-hidden="true" className="flex gap-1 sm:hidden">
+                {STEPS.slice(0, TASK_COUNT).map((item, index) => (
+                  <span
+                    key={item.id}
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      index < stepIndex
+                        ? "bg-brand-deep"
+                        : index === stepIndex
+                          ? "bg-brand"
+                          : "bg-brand-deep/20",
+                    )}
+                  />
+                ))}
+              </span>
             </p>
-            <h2 className="mt-0.5 text-base leading-tight font-semibold">
+            <h2 className="mt-0.5 text-sm leading-tight font-semibold sm:text-base">
               {step.title}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-brand-deep/75 [@media(max-height:520px)]:line-clamp-1">
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-brand-deep/75 sm:mt-1 sm:line-clamp-none sm:text-xs sm:leading-relaxed [@media(max-height:520px)]:line-clamp-1">
               {body}
             </p>
           </div>
@@ -278,7 +296,7 @@ export function ExploreTour({
 
         <ol
           aria-label="Tasks"
-          className="mt-3 flex gap-1.5 [@media(max-height:520px)]:hidden"
+          className="mt-3 hidden gap-1.5 sm:flex [@media(max-height:520px)]:hidden"
         >
           {STEPS.slice(0, TASK_COUNT).map((item, index) => {
             const done = index < stepIndex;
@@ -310,7 +328,7 @@ export function ExploreTour({
           <button
             type="button"
             onClick={() => setStepIndex((value) => value + 1)}
-            className="mt-1 min-h-11 w-full [@media(max-height:520px)]:hidden rounded-full font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep/60 uppercase transition hover:bg-brand-deep/5 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            className="mt-1 min-h-11 w-full rounded-full [@media(max-height:520px)]:hidden font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep/60 uppercase transition hover:bg-brand-deep/5 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             Skip this step
           </button>

@@ -2,7 +2,9 @@
 
 import {
   ArrowUpRight,
+  Crown,
   RefreshCw,
+  Timer,
   Trophy,
   Users,
 } from "lucide-react";
@@ -19,6 +21,8 @@ import {
   getSupabaseClient,
   isSupabaseConfigured,
 } from "@/lib/supabase/client";
+import { useEventClock } from "@/lib/use-event-clock";
+import { cn } from "@/lib/utils";
 import type { LeaderboardRow, LeaderboardScope } from "@/types/leaderboard";
 
 const POLL_MS = 30_000;
@@ -49,27 +53,53 @@ function scopeLabel(scope: LeaderboardScope): string {
   return scope === "daily" ? "today" : "all time";
 }
 
+const MEDALS = {
+  1: { badge: "bg-gold text-brand-deep", row: "border-gold/70 bg-gold/25" },
+  2: { badge: "bg-silver text-brand-deep", row: "border-silver bg-silver/30" },
+  3: {
+    badge: "bg-bronze text-brand-deep",
+    row: "border-bronze/60 bg-bronze/20",
+  },
+} as const;
+
+function medalFor(rank: number) {
+  return rank === 1 || rank === 2 || rank === 3 ? MEDALS[rank] : null;
+}
+
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** "8h 40m" until the next midnight in Asia/Kolkata, when the daily board resets. */
+function formatTimeToReset(nowMs: number): string {
+  const nextMidnight =
+    Math.floor((nowMs + IST_OFFSET_MS) / DAY_MS + 1) * DAY_MS - IST_OFFSET_MS;
+  const minutes = Math.max(1, Math.ceil((nextMidnight - nowMs) / 60_000));
+  const hours = Math.floor(minutes / 60);
+
+  return hours > 0 ? `${hours}h ${minutes % 60}m` : `${minutes}m`;
+}
+
 const PODIUM_STYLES = [
   {
     place: 2,
     label: "Runner-up",
     height: "h-20",
-    block: "bg-white/75",
-    ring: "border-brand-deep/15",
+    block: "bg-silver/80",
+    ring: "border-silver",
   },
   {
     place: 1,
     label: "Champion",
     height: "h-28",
-    block: "bg-lime",
-    ring: "border-brand-deep/25",
+    block: "bg-gold",
+    ring: "border-gold",
   },
   {
     place: 3,
     label: "Third",
     height: "h-16",
-    block: "bg-coral/25",
-    ring: "border-coral/40",
+    block: "bg-bronze/60",
+    ring: "border-bronze/70",
   },
 ] as const;
 
@@ -91,14 +121,16 @@ function Podium({ rows }: { rows: LeaderboardRow[] }) {
                 <>
                   <span
                     aria-label={`Rank ${row.rank}`}
-                    className={
+                    className={cn(
+                      "grid place-items-center rounded-full font-display font-bold ring-2 ring-white",
+                      medalFor(place)?.badge,
                       place === 1
-                        ? "grid size-9 place-items-center rounded-full bg-brand-deep text-lime shadow-lift"
-                        : "grid size-8 place-items-center rounded-full border border-brand-deep/15 bg-white/80 font-display text-[10px] font-bold text-brand-deep/70"
-                    }
+                        ? "size-10 shadow-lift"
+                        : "size-8 text-[11px]",
+                    )}
                   >
                     {place === 1 ? (
-                      <Trophy aria-hidden="true" className="size-4" />
+                      <Crown aria-hidden="true" className="size-4" />
                     ) : (
                       place
                     )}
@@ -133,7 +165,11 @@ function Podium({ rows }: { rows: LeaderboardRow[] }) {
   );
 }
 
-export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean }) {
+export function LeaderboardBoard({
+  showPodium = false,
+}: {
+  showPodium?: boolean;
+}) {
   const [scope, setScope] = useState<LeaderboardScope>("daily");
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -141,6 +177,7 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
   const [presence, setPresence] = useState(0);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
+  const now = useEventClock();
 
   const selectScope = (nextScope: LeaderboardScope) => {
     if (nextScope === scope) {
@@ -234,9 +271,7 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
         setLoading(false);
 
         if (sessionReady) {
-          const { data: presenceData } = await supabase.rpc(
-            "touch_presence",
-          );
+          const { data: presenceData } = await supabase.rpc("touch_presence");
           const nextPresence = presenceData as PresenceResult | null;
 
           if (
@@ -288,9 +323,17 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
     <div className="rounded-[2rem] border border-brand-deep/15 bg-cream p-5 text-brand-deep shadow-lift sm:p-7">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/60 uppercase">
-            {scope === "daily" ? "Today's explorers" : "All-time explorers"}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/60 uppercase">
+              {scope === "daily" ? "Today's explorers" : "All-time explorers"}
+            </p>
+            {scope === "daily" && now !== null && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-deep px-2 py-0.5 font-display text-[9px] font-bold tracking-[0.08em] text-lime uppercase">
+                <Timer aria-hidden="true" className="size-3" />
+                Resets in {formatTimeToReset(now)}
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-brand-deep/70">
             Choose a name on the beach map to appear here. Today&rsquo;s board
             resets at midnight IST.
@@ -300,7 +343,7 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
         <div
           role="group"
           aria-label="Leaderboard period"
-          className="flex shrink-0 rounded-full border border-brand-deep/10 bg-brand-deep/5 p-1"
+          className="grid shrink-0 grid-cols-2 rounded-full border border-brand-deep/10 bg-brand-deep/5 p-1 sm:w-56"
         >
           {(
             [
@@ -315,8 +358,8 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
               onClick={() => selectScope(value)}
               className={
                 scope === value
-                  ? "min-h-11 rounded-full bg-brand-deep px-3.5 py-1.5 font-display text-[9px] font-bold tracking-[0.08em] text-lime uppercase"
-                  : "min-h-11 rounded-full px-3.5 py-1.5 font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep/60 uppercase transition hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                  ? "min-h-11 rounded-full bg-brand-deep px-3.5 py-1.5 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase shadow-soft"
+                  : "min-h-11 rounded-full px-3.5 py-1.5 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/60 uppercase transition hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               }
             >
               {label}
@@ -334,9 +377,7 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
           </span>
         )}
         {updatedAt && !error && (
-          <span>
-            Updated {timeFormatter.format(updatedAt)} IST
-          </span>
+          <span>Updated {timeFormatter.format(updatedAt)} IST</span>
         )}
         <button
           type="button"
@@ -367,8 +408,13 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
             ))}
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-coral/40 bg-coral/15 px-4 py-5" role="alert">
-            <p className="text-sm leading-relaxed text-brand-deep/80">{error}</p>
+          <div
+            className="rounded-2xl border border-coral/40 bg-coral/15 px-4 py-5"
+            role="alert"
+          >
+            <p className="text-sm leading-relaxed text-brand-deep/80">
+              {error}
+            </p>
             <button
               type="button"
               onClick={refresh}
@@ -403,67 +449,89 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
             aria-label={`${scopeLabel(scope)} leaderboard`}
             className="space-y-1.5"
           >
-            {rows.map((row) => (
-              <li
-                key={`${row.rank}-${row.displayName}-${row.points}`}
-                className={
-                  row.isYou
-                    ? "flex items-center gap-3 rounded-2xl border border-brand/25 bg-lime/45 px-3.5 py-3"
-                    : "flex items-center gap-3 rounded-2xl border border-brand-deep/8 bg-white/60 px-3.5 py-3 odd:bg-white/80"
-                }
-              >
-                <span
-                  aria-label={`Rank ${row.rank}`}
-                  className={
-                    row.rank <= 3
-                      ? "grid size-9 shrink-0 place-items-center rounded-full bg-brand-deep font-display text-xs font-bold text-lime"
-                      : "grid size-9 shrink-0 place-items-center rounded-full border border-brand-deep/15 font-display text-xs font-bold text-brand-deep/70"
-                  }
-                >
-                  {row.rank <= 3 ? (
-                    <Trophy aria-hidden="true" className="size-4" />
-                  ) : (
-                    row.rank
-                  )}
-                </span>
+            {rows.map((row) => {
+              const medal = medalFor(row.rank);
+              const leader = row.rank === 1;
 
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-1.5">
-                    <span className="truncate text-sm font-semibold">
-                      {row.displayName}
-                    </span>
-                    {row.isYou && (
-                      <span className="rounded-full bg-brand-deep px-1.5 py-0.5 font-display text-[8px] font-bold tracking-[0.08em] text-lime uppercase">
-                        You
-                      </span>
+              return (
+                <li
+                  key={`${row.rank}-${row.displayName}-${row.points}`}
+                  className={cn(
+                    "flex items-center gap-3 rounded-2xl border px-3.5",
+                    leader ? "py-4 shadow-soft" : "py-3",
+                    medal
+                      ? medal.row
+                      : row.isYou
+                        ? "border-brand/25 bg-lime/45"
+                        : "border-brand-deep/8 bg-white/60 odd:bg-white/80",
+                    row.isYou && medal && "ring-2 ring-brand/40",
+                  )}
+                >
+                  <span
+                    aria-label={`Rank ${row.rank}`}
+                    className={cn(
+                      "grid shrink-0 place-items-center rounded-full font-display text-xs font-bold",
+                      medal
+                        ? cn(medal.badge, "ring-2 ring-white")
+                        : "border border-brand-deep/15 text-brand-deep/70",
+                      leader ? "size-11" : "size-9",
+                    )}
+                  >
+                    {leader ? (
+                      <Crown aria-hidden="true" className="size-5" />
+                    ) : (
+                      row.rank
                     )}
                   </span>
-                  <span className="mt-0.5 block text-[10px] text-brand-deep/60">
-                    {row.shells} {row.shells === 1 ? "shell" : "shells"} ·{" "}
-                    {row.checkins}{" "}
-                    {row.checkins === 1 ? "venue stamp" : "venue stamps"}
-                  </span>
-                </span>
 
-                <span className="shrink-0 text-right">
-                  <span className="block font-display text-lg font-bold">
-                    {row.points}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={cn(
+                          "truncate font-semibold",
+                          leader ? "text-base" : "text-sm",
+                        )}
+                      >
+                        {row.displayName}
+                      </span>
+                      {row.isYou && (
+                        <span className="rounded-full bg-brand-deep px-1.5 py-0.5 font-display text-[8px] font-bold tracking-[0.08em] text-lime uppercase">
+                          You
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-0.5 block text-[10px] text-brand-deep/60">
+                      {row.shells} {row.shells === 1 ? "shell" : "shells"} ·{" "}
+                      {row.checkins}{" "}
+                      {row.checkins === 1 ? "venue stamp" : "venue stamps"}
+                    </span>
                   </span>
-                  <span className="block text-[9px] font-semibold tracking-[0.08em] text-brand-deep/50 uppercase">
-                    points
+
+                  <span className="shrink-0 text-right">
+                    <span
+                      className={cn(
+                        "block font-display font-bold",
+                        leader ? "text-2xl" : "text-lg",
+                      )}
+                    >
+                      {row.points}
+                    </span>
+                    <span className="block text-[9px] font-semibold tracking-[0.08em] text-brand-deep/50 uppercase">
+                      points
+                    </span>
                   </span>
-                </span>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ol>
         )}
       </div>
 
       <p className="mt-5 border-t border-brand-deep/10 pt-3 text-[10px] leading-relaxed text-brand-deep/55">
-        Each shell and each venue stamp counts once a day: {SHELL_POINTS}{" "}
-        points per shell, {VENUE_CHECKIN_POINTS} per stamp, and +
-        {SHELL_SET_BONUS} for the full set. The board updates every 30 seconds.
-        Fair play: unusual scores and names are reviewed by the event team.
+        Each shell and each venue stamp counts once a day: {SHELL_POINTS} points
+        per shell, {VENUE_CHECKIN_POINTS} per stamp, and +{SHELL_SET_BONUS} for
+        the full set. The board updates every 30 seconds. Fair play: unusual
+        scores and names are reviewed by the event team.
       </p>
     </div>
   );

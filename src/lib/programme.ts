@@ -269,6 +269,23 @@ export function isMalayalam(text: string | undefined): boolean {
   return typeof text === "string" && MALAYALAM_PATTERN.test(text);
 }
 
+/**
+ * True when a Latin-script title is set entirely in capitals in the source
+ * ("INAUGURATION"). The text stays as published; the UI only tones down its
+ * size and spacing so it does not shout next to sentence-case titles.
+ */
+export function isAllCapsTitle(text: string): boolean {
+  const letters = text.replace(/[^A-Za-z]/g, "");
+
+  if (letters.length < 4 || isMalayalam(text)) {
+    return false;
+  }
+
+  const upper = letters.replace(/[^A-Z]/g, "").length;
+
+  return upper / letters.length > 0.85;
+}
+
 export function getSessionSpeakers(session: Session): SessionSpeaker[] {
   return session.speakerIds.flatMap((speakerId) => {
     const speaker = SPEAKERS_BY_ID.get(speakerId);

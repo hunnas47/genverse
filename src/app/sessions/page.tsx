@@ -28,7 +28,7 @@ export const metadata: Metadata = pageMetadata({
 function SessionsLoading() {
   return (
     <div aria-hidden="true" className="space-y-4">
-      <div className="h-44 rounded-[2rem] bg-lime/30 motion-safe:animate-pulse" />
+      <div className="h-24 rounded-3xl bg-white/10 motion-safe:animate-pulse" />
       <div className="h-32 rounded-3xl bg-white/10 motion-safe:animate-pulse" />
       <div className="h-32 rounded-3xl bg-white/10 motion-safe:animate-pulse" />
     </div>

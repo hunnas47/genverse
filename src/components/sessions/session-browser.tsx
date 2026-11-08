@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SessionCard } from "@/components/sessions/session-card";
 import { SessionsNowNext } from "@/components/sessions/sessions-now-next";
@@ -23,6 +23,9 @@ function dayChipClass(active: boolean): string {
       : "border-white/20 bg-white/5 text-white/85 hover:border-white/40 hover:bg-white/10 hover:text-white",
   );
 }
+
+const FILTER_FIELD =
+  "min-h-11 w-full rounded-full border border-white/20 bg-white/10 py-2 text-sm text-white transition hover:border-white/35 focus-visible:border-lime focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime";
 
 export function SessionBrowser({
   initialDayId,
@@ -47,7 +50,9 @@ export function SessionBrowser({
       ? initialDayId
       : "all";
 
-  const hasDeepLink = Boolean(initialDayId || initialVenueId || initialSessionId);
+  const hasDeepLink = Boolean(
+    initialDayId || initialVenueId || initialSessionId,
+  );
   const now = useEventClock();
   const today = now === null ? undefined : getProgrammeDayAt(now);
   // null until the visitor picks a day. Without a deep link, event days open
@@ -58,6 +63,8 @@ export function SessionBrowser({
   const dayId = dayChoice ?? today?.id ?? "all";
   const [venueId, setVenueId] = useState(initialVenue);
   const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   const venuesWithSessions = useMemo(() => {
     const venueIds = new Set(SESSIONS.map((session) => session.venueId));
@@ -122,16 +129,33 @@ export function SessionBrowser({
         "(prefers-reduced-motion: reduce)",
       ).matches;
 
-      document
-        .getElementById(`session-${initialSessionId}`)
-        ?.scrollIntoView({
-          block: "start",
-          behavior: reduceMotion ? "auto" : "smooth",
-        });
+      document.getElementById(`session-${initialSessionId}`)?.scrollIntoView({
+        block: "start",
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
     });
 
     return () => cancelAnimationFrame(frame);
   }, [initialSessionId]);
+
+  // Day headers stick just below the toolbar, whose height changes with the
+  // viewport, so measure it into a CSS variable.
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    const root = rootRef.current;
+
+    if (!toolbar || !root) {
+      return;
+    }
+
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty("--toolbar-h", `${toolbar.offsetHeight}px`);
+    });
+
+    observer.observe(toolbar);
+
+    return () => observer.disconnect();
+  }, []);
 
   function clearFilters() {
     setDayChoice("all");
@@ -140,69 +164,67 @@ export function SessionBrowser({
   }
 
   return (
-    <div>
+    <div ref={rootRef}>
       <SessionsNowNext now={now} />
 
-      {/* Day chips stay reachable while scrolling a long list. */}
-      <div className="sticky top-0 z-20 -mx-4 border-b border-white/10 bg-brand/95 px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <div
-          role="group"
-          aria-label="Filter by day"
-          className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          <button
-            type="button"
-            aria-pressed={dayId === "all"}
-            onClick={() => setDayChoice("all")}
-            className={dayChipClass(dayId === "all")}
-          >
-            All days
-          </button>
-
-          {PROGRAMME_DAYS.map((day) => (
-            <button
-              key={day.id}
-              type="button"
-              aria-pressed={dayId === day.id}
-              onClick={() => setDayChoice(day.id)}
-              className={dayChipClass(dayId === day.id)}
-            >
-              {formatDayShort(day)}
-              {today?.id === day.id && (
-                <span
-                  className={cn(
-                    "rounded-full px-1.5 py-0.5 text-[9px]",
-                    dayId === day.id
-                      ? "bg-brand-deep text-lime"
-                      : "bg-lime text-brand-deep",
-                  )}
-                >
-                  Today
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <section
-        aria-label="Session filters"
-        className="mt-4 rounded-[2rem] border border-brand-deep/10 bg-lime p-4 text-brand-deep shadow-lift sm:p-6"
+      {/* Day chips and filters stay reachable while scrolling a long list. */}
+      <div
+        ref={toolbarRef}
+        className="sticky top-0 z-20 -mx-4 border-b border-white/10 bg-brand/95 px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
       >
-        <div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label
-                htmlFor="session-venue-filter"
-                className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/75 uppercase"
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <div
+            role="group"
+            aria-label="Filter by day"
+            className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <button
+              type="button"
+              aria-pressed={dayId === "all"}
+              onClick={() => setDayChoice("all")}
+              className={dayChipClass(dayId === "all")}
+            >
+              All days
+            </button>
+
+            {PROGRAMME_DAYS.map((day) => (
+              <button
+                key={day.id}
+                type="button"
+                aria-pressed={dayId === day.id}
+                onClick={() => setDayChoice(day.id)}
+                className={dayChipClass(dayId === day.id)}
               >
+                {formatDayShort(day)}
+                {today?.id === day.id && (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 py-0.5 text-[9px]",
+                      dayId === day.id
+                        ? "bg-brand-deep text-lime"
+                        : "bg-lime text-brand-deep",
+                    )}
+                  >
+                    Today
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <section
+            aria-label="Session filters"
+            className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2 lg:w-[28rem] lg:shrink-0"
+          >
+            <div>
+              <label htmlFor="session-venue-filter" className="sr-only">
                 Venue
               </label>
               <select
                 id="session-venue-filter"
                 value={venueId}
                 onChange={(event) => setVenueId(event.target.value)}
-                className="mt-2 min-h-11 w-full rounded-2xl border border-brand-deep/15 bg-cream px-3 py-2 text-sm text-brand-deep shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                className={cn(FILTER_FIELD, "px-3 [&>option]:text-brand-deep")}
               >
                 <option value="all">All venues</option>
                 {venuesWithSessions.map((venue) => (
@@ -213,65 +235,64 @@ export function SessionBrowser({
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="session-search"
-                className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/75 uppercase"
-              >
-                Search
+            <div className="relative">
+              <label htmlFor="session-search" className="sr-only">
+                Search sessions
               </label>
-              <div className="relative mt-2">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-brand-deep/70"
-                >
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.5-3.5" />
-                </svg>
-                {/* Browser extensions can inject a caret-color style before hydration. */}
-                <input
-                  id="session-search"
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Session, talk, or venue"
-                  suppressHydrationWarning
-                  className="min-h-11 w-full rounded-2xl border border-brand-deep/15 bg-cream py-2 pr-3 pl-10 text-sm text-brand-deep shadow-sm transition placeholder:text-brand-deep/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
-                />
-              </div>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/70"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              {/* Browser extensions can inject a caret-color style before hydration. */}
+              <input
+                id="session-search"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Session, talk, or venue"
+                suppressHydrationWarning
+                className={cn(
+                  FILTER_FIELD,
+                  "pr-3 pl-9 placeholder:text-white/65",
+                )}
+              />
             </div>
-          </div>
+          </section>
         </div>
+      </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-brand-deep/10 pt-4">
-          <p role="status" className="text-xs text-brand-deep/75">
-            Showing {resultLabel} of {SESSIONS.length} · All times Asia/Kolkata
-            (IST)
-          </p>
-          {hasFilters && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="min-h-10 rounded-full px-2 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep/75 uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
-      </section>
+      <div className="mt-3 flex min-h-10 flex-wrap items-center justify-between gap-x-3">
+        <p role="status" className="text-xs text-white/85">
+          Showing {resultLabel} of {SESSIONS.length} · All times Asia/Kolkata
+          (IST)
+        </p>
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="min-h-10 rounded-full px-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase underline decoration-lime/30 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
       {groups.length > 0 ? (
-        <div className="mt-10 space-y-10">
+        <div className="mt-6 space-y-10">
           {groups.map((group) => (
             <section
               key={group.day.id}
               aria-labelledby={`session-day-${group.day.id}`}
             >
-              <div className="flex items-baseline justify-between gap-3 border-b border-white/15 pb-3">
+              {/* Sticks under the toolbar so you always know which day you are in. */}
+              <div className="sticky top-[var(--toolbar-h,0px)] z-10 -mx-4 flex items-baseline justify-between gap-3 border-b border-white/15 bg-brand/90 px-4 py-2.5 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                 <h2
                   id={`session-day-${group.day.id}`}
                   className="font-display text-sm font-bold tracking-[0.18em] text-lime uppercase"
@@ -298,7 +319,9 @@ export function SessionBrowser({
         </div>
       ) : (
         <div className="mt-10 rounded-[2rem] border border-dashed border-white/25 bg-brand-deep/25 px-5 py-12 text-center text-white">
-          <p className="text-lg font-medium">No sessions match these filters.</p>
+          <p className="text-lg font-medium">
+            No sessions match these filters.
+          </p>
           <p className="mt-2 text-sm text-white/90">
             Try a different day, venue, or search term.
           </p>

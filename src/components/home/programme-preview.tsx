@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import type { CSSProperties } from "react";
 
+import { VENUE_MAP, getVenueAccent } from "@/data/venue-map";
 import { VENUES_BY_ID } from "@/data/venues";
 import {
   formatDayShort,
@@ -11,11 +13,13 @@ import {
   getProgrammeDay,
   getProgrammeDayAt,
   getSessionSpeakers,
+  isAllCapsTitle,
   isMalayalam,
   PROGRAMME_DAYS,
   SESSIONS,
 } from "@/lib/programme";
 import { useEventClock } from "@/lib/use-event-clock";
+import { cn } from "@/lib/utils";
 import type { Session } from "@/types/session";
 
 const ONE_PER_DAY = PROGRAMME_DAYS.flatMap((day) => {
@@ -48,14 +52,23 @@ function ProgrammePreviewCard({
   const venue = VENUES_BY_ID.get(session.venueId);
   const day = getProgrammeDay(session.dayId);
   const summary = sessionSummary(session);
+  const accent = venue ? getVenueAccent(venue) : null;
+  const mapPosition = venue?.mapPosition;
 
   return (
     <Link
       href={`/sessions?session=${session.id}`}
-      className="group flex flex-col rounded-3xl border border-white/10 bg-cream p-5 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime motion-safe:hover:-translate-y-1"
+      style={
+        accent ? ({ "--venue-accent": accent.css } as CSSProperties) : undefined
+      }
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-cream p-5 pt-6 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime motion-safe:hover:-translate-y-1"
     >
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-1.5 bg-[var(--venue-accent,var(--brand-soft))]"
+      />
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-brand-deep px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase">
+        <span className="rounded-full bg-[var(--venue-accent,var(--brand-deep))] px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase ring-1 ring-brand-deep/10">
           {venue?.mapLabel ?? session.venueId}
         </span>
         {live ? (
@@ -72,7 +85,12 @@ function ProgrammePreviewCard({
 
       <h3
         lang={isMalayalam(session.title) ? "ml" : undefined}
-        className="mt-4 text-balance text-lg leading-snug font-medium"
+        className={cn(
+          "mt-4 text-balance leading-snug font-medium",
+          isAllCapsTitle(session.title)
+            ? "text-base tracking-[0.01em]"
+            : "text-lg",
+        )}
       >
         {session.title}
       </h3>
@@ -83,10 +101,34 @@ function ProgrammePreviewCard({
       <p className="mt-4 font-display text-xs font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
         {formatSessionTimeRange(session)}
       </p>
-      {summary && (
+      {summary ? (
         <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-brand-deep/75">
           {summary}
         </p>
+      ) : (
+        mapPosition && (
+          // No published description: show where the session happens instead
+          // of leaving a blank card.
+          <div
+            aria-hidden="true"
+            className="relative mt-4 h-20 overflow-hidden rounded-2xl ring-1 ring-brand-deep/10"
+          >
+            {/* Translate by the venue's fraction of the image so the venue
+                sits exactly at the strip's center. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- decorative crop of an already-loaded asset */}
+            <img
+              src={VENUE_MAP.image.previewSrc}
+              alt=""
+              loading="lazy"
+              className="absolute top-1/2 left-1/2 w-[260%] max-w-none transition duration-700 motion-safe:group-hover:scale-105"
+              style={{
+                transform: `translate(-${((mapPosition.x / VENUE_MAP.image.width) * 100).toFixed(2)}%, -${((mapPosition.y / VENUE_MAP.image.height) * 100).toFixed(2)}%)`,
+                transformOrigin: `${((mapPosition.x / VENUE_MAP.image.width) * 100).toFixed(2)}% ${((mapPosition.y / VENUE_MAP.image.height) * 100).toFixed(2)}%`,
+              }}
+            />
+            <span className="absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[var(--venue-accent,var(--lime))] shadow" />
+          </div>
+        )
       )}
 
       <span className="mt-auto inline-flex items-center gap-1.5 pt-5 font-display text-[10px] font-bold tracking-[0.14em] uppercase">

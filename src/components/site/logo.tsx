@@ -28,7 +28,7 @@ export function Logo({
       />
       {showExplorer && (
         <span className="border-l border-white/25 pl-2.5 font-display text-[10px] font-bold tracking-[0.2em] text-lime uppercase">
-          Explorer
+          Genverse Explorer
         </span>
       )}
     </Link>

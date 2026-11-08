@@ -24,6 +24,47 @@ export const VENUE_MARKER_TEXT_COLORS: Record<VenueCategory, string> = {
 };
 
 /**
+ * Per-stage accents shared by the map markers, the minimap, and programme
+ * cards so a stage reads as the same color everywhere. These are a visual
+ * identity of this guide, not official GEN M colors. Venues without an entry
+ * fall back to their category color.
+ */
+const STAGE_ACCENTS: Record<string, number> = {
+  s1: 0xf7c873,
+  s2: 0x9be3c4,
+  s3: 0x6ec6ff,
+  s4: 0xf29e7c,
+  s5: 0xd9a6f5,
+  s6: 0xf7a8c8,
+  s7: 0xc3c8f0,
+};
+
+export type VenueAccent = {
+  /** Phaser fill color. */
+  fill: number;
+  /** CSS color for the same fill. */
+  css: string;
+  /** Legible text color on top of the fill. */
+  text: string;
+};
+
+export function toCssColor(value: number): string {
+  return `#${value.toString(16).padStart(6, "0")}`;
+}
+
+export function getVenueAccent(venue: {
+  id: string;
+  category: VenueCategory;
+}): VenueAccent {
+  const fill = STAGE_ACCENTS[venue.id] ?? VENUE_MARKER_COLORS[venue.category];
+  const text = STAGE_ACCENTS[venue.id]
+    ? "#2c2d6f"
+    : VENUE_MARKER_TEXT_COLORS[venue.category];
+
+  return { fill, css: toCssColor(fill), text };
+}
+
+/**
  * World geometry for the final GEN M beachfront map.
  *
  * World units match the source image pixels 1:1. The artwork is a top-down,

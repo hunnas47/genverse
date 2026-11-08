@@ -8,11 +8,7 @@ import {
   type AvatarFacing,
 } from "@/game/avatar";
 import { VENUES, VENUES_BY_ID } from "@/data/venues";
-import {
-  VENUE_MAP,
-  VENUE_MARKER_COLORS,
-  VENUE_MARKER_TEXT_COLORS,
-} from "@/data/venue-map";
+import { VENUE_MAP, getVenueAccent } from "@/data/venue-map";
 import type { GameEventBridge } from "@/game/event-bridge";
 import type { NavigationTarget } from "@/game/events";
 import {
@@ -63,6 +59,20 @@ type MovementKeys = Record<
 
 type NavigationReason = "arrived" | "cancelled" | "unreachable";
 
+const FALLBACK_LABEL_FONT = '"Trebuchet MS", "Segoe UI", sans-serif';
+
+function readBrandFontFamily(): string {
+  if (typeof document === "undefined") {
+    return FALLBACK_LABEL_FONT;
+  }
+
+  const family = getComputedStyle(document.documentElement)
+    .getPropertyValue("--font-neoverse")
+    .trim();
+
+  return family ? `${family}, ${FALLBACK_LABEL_FONT}` : FALLBACK_LABEL_FONT;
+}
+
 /**
  * The venue-map scene.
  *
@@ -88,6 +98,21 @@ export class BeachScene extends Phaser.Scene {
   private mobileLayout = false;
   private nearbyVenueId: string | null = null;
   private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
+  private readonly venueLabels = new Map<
+    string,
+    {
+      label: Phaser.GameObjects.Container;
+      text: Phaser.GameObjects.Text;
+      background: Phaser.GameObjects.Graphics;
+      parts: Array<Phaser.GameObjects.Graphics | Phaser.GameObjects.Text>;
+      accent: number;
+      isStage: boolean;
+    }
+  >();
+  /** Brand sans for canvas text, read from the CSS variable next/font sets. */
+  private readonly labelFontFamily = readBrandFontFamily();
+  /** The spawn alert waits until the player has taken a first step. */
+  private hasLeftSpawn = false;
   private nearbyTween?: Phaser.Tweens.Tween;
   private proximityAlert?: Phaser.GameObjects.Image;
   private proximityAlertTween?: Phaser.Tweens.Tween;
@@ -283,6 +308,7 @@ export class BeachScene extends Phaser.Scene {
     this.updateProximityAlert();
     this.updateNearbyShell();
     this.updateShellCompass();
+    this.updateLabelOcclusion();
     this.emitPlayerPosition(time, moving);
   }
 
@@ -518,54 +544,184 @@ export class BeachScene extends Phaser.Scene {
       }
 
       const { x, y } = venue.mapPosition;
-      const color = VENUE_MARKER_COLORS[venue.category];
+      const accent = getVenueAccent(venue);
+      const isStage = venue.category === "stage";
+      const isFacility = venue.category === "facility";
       const markerDepth = y;
+      // Stages are the destinations people came for, so they are the biggest
+      // markers; facilities are small way-finding dots.
+      const size = isStage ? 16 : isFacility ? 11 : 13;
 
       this.add
-        .circle(x, y + 2, 15, 0x1c1d3a, 0.22)
+        .ellipse(x, y + size * 0.55, size * 2.1, size * 0.9, 0x1c1d3a, 0.28)
         .setDepth(markerDepth - 1);
 
       const ring = this.add
-        .circle(x, y, 22)
+        .circle(x, y, size + 9)
         .setStrokeStyle(2, 0xffffff, 0.9)
-        .setFillStyle(color, 0.16)
+        .setFillStyle(accent.fill, 0.16)
         .setDepth(markerDepth)
         .setAlpha(0.3);
 
-      this.add
-        .circle(x, y, 13)
-        .setStrokeStyle(2, 0xffffff, 0.95)
-        .setFillStyle(color, 1)
-        .setDepth(markerDepth + 1);
+      // Shape encodes the kind of place: discs for stages and facilities,
+      // rounded squares for expo halls, diamonds for booths.
+      const shape = this.add.graphics({ x, y }).setDepth(markerDepth + 1);
+      shape.fillStyle(accent.fill, 1);
+      shape.lineStyle(isStage ? 3 : 2, 0xffffff, 0.95);
 
-      this.add
+      if (venue.category === "expo") {
+        shape.fillRoundedRect(-size, -size, size * 2, size * 2, 6);
+        shape.strokeRoundedRect(-size, -size, size * 2, size * 2, 6);
+      } else if (venue.category === "booth") {
+        const points = [
+          new Phaser.Math.Vector2(0, -size - 2),
+          new Phaser.Math.Vector2(size + 2, 0),
+          new Phaser.Math.Vector2(0, size + 2),
+          new Phaser.Math.Vector2(-size - 2, 0),
+        ];
+        shape.fillPoints(points, true);
+        shape.strokePoints(points, true);
+      } else {
+        shape.fillCircle(0, 0, size);
+        shape.strokeCircle(0, 0, size);
+      }
+
+      if (isStage) {
+        // A thin navy inner ring gives stages a badge-like finish.
+        shape.lineStyle(1.5, 0x2c2d6f, 0.35);
+        shape.strokeCircle(0, 0, size - 4);
+      }
+
+      const code = this.add
         .text(x, y, venue.mapLabel, {
-          fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
-          fontSize: "11px",
+          fontFamily: this.labelFontFamily,
+          fontSize: isStage ? "12px" : "10px",
           fontStyle: "bold",
-          color: VENUE_MARKER_TEXT_COLORS[venue.category],
+          color: accent.text,
         })
         .setOrigin(0.5)
-        .setDepth(markerDepth + 2);
-
-      // A readable name under the code letter: "R" alone means nothing to a
-      // first-time visitor.
-      this.add
-        .text(x, y + 19, venue.name, {
-          fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
-          fontSize: "10px",
-          fontStyle: "bold",
-          color: "#f7f3e8",
-          backgroundColor: "rgba(44, 45, 111, 0.82)",
-          padding: { x: 5, y: 2 },
-          align: "center",
-          wordWrap: { width: 104 },
-        })
-        .setOrigin(0.5, 0)
         .setResolution(2)
         .setDepth(markerDepth + 2);
 
+      // A readable name under the code letter: "R" alone means nothing to a
+      // first-time visitor. Pills match the HUD's rounded navy chips.
+      const label = this.add.container(x, y + size + 6).setDepth(
+        markerDepth + 2,
+      );
+      const labelText = this.add
+        .text(0, 0, venue.name, {
+          fontFamily: this.labelFontFamily,
+          fontSize: isStage ? "11px" : "10px",
+          fontStyle: "bold",
+          color: isStage ? "#edf2b5" : "#f7f3e8",
+          align: "center",
+          wordWrap: { width: 112 },
+        })
+        .setOrigin(0.5, 0)
+        .setResolution(2);
+      const labelBackground = this.add.graphics();
+      label.add([labelBackground, labelText]);
+      this.drawLabelPill(labelBackground, labelText, accent.fill, isStage);
+
+      this.venueLabels.set(venue.id, {
+        label,
+        text: labelText,
+        background: labelBackground,
+        parts: [shape, code],
+        accent: accent.fill,
+        isStage,
+      });
       this.markerRings.set(venue.id, ring);
+    }
+
+    this.refreshLabelFont();
+  }
+
+  private drawLabelPill(
+    background: Phaser.GameObjects.Graphics,
+    text: Phaser.GameObjects.Text,
+    accent: number,
+    isStage: boolean,
+  ): void {
+    const padX = 7;
+    const padY = 3;
+    const width = text.width + padX * 2;
+    const height = text.height + padY * 2;
+    const radius = Math.min(height / 2, 10);
+
+    background.clear();
+    background.fillStyle(0x1c1d3a, 0.25);
+    background.fillRoundedRect(-width / 2, -padY + 2, width, height, radius);
+    background.fillStyle(0x2c2d6f, 0.9);
+    background.fillRoundedRect(-width / 2, -padY, width, height, radius);
+
+    if (isStage) {
+      background.lineStyle(1.5, accent, 0.9);
+      background.strokeRoundedRect(-width / 2, -padY, width, height, radius);
+    }
+  }
+
+  /**
+   * Phaser renders text once, so labels drawn before the brand font finishes
+   * loading keep the fallback. Re-render them when the font is ready.
+   */
+  private refreshLabelFont(): void {
+    if (typeof document === "undefined" || !("fonts" in document)) {
+      return;
+    }
+
+    const family = this.labelFontFamily;
+
+    void document.fonts
+      .load(`bold 11px ${family}`)
+      .then(() => {
+        // Shutdown clears the map, so a late load after unmount is a no-op.
+        for (const entry of this.venueLabels.values()) {
+          for (const part of entry.parts) {
+            if (part instanceof Phaser.GameObjects.Text) {
+              part.setFontFamily(family);
+            }
+          }
+          entry.text.setFontFamily(family);
+          this.drawLabelPill(
+            entry.background,
+            entry.text,
+            entry.accent,
+            entry.isStage,
+          );
+        }
+      })
+      .catch(() => undefined);
+  }
+
+  /**
+   * Fades any venue label or marker the avatar is standing on so the player
+   * never disappears under map furniture.
+   */
+  private updateLabelOcclusion(): void {
+    if (!this.player) {
+      return;
+    }
+
+    const px = this.player.x;
+    const py = this.player.y - AVATAR_DISPLAY_HEIGHT / 2;
+
+    for (const entry of this.venueLabels.values()) {
+      const halfWidth = entry.text.width / 2 + 14;
+      const top = entry.label.y - 8;
+      const bottom = entry.label.y + entry.text.height + 10;
+      const overlapsLabel =
+        Math.abs(px - entry.label.x) < halfWidth + 10 &&
+        py + AVATAR_DISPLAY_HEIGHT / 2 > top &&
+        py - AVATAR_DISPLAY_HEIGHT / 2 < bottom;
+      const target = overlapsLabel ? 0.28 : 1;
+
+      if (entry.label.alpha !== target) {
+        entry.label.setAlpha(target);
+        for (const part of entry.parts) {
+          part.setAlpha(overlapsLabel ? 0.45 : 1);
+        }
+      }
     }
   }
 
@@ -833,15 +989,32 @@ export class BeachScene extends Phaser.Scene {
       }
     }
 
-    if (nearestVenueId === this.nearbyVenueId) {
+    // The player spawns inside the Entrance radius; a "!" over them before
+    // they have moved is noise, so the alert waits for the first step.
+    const leftSpawnNow =
+      !this.hasLeftSpawn &&
+      Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        VENUE_MAP.spawn.x,
+        VENUE_MAP.spawn.y,
+      ) > 6;
+
+    if (leftSpawnNow) {
+      this.hasLeftSpawn = true;
+    }
+
+    if (nearestVenueId === this.nearbyVenueId && !leftSpawnNow) {
       return;
     }
 
-    this.nearbyVenueId = nearestVenueId;
-    this.updateMarkerHighlights();
-    this.bridge.emit("venue:nearby", { venueId: nearestVenueId });
+    if (nearestVenueId !== this.nearbyVenueId) {
+      this.nearbyVenueId = nearestVenueId;
+      this.updateMarkerHighlights();
+      this.bridge.emit("venue:nearby", { venueId: nearestVenueId });
+    }
 
-    if (nearestVenueId) {
+    if (nearestVenueId && this.hasLeftSpawn) {
       this.showProximityAlert(this.player);
     } else {
       this.removeProximityAlert();
@@ -1903,6 +2076,7 @@ export class BeachScene extends Phaser.Scene {
     this.nearbyTween?.stop();
     this.nearbyTween = undefined;
     this.markerRings.clear();
+    this.venueLabels.clear();
     this.shellMarkers.clear();
     this.pendingShellIds.clear();
     this.blockedShellIds.clear();
