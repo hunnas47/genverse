@@ -10,6 +10,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import {
+  SHELL_POINTS,
+  SHELL_SET_BONUS,
+  VENUE_CHECKIN_POINTS,
+} from "@/data/quest";
+import {
   ensureAnonymousSession,
   getSupabaseClient,
   isSupabaseConfigured,
@@ -17,6 +22,8 @@ import {
 import type { LeaderboardRow, LeaderboardScope } from "@/types/leaderboard";
 
 const POLL_MS = 30_000;
+const UNAVAILABLE_MESSAGE =
+  "The shared board isn't available right now. Your shells and stamps are still saved on this phone.";
 
 interface RawLeaderboardRow {
   rank: number | string;
@@ -157,9 +164,9 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
       if (!isSupabaseConfigured()) {
         if (active) {
           setLoading(false);
-          setError(
-            "Live sync is not configured yet. Add the Supabase URL and publishable key to enable the shared board.",
-          );
+          // Developer note: set NEXT_PUBLIC_SUPABASE_URL and the publishable
+          // key to enable the shared board.
+          setError(UNAVAILABLE_MESSAGE);
         }
         return;
       }
@@ -169,7 +176,7 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
       if (!supabase) {
         if (active) {
           setLoading(false);
-          setError("Live sync is not configured yet.");
+          setError(UNAVAILABLE_MESSAGE);
         }
         return;
       }
@@ -285,8 +292,8 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
             {scope === "daily" ? "Today's explorers" : "All-time explorers"}
           </p>
           <p className="mt-1 text-sm text-brand-deep/70">
-            Scores are validated on the server. Choose a display name on the
-            beach map to appear here.
+            Choose a name on the beach map to appear here. Today&rsquo;s board
+            resets at midnight IST.
           </p>
         </div>
 
@@ -319,13 +326,14 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-brand-deep/10 pt-3 text-[10px] text-brand-deep/60">
-        <span className="inline-flex items-center gap-1.5">
-          <Users aria-hidden="true" className="size-3.5" />
-          {presence > 0
-            ? `${presence} ${presence === 1 ? "explorer" : "explorers"} here now`
-            : "Waiting for the first check-in"}
-        </span>
-        {updatedAt && (
+        {/* Presence only means something when the board is live. */}
+        {!error && presence > 0 && (
+          <span className="inline-flex items-center gap-1.5">
+            <Users aria-hidden="true" className="size-3.5" />
+            {`${presence} ${presence === 1 ? "explorer" : "explorers"} on the beach now`}
+          </span>
+        )}
+        {updatedAt && !error && (
           <span>
             Updated {timeFormatter.format(updatedAt)} IST
           </span>
@@ -452,10 +460,10 @@ export function LeaderboardBoard({ showPodium = false }: { showPodium?: boolean 
       </div>
 
       <p className="mt-5 border-t border-brand-deep/10 pt-3 text-[10px] leading-relaxed text-brand-deep/55">
-        The board refreshes every 30 seconds. One shell and one stamp per venue
-        per day; the full shell set adds a 50-point bonus. Server checks stop
-        duplicate and rapid submissions, but walking to a shell is an
-        on-device rule. Names can be moderated by the event team.
+        Each shell and each venue stamp counts once a day: {SHELL_POINTS}{" "}
+        points per shell, {VENUE_CHECKIN_POINTS} per stamp, and +
+        {SHELL_SET_BONUS} for the full set. The board updates every 30 seconds.
+        Fair play: unusual scores and names are reviewed by the event team.
       </p>
     </div>
   );

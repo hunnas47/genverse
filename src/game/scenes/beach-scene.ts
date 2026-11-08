@@ -30,6 +30,7 @@ import type { QuestShell } from "@/types/quest";
 import type { Venue } from "@/types/venue";
 
 const MAP_TEXTURE_KEY = "genm-venue-map";
+const MAP_PREVIEW_TEXTURE_KEY = "genm-venue-map-preview";
 const MOBILE_BREAKPOINT = 640;
 const MOBILE_PLAYER_SPEED = 180;
 const MARKER_DEPTH = 5000;
@@ -48,6 +49,12 @@ const TAP_TARGET_DISPLAY_SIZE = 56;
 const PROXIMITY_ALERT_HEAD_OFFSET = AVATAR_DISPLAY_HEIGHT + 12;
 const PROXIMITY_ALERT_DEPTH = MARKER_DEPTH + 30;
 const TAP_TARGET_DEPTH = MARKER_DEPTH + 4;
+const SHELL_COMPASS_DEPTH = MARKER_DEPTH + 40;
+/**
+ * Screen-space (CSS px) margins the shell compass keeps clear of: the HUD at
+ * the top and the joystick/map buttons at the bottom on phones.
+ */
+const SHELL_COMPASS_INSET = { top: 84, side: 30, bottom: 40, bottomMobile: 150 };
 
 type MovementKeys = Record<
   "up" | "down" | "left" | "right",
@@ -87,6 +94,8 @@ export class BeachScene extends Phaser.Scene {
   private proximityAlertExitTween?: Phaser.Tweens.Tween;
   private readonly proximityAlertBob = { offset: 0 };
   private readonly tapTargets = new Set<Phaser.GameObjects.Image>();
+  private shellCompass?: Phaser.GameObjects.Container;
+  private shellCompassPointer?: Phaser.GameObjects.Triangle;
 
   private readonly shellMarkers = new Map<
     string,
@@ -127,7 +136,10 @@ export class BeachScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.image(MAP_TEXTURE_KEY, VENUE_MAP.image.src);
+    this.load.on(Phaser.Loader.Events.PROGRESS, this.handleLoadProgress);
+    // The light preview gets the map on screen fast; createMapBackground
+    // swaps in the full artwork once it has downloaded.
+    this.load.image(MAP_PREVIEW_TEXTURE_KEY, VENUE_MAP.image.previewSrc);
     this.load.image(AVATAR_TEXTURES.down, AVATAR_ASSETS.down);
     this.load.image(AVATAR_TEXTURES.up, AVATAR_ASSETS.up);
     this.load.image(AVATAR_TEXTURES.right, AVATAR_ASSETS.right);
@@ -135,7 +147,12 @@ export class BeachScene extends Phaser.Scene {
     this.load.image(TAP_TARGET_TEXTURE, TAP_TARGET_ASSET);
   }
 
+  private handleLoadProgress = (progress: number): void => {
+    this.bridge.emit("game:load-progress", { progress });
+  };
+
   create(): void {
+    this.load.off(Phaser.Loader.Events.PROGRESS, this.handleLoadProgress);
     this.reducedMotion =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -145,6 +162,7 @@ export class BeachScene extends Phaser.Scene {
     this.createMapBackground();
     this.createVenueMarkers();
     this.createShells();
+    this.createShellCompass();
     this.createPlayer();
     this.setupInput();
     this.setupCamera();
@@ -264,24 +282,175 @@ export class BeachScene extends Phaser.Scene {
     this.updateNearbyVenue();
     this.updateProximityAlert();
     this.updateNearbyShell();
+    this.updateShellCompass();
     this.emitPlayerPosition(time, moving);
   }
 
-  private createMapBackground(): void {
-    if (!this.textures.exists(MAP_TEXTURE_KEY)) {
-      this.drawMapFallback();
-      this.bridge.emit("game:map-fallback", {
-        message:
-          "The venue map could not be loaded. You can still walk, use the directory, and open venue details on a simplified background.",
-      });
+  /**
+   * An arrow at the edge of the view pointing at the nearest shell still to
+   * find, shown only when no shell is on screen.
+   */
+  private createShellCompass(): void {
+    if (this.shells.length === 0) {
       return;
     }
 
-    this.add
-      .image(0, 0, MAP_TEXTURE_KEY)
-      .setOrigin(0, 0)
-      .setDisplaySize(VENUE_MAP.world.width, VENUE_MAP.world.height)
-      .setDepth(-1000);
+    const disc = this.add
+      .circle(0, 0, 15, 0xedf2b5, 0.95)
+      .setStrokeStyle(2.5, 0x2c2d6f, 0.95);
+    const spiral = this.add.graphics();
+
+    spiral.lineStyle(1.75, 0x2c2d6f, 1);
+    spiral.beginPath();
+    for (let index = 0; index <= 24; index += 1) {
+      const angle = (index / 24) * Math.PI * 3.2;
+      const radius = 0.8 + (index / 24) * 5.5;
+      const px = Math.cos(angle) * radius;
+      const py = Math.sin(angle) * radius;
+
+      if (index === 0) {
+        spiral.moveTo(px, py);
+      } else {
+        spiral.lineTo(px, py);
+      }
+    }
+    spiral.strokePath();
+
+    // Points along +x; rotated toward the shell each frame.
+    const pointer = this.add
+      .triangle(22, 0, 0, -6, 0, 6, 9, 0, 0x2c2d6f, 1)
+      .setOrigin(0, 0.5);
+
+    this.shellCompassPointer = pointer;
+    this.shellCompass = this.add
+      .container(0, 0, [pointer, disc, spiral])
+      .setDepth(SHELL_COMPASS_DEPTH)
+      .setVisible(false);
+  }
+
+  private updateShellCompass(): void {
+    const compass = this.shellCompass;
+    const pointer = this.shellCompassPointer;
+
+    if (!compass || !pointer || !this.player) {
+      return;
+    }
+
+    let nearest: Phaser.GameObjects.Container | null = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (const marker of this.shellMarkers.values()) {
+      const distance = Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        marker.x,
+        marker.y,
+      );
+
+      if (distance < nearestDistance) {
+        nearest = marker;
+        nearestDistance = distance;
+      }
+    }
+
+    const camera = this.cameras.main;
+    const view = camera.worldView;
+    // World px → CSS px, so the insets stay constant on screen.
+    const cssPerWorld = camera.zoom * this.scale.zoom;
+    const inset = {
+      top: SHELL_COMPASS_INSET.top / cssPerWorld,
+      side: SHELL_COMPASS_INSET.side / cssPerWorld,
+      bottom:
+        (this.mobileLayout
+          ? SHELL_COMPASS_INSET.bottomMobile
+          : SHELL_COMPASS_INSET.bottom) / cssPerWorld,
+    };
+    const inner = new Phaser.Geom.Rectangle(
+      view.x + inset.side,
+      view.y + inset.top,
+      Math.max(1, view.width - inset.side * 2),
+      Math.max(1, view.height - inset.top - inset.bottom),
+    );
+
+    if (!nearest || inner.contains(nearest.x, nearest.y)) {
+      compass.setVisible(false);
+      return;
+    }
+
+    // Walk from the view's center toward the shell until hitting the inner
+    // rectangle's edge.
+    const centerX = inner.centerX;
+    const centerY = inner.centerY;
+    const dx = nearest.x - centerX;
+    const dy = nearest.y - centerY;
+    const scale = Math.min(
+      dx !== 0 ? (inner.width / 2) / Math.abs(dx) : Number.POSITIVE_INFINITY,
+      dy !== 0 ? (inner.height / 2) / Math.abs(dy) : Number.POSITIVE_INFINITY,
+    );
+
+    compass
+      .setPosition(centerX + dx * scale, centerY + dy * scale)
+      .setScale(1 / cssPerWorld)
+      .setVisible(true);
+    pointer.setRotation(Math.atan2(dy, dx));
+    pointer.setPosition(Math.cos(pointer.rotation) * 16, Math.sin(pointer.rotation) * 16);
+  }
+
+  private createMapBackground(): void {
+    const { width, height } = VENUE_MAP.world;
+    const initialKey = this.textures.exists(MAP_TEXTURE_KEY)
+      ? MAP_TEXTURE_KEY
+      : this.textures.exists(MAP_PREVIEW_TEXTURE_KEY)
+        ? MAP_PREVIEW_TEXTURE_KEY
+        : null;
+    let image: Phaser.GameObjects.Image | null = null;
+
+    if (initialKey) {
+      image = this.add
+        .image(0, 0, initialKey)
+        .setOrigin(0, 0)
+        .setDisplaySize(width, height)
+        .setDepth(-1000);
+    } else {
+      this.drawMapFallback();
+    }
+
+    if (initialKey === MAP_TEXTURE_KEY) {
+      return;
+    }
+
+    // Download the full-resolution artwork in the background.
+    this.load.image(MAP_TEXTURE_KEY, VENUE_MAP.image.src);
+    this.load.once(Phaser.Loader.Events.COMPLETE, () => {
+      if (!this.sys.isActive() && !this.sys.isPaused()) {
+        return;
+      }
+
+      if (!this.textures.exists(MAP_TEXTURE_KEY)) {
+        if (!image) {
+          this.bridge.emit("game:map-fallback", {
+            message:
+              "The venue map could not be loaded. You can still walk, use the directory, and open venue details on a simplified background.",
+          });
+        }
+        return;
+      }
+
+      if (image?.active) {
+        image.setTexture(MAP_TEXTURE_KEY).setDisplaySize(width, height);
+      } else {
+        this.add
+          .image(0, 0, MAP_TEXTURE_KEY)
+          .setOrigin(0, 0)
+          .setDisplaySize(width, height)
+          .setDepth(-999);
+      }
+
+      if (this.textures.exists(MAP_PREVIEW_TEXTURE_KEY)) {
+        this.textures.remove(MAP_PREVIEW_TEXTURE_KEY);
+      }
+    });
+    this.load.start();
   }
 
   private drawMapFallback(): void {
@@ -1698,6 +1867,7 @@ export class BeachScene extends Phaser.Scene {
   };
 
   private handleShutdown(): void {
+    this.load.off(Phaser.Loader.Events.PROGRESS, this.handleLoadProgress);
     this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
     window.removeEventListener("blur", this.handleWindowBlur);
     window.removeEventListener("keydown", this.handleMovementKeyDown);
@@ -1728,6 +1898,8 @@ export class BeachScene extends Phaser.Scene {
     this.clearNavigationState();
     this.destroyProximityAlert();
     this.destroyTapTargets();
+    this.shellCompass = undefined;
+    this.shellCompassPointer = undefined;
     this.nearbyTween?.stop();
     this.nearbyTween = undefined;
     this.markerRings.clear();

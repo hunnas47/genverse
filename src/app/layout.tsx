@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Anek_Malayalam } from "next/font/google";
 import localFont from "next/font/local";
 
+import { EVENT_DATES, EVENT_PLACE, SITE_NAME, SITE_URL } from "@/lib/site";
+
 import "./globals.css";
 
 const neoverse = localFont({
@@ -62,9 +64,21 @@ const anekMalayalam = Anek_Malayalam({
 });
 
 export const metadata: Metadata = {
-  title: "GENVerse | GEN M Explorer",
-  description:
-    "Explore the GEN M beach venue, find every stage, and browse the official session programme.",
+  metadataBase: SITE_URL,
+  applicationName: SITE_NAME,
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: `Walk an illustrated map of the GEN M venue at ${EVENT_PLACE} (${EVENT_DATES}), find every stage, and plan your day with the programme.`,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export const viewport: Viewport = {

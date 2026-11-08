@@ -29,6 +29,10 @@ export interface GameEventMap {
    * The final map artwork failed to load. The scene keeps running with a
    * simplified background so movement and venue data remain usable.
    */
+  /** Asset loading progress before the scene starts, 0–1. */
+  "game:load-progress": {
+    progress: number;
+  };
   "game:map-fallback": {
     message: string;
   };

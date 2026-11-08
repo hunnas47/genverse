@@ -7,27 +7,34 @@ import Link from "next/link";
 import { LeaderboardOverlay } from "@/components/explore/leaderboard-overlay";
 import { AVATAR_ASSETS } from "@/game/avatar";
 import { cn } from "@/lib/utils";
-import type { QuestSnapshot } from "@/types/quest";
+import type { QuestSnapshot, QuestSyncInfo } from "@/types/quest";
 
 const HUD_BUTTON =
   "grid size-11 shrink-0 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime";
 
 function ProfileButton({
   snapshot,
+  sync,
   onOpen,
 }: {
   snapshot: QuestSnapshot | null;
+  sync: QuestSyncInfo;
   onOpen: () => void;
 }) {
+  // "local" means no backend is configured, which is not an outage.
+  const offline = sync.status === "offline" || sync.status === "error";
   const found = snapshot?.collectedShellIds.length ?? 0;
   const total = snapshot?.period.shellSet.shells.length ?? 0;
   const points = snapshot?.todayPoints ?? 0;
   const progress = total > 0 ? Math.min(100, (found / total) * 100) : 0;
   const name = snapshot?.profile?.displayName;
   const joined = snapshot?.joined ?? false;
-  const label = joined
+  const baseLabel = joined
     ? `${name ?? "Explorer"} profile. ${points} points today, ${found} of ${total} shells found. Open your Beach Quest profile.`
     : `Beach Quest: ${found} of ${total} shells found today. Open the quest and choose a name to join the leaderboard.`;
+  const label = offline
+    ? `${baseLabel} Offline: your progress is saved on this phone and will sync when you reconnect.`
+    : baseLabel;
 
   return (
     <button
@@ -40,6 +47,12 @@ function ProfileButton({
       className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/25 bg-brand-deep/85 py-0.5 pr-3.5 pl-0.5 text-white shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
     >
       <span className="relative grid size-10 shrink-0 place-items-center">
+        {offline && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-0.5 -left-0.5 z-10 size-3 rounded-full border-2 border-brand-deep bg-coral"
+          />
+        )}
         <span
           aria-hidden="true"
           className="absolute inset-0 rounded-full bg-white/15"
@@ -73,8 +86,13 @@ function ProfileButton({
           <Shell className="size-3.5" />
           {found}/{total}
         </span>
-        <span className="mt-1 font-display text-[9px] font-bold tracking-[0.14em] text-white/75 uppercase">
-          {joined ? `${points} pts` : "Join quest"}
+        <span
+          className={cn(
+            "mt-1 font-display text-[9px] font-bold tracking-[0.14em] uppercase",
+            offline ? "text-coral" : "text-white/75",
+          )}
+        >
+          {offline ? "Saved offline" : joined ? `${points} pts` : "Join quest"}
         </span>
       </span>
     </button>
@@ -83,12 +101,14 @@ function ProfileButton({
 
 export function ExploreHud({
   snapshot,
+  sync,
   leaderboardOpen,
   onOpenProfile,
   onOpenLeaderboard,
   onCloseLeaderboard,
 }: {
   snapshot: QuestSnapshot | null;
+  sync: QuestSyncInfo;
   leaderboardOpen: boolean;
   onOpenProfile: () => void;
   onOpenLeaderboard: () => void;
@@ -124,7 +144,11 @@ export function ExploreHud({
         </div>
 
         <div className="pointer-events-auto flex items-center gap-2">
-          <ProfileButton snapshot={snapshot} onOpen={onOpenProfile} />
+          <ProfileButton
+            snapshot={snapshot}
+            sync={sync}
+            onOpen={onOpenProfile}
+          />
 
           <button
             type="button"

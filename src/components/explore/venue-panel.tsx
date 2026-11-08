@@ -14,11 +14,15 @@ import { memo, useEffect, useRef, useState } from "react";
 
 import {
   formatSessionTimeRange,
+  getProgrammeDayAt,
+  getSessionEndMs,
   getSessionSpeakers,
+  getSessionStartMs,
   getSessionsForVenue,
   groupSessionsByDay,
   isMalayalam,
 } from "@/lib/programme";
+import { useEventClock } from "@/lib/use-event-clock";
 import { cn } from "@/lib/utils";
 import { formatActiveDays, VENUE_CATEGORY_LABELS } from "@/lib/venues";
 import type { Venue } from "@/types/venue";
@@ -53,6 +57,8 @@ export const VenuePanel = memo(function VenuePanel({
   const activeDays = formatActiveDays(venue.activeDays);
   const sessions = getSessionsForVenue(venue.id);
   const sessionGroups = groupSessionsByDay(sessions);
+  const nowMs = useEventClock();
+  const liveSession = getLiveVenueSession(sessions, nowMs);
 
   useEffect(() => {
     if (previousVenueIdRef.current !== venue.id) {
@@ -302,6 +308,32 @@ export const VenuePanel = memo(function VenuePanel({
           </div>
         )}
 
+        {liveSession && (
+          <Link
+            href={`/sessions?session=${liveSession.session.id}`}
+            className="mt-4 block rounded-2xl border border-brand-deep/15 bg-brand-deep p-3.5 text-cream transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+          >
+            <span className="flex items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.18em] text-lime uppercase">
+              {liveSession.kind === "now" && (
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-lime motion-safe:animate-pulse"
+                />
+              )}
+              {liveSession.kind === "now" ? "On now" : "Up next today"}
+              <span className="font-normal tracking-[0.08em] text-cream/75 normal-case">
+                · {formatSessionTimeRange(liveSession.session)}
+              </span>
+            </span>
+            <span
+              lang={isMalayalam(liveSession.session.title) ? "ml" : undefined}
+              className="mt-1 block text-sm leading-snug font-semibold"
+            >
+              {liveSession.session.title}
+            </span>
+          </Link>
+        )}
+
         {activeDays && (
           <div className="mt-4">
             <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
@@ -401,3 +433,41 @@ export const VenuePanel = memo(function VenuePanel({
     </aside>
   );
 });
+
+/**
+ * During the event, the session running at this venue now, or else the next
+ * one later the same day (Asia/Kolkata). Null before hydration and outside
+ * programme days.
+ */
+function getLiveVenueSession(
+  sessions: ReturnType<typeof getSessionsForVenue>,
+  nowMs: number | null,
+): { kind: "now" | "next"; session: (typeof sessions)[number] } | null {
+  if (nowMs === null) {
+    return null;
+  }
+
+  const today = getProgrammeDayAt(nowMs);
+
+  if (!today) {
+    return null;
+  }
+
+  const live = sessions.filter(
+    (session) => session.status !== "cancelled" && session.dayId === today.id,
+  );
+  const current = live.find(
+    (session) =>
+      getSessionStartMs(session) <= nowMs && nowMs < getSessionEndMs(session),
+  );
+
+  if (current) {
+    return { kind: "now", session: current };
+  }
+
+  const next = live
+    .filter((session) => getSessionStartMs(session) > nowMs)
+    .sort((a, b) => getSessionStartMs(a) - getSessionStartMs(b))[0];
+
+  return next ? { kind: "next", session: next } : null;
+}

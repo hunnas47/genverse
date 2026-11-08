@@ -46,6 +46,11 @@ export const VENUE_MARKER_TEXT_COLORS: Record<VenueCategory, string> = {
 export const VENUE_MAP: VenueMapConfig = {
   image: {
     src: "/images/genm-venue-map-final.webp",
+    /**
+     * Half-resolution copy (about 1/8 of the bytes) shown first so the map is
+     * playable sooner on mobile data; the full artwork swaps in when loaded.
+     */
+    previewSrc: "/images/genm-venue-map-preview.webp",
     width: 1467,
     height: 1072,
   },

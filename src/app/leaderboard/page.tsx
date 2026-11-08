@@ -5,12 +5,19 @@ import { LeaderboardBoard } from "@/components/leaderboard/leaderboard-board";
 import { ActionLink } from "@/components/site/action-link";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import {
+  SHELL_POINTS,
+  SHELL_SET_BONUS,
+  VENUE_CHECKIN_POINTS,
+} from "@/data/quest";
+import { pageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Beach Quest leaderboard | GEN M Explorer",
+export const metadata: Metadata = pageMetadata({
+  title: "Beach Quest leaderboard",
   description:
-    "See who is leading the GEN M Beach Quest today and all time. Find shells, check in at venues, and return to the beach map.",
-};
+    "See who is leading the GEN M Beach Quest today and all time. Find shells and stamp venues on the beach map to climb the board.",
+  path: "/leaderboard",
+});
 
 export default function LeaderboardPage() {
   return (
@@ -55,8 +62,9 @@ export default function LeaderboardPage() {
           </div>
 
           <p className="mt-4 text-[11px] text-white/55">
-            Daily reset · Asia/Kolkata (IST) · Shells 10 points · Venue check-in
-            25 points · Full shell set +50
+            Resets daily at midnight IST · Shell {SHELL_POINTS} points · Venue
+            stamp {VENUE_CHECKIN_POINTS} points · Full shell set +
+            {SHELL_SET_BONUS}
           </p>
 
           <div className="mt-8">

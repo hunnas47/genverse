@@ -26,12 +26,15 @@ function toCssColor(value: number): string {
  */
 export function MiniMap({
   playerPosition,
+  shells = [],
   target,
   onNavigate,
   onOpenDirectory,
   className,
 }: {
   playerPosition: MapPoint | null;
+  /** Today's shells that are still to be found. */
+  shells?: readonly MapPoint[];
   target: MapPoint | null;
   onNavigate: (point: MapPoint) => void;
   onOpenDirectory: () => void;
@@ -74,11 +77,11 @@ export function MiniMap({
       <button
         type="button"
         onClick={handleMapClick}
-        aria-label="Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. Your position is marked in lime."
+        aria-label={`Mini map. Tap or click to walk to a point. Press Enter to open the venue directory. You are the navy dot with a lime ring${shells.length > 0 ? `; ${shells.length} shells left to find are lime dots` : ""}.`}
         className="relative block w-full overflow-hidden rounded-xl border border-white/20 bg-cream/10 transition hover:border-lime/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
         style={{
           aspectRatio: `${VENUE_MAP.world.width} / ${VENUE_MAP.world.height}`,
-          backgroundImage: `url("${VENUE_MAP.image.src}")`,
+          backgroundImage: `url("${VENUE_MAP.image.previewSrc}")`,
           backgroundSize: "100% 100%",
         }}
       >
@@ -101,6 +104,18 @@ export function MiniMap({
           );
         })}
 
+        {shells.map((shell) => (
+          <span
+            key={`${shell.x}:${shell.y}`}
+            aria-hidden="true"
+            className="absolute size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime shadow-[0_0_0_2px_rgba(237,242,181,0.35)] motion-safe:animate-pulse"
+            style={{
+              left: `${(shell.x / VENUE_MAP.world.width) * 100}%`,
+              top: `${(shell.y / VENUE_MAP.world.height) * 100}%`,
+            }}
+          />
+        ))}
+
         {target && (
           <span
             data-testid="mini-map-target"
@@ -117,7 +132,7 @@ export function MiniMap({
           <span
             data-testid="mini-map-player"
             aria-hidden="true"
-            className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-brand-deep bg-lime shadow"
+            className="absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-lime bg-brand-deep shadow"
             style={{
               left: `${(playerPosition.x / VENUE_MAP.world.width) * 100}%`,
               top: `${(playerPosition.y / VENUE_MAP.world.height) * 100}%`,
@@ -170,6 +185,7 @@ export function MapButton({
 export function MapDrawer({
   open,
   playerPosition,
+  shells,
   target,
   onNavigate,
   onOpenDirectory,
@@ -177,6 +193,7 @@ export function MapDrawer({
 }: {
   open: boolean;
   playerPosition: MapPoint | null;
+  shells?: readonly MapPoint[];
   target: MapPoint | null;
   onNavigate: (point: MapPoint) => void;
   onOpenDirectory: () => void;
@@ -291,6 +308,7 @@ export function MapDrawer({
         >
           <MiniMap
             playerPosition={playerPosition}
+            shells={shells}
             target={target}
             onNavigate={onNavigate}
             onOpenDirectory={onOpenDirectory}
@@ -299,8 +317,8 @@ export function MapDrawer({
         </div>
 
         <p className="mt-3 text-[11px] leading-relaxed text-brand-deep/70 [@media(max-height:520px)]:hidden">
-          The lime dot is you. The dark dot is your walking target. Markers
-          match the coloured venue labels on the beach.
+          You are the navy dot with a lime ring, and the white dot is where
+          you&apos;re walking. Small lime dots are shells still to find.
         </p>
       </section>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Footprints, Sparkles, X } from "lucide-react";
+import { Footprints, Share2, Shell, Sparkles, X } from "lucide-react";
 import type Phaser from "phaser";
 
 import { ExploreHud } from "@/components/explore/explore-hud";
@@ -22,6 +22,7 @@ import { VENUE_MAP } from "@/data/venue-map";
 import { GameEventBridge } from "@/game/event-bridge";
 import { liveQuestStore } from "@/lib/quest/live-store";
 import { useQuest } from "@/lib/quest/use-quest";
+import { fullSetShareMessage, shareLink } from "@/lib/share";
 import type { MapPoint } from "@/types/map";
 import type { QuestNameResult } from "@/types/quest";
 import type { Venue } from "@/types/venue";
@@ -33,6 +34,24 @@ const BOOT_TIMEOUT_MS = 15000;
 const TOUR_STORAGE_KEY = "genm:explore:tour:v2";
 const SPAWN_MOVE_THRESHOLD = 28;
 let tourSeenInMemory = false;
+const NUDGE_STORAGE_PREFIX = "genm:explore:dismissed:";
+
+/** Per-day, per-tab dismissal for the join nudge and share card. */
+function isDismissed(key: string): boolean {
+  try {
+    return window.sessionStorage.getItem(NUDGE_STORAGE_PREFIX + key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function rememberDismissed(key: string): void {
+  try {
+    window.sessionStorage.setItem(NUDGE_STORAGE_PREFIX + key, "1");
+  } catch {
+    // The card still closes for this render.
+  }
+}
 
 function hasSeenTour(): boolean {
   if (typeof window === "undefined" || tourSeenInMemory) {
@@ -81,6 +100,7 @@ export function GameCanvas({
   const hasMovedRef = useRef(false);
   const [status, setStatus] = useState<GameStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loadProgress, setLoadProgress] = useState<number | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [mapFallbackMessage, setMapFallbackMessage] = useState<string | null>(
     null,
@@ -101,6 +121,9 @@ export function GameCanvas({
   const [tourOpen, setTourOpen] = useState(false);
   const [tourRun, setTourRun] = useState(0);
   const [walkingVenueId, setWalkingVenueId] = useState<string | null>(null);
+  const [dismissedCards, setDismissedCards] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const [questNotice, setQuestNotice] = useState<string | null>(null);
   const [questCelebration, setQuestCelebration] = useState<{
     points: number;
@@ -129,6 +152,7 @@ export function GameCanvas({
 
     setStatus("loading");
     setErrorMessage(null);
+    setLoadProgress(null);
     setMapFallbackMessage(null);
     setNearbyVenueId(null);
     setSelectedVenueId(null);
@@ -179,6 +203,14 @@ export function GameCanvas({
       window.clearTimeout(bootTimeout);
       setStatus("ready");
     });
+    const unsubscribeLoadProgress = bridge.on(
+      "game:load-progress",
+      ({ progress }) => {
+        if (!cancelled && !ready) {
+          setLoadProgress(progress);
+        }
+      },
+    );
     const unsubscribeMapFallback = bridge.on(
       "game:map-fallback",
       ({ message }) => {
@@ -332,6 +364,7 @@ export function GameCanvas({
       window.clearTimeout(bootTimeout);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       unsubscribeReady();
+      unsubscribeLoadProgress();
       unsubscribeMapFallback();
       unsubscribeNearby();
       unsubscribeInteract();
@@ -610,6 +643,60 @@ export function GameCanvas({
     }
   }, [selectedVenueId, checkingInVenueId, canCheckInSelected]);
 
+  const questSnapshot = quest.snapshot;
+  const shellsFound = questSnapshot?.collectedShellIds.length ?? 0;
+  const shellsTotal = questSnapshot?.period.shellSet.shells.length ?? 0;
+  const periodKey = questSnapshot?.period.id ?? "";
+  const joinNudgeKey = `join:${periodKey}`;
+  const shareKey = `share:${periodKey}`;
+  const overlayOpen =
+    !!selectedVenue ||
+    directoryOpen ||
+    mapDrawerOpen ||
+    leaderboardOpen ||
+    questPanelOpen ||
+    joinDialogOpen;
+  const remainingShells =
+    questSnapshot?.period.shellSet.shells.filter(
+      (shell) => !questSnapshot.collectedShellIds.includes(shell.id),
+    ) ?? [];
+  // Guests can collect, but only named players appear on the leaderboard.
+  const showJoinNudge =
+    !!questSnapshot &&
+    !questSnapshot.joined &&
+    shellsFound > 0 &&
+    !tourOpen &&
+    !overlayOpen &&
+    !questCelebration &&
+    !dismissedCards.has(joinNudgeKey) &&
+    !isDismissed(joinNudgeKey);
+  const showShareCard =
+    shellsTotal > 0 &&
+    shellsFound >= shellsTotal &&
+    !tourOpen &&
+    !overlayOpen &&
+    !questCelebration &&
+    !showJoinNudge &&
+    !dismissedCards.has(shareKey) &&
+    !isDismissed(shareKey);
+
+  const dismissCard = useCallback((key: string) => {
+    rememberDismissed(key);
+    setDismissedCards((current) => new Set(current).add(key));
+  }, []);
+
+  const shareFullSet = useCallback(async () => {
+    const outcome = await shareLink(
+      fullSetShareMessage(shellsTotal, questSnapshot?.todayPoints ?? 0),
+    );
+
+    if (outcome === "copied") {
+      setQuestNotice("Link copied. Paste it into WhatsApp or anywhere.");
+    } else if (outcome === "failed") {
+      setQuestNotice("Sharing isn't available in this browser.");
+    }
+  }, [questSnapshot?.todayPoints, shellsTotal]);
+
   const showBottomControls =
     status === "ready" &&
     !selectedVenue &&
@@ -651,13 +738,36 @@ export function GameCanvas({
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3 text-white">
-              <span
-                aria-hidden="true"
-                className="size-8 rounded-full border-2 border-lime/25 border-t-lime motion-safe:animate-spin"
-              />
+            <div className="flex w-full max-w-60 flex-col items-center gap-3 text-white">
               <p className="font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
                 Preparing the beach
+              </p>
+              <div
+                role="progressbar"
+                aria-label="Loading the beach map"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={
+                  loadProgress === null
+                    ? undefined
+                    : Math.round(loadProgress * 100)
+                }
+                className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/15"
+              >
+                {loadProgress === null ? (
+                  // The game engine is still downloading; no byte count yet.
+                  <span className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-lime/70 motion-safe:animate-pulse" />
+                ) : (
+                  <span
+                    className="absolute inset-y-0 left-0 rounded-full bg-lime transition-[width] duration-200 motion-reduce:transition-none"
+                    style={{ width: `${Math.max(8, loadProgress * 100)}%` }}
+                  />
+                )}
+              </div>
+              <p className="text-[11px] text-white/70">
+                {loadProgress === null
+                  ? "Loading the game…"
+                  : "Downloading the map…"}
               </p>
             </div>
           )}
@@ -666,6 +776,7 @@ export function GameCanvas({
 
       <ExploreHud
         snapshot={quest.snapshot}
+        sync={quest.sync}
         leaderboardOpen={leaderboardOpen}
         onOpenProfile={openProfile}
         onOpenLeaderboard={openLeaderboard}
@@ -738,6 +849,75 @@ export function GameCanvas({
             </div>
           )}
 
+          {showJoinNudge && questSnapshot && (
+            <section
+              aria-label="Join the leaderboard"
+              className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-brand-deep/15 bg-cream/95 p-3 text-brand-deep shadow-lift backdrop-blur-md"
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-lime text-brand-deep">
+                <Shell aria-hidden="true" className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm leading-tight font-semibold">
+                  Save your {questSnapshot.todayPoints} points
+                </p>
+                <p className="mt-0.5 text-xs leading-snug text-brand-deep/75">
+                  Pick a name to join today&apos;s leaderboard.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={openJoinDialog}
+                className="order-last inline-flex min-h-11 w-full shrink-0 items-center justify-center @[20rem]:order-none @[20rem]:w-auto rounded-full bg-brand-deep px-3.5 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              >
+                Pick a name
+              </button>
+              <button
+                type="button"
+                onClick={() => dismissCard(joinNudgeKey)}
+                aria-label="Not now"
+                className="-mr-1 grid size-11 shrink-0 place-items-center rounded-full text-brand-deep/60 transition hover:bg-brand-deep/5 hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              >
+                <X aria-hidden="true" className="size-4" />
+              </button>
+            </section>
+          )}
+
+          {showShareCard && (
+            <section
+              aria-label="Share your full set"
+              className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-lime/30 bg-brand-deep/95 p-3 text-cream shadow-lift backdrop-blur-md"
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-lime text-brand-deep">
+                <Sparkles aria-hidden="true" className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm leading-tight font-semibold">
+                  All {shellsTotal} shells found!
+                </p>
+                <p className="mt-0.5 text-xs leading-snug text-cream/75">
+                  Challenge your friends to find them too.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void shareFullSet()}
+                className="order-last inline-flex min-h-11 w-full shrink-0 items-center justify-center @[20rem]:order-none @[20rem]:w-auto gap-1.5 rounded-full bg-lime px-3.5 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+              >
+                <Share2 aria-hidden="true" className="size-3.5" />
+                Share
+              </button>
+              <button
+                type="button"
+                onClick={() => dismissCard(shareKey)}
+                aria-label="Dismiss"
+                className="-mr-1 grid size-11 shrink-0 place-items-center rounded-full text-cream/70 transition hover:bg-white/10 hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+              >
+                <X aria-hidden="true" className="size-4" />
+              </button>
+            </section>
+          )}
+
           {tourOpen && (
             <ExploreTour
               key={tourRun}
@@ -771,6 +951,7 @@ export function GameCanvas({
           />
           <MiniMap
             playerPosition={playerPosition}
+            shells={remainingShells}
             target={navigationTarget}
             onNavigate={navigateToPoint}
             onOpenDirectory={openDirectory}
@@ -782,6 +963,7 @@ export function GameCanvas({
       <MapDrawer
         open={mapDrawerOpen}
         playerPosition={playerPosition}
+        shells={remainingShells}
         target={navigationTarget}
         onNavigate={navigateToPoint}
         onOpenDirectory={openDirectory}

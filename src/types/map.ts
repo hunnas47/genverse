@@ -17,6 +17,8 @@ export interface MapPoint {
 
 export interface MapImageConfig {
   src: string;
+  /** Smaller copy of the same artwork for fast first paint and thumbnails. */
+  previewSrc: string;
   width: number;
   height: number;
 }

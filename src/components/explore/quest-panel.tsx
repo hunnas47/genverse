@@ -8,18 +8,20 @@ import {
   Flame,
   MapPin,
   RotateCcw,
+  Share2,
   Sparkles,
   Trophy,
   X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { VENUES } from "@/data/venues";
 import { AVATAR_ASSETS } from "@/game/avatar";
 import { VENUE_CATEGORY_LABELS } from "@/lib/venues";
 import { formatPeriodLabel } from "@/lib/quest/period";
+import { fullSetShareMessage, shareLink } from "@/lib/share";
 import type { QuestSnapshot, QuestSyncInfo } from "@/types/quest";
 
 const MAP_VENUES = VENUES.filter((venue) => venue.mapPosition);
@@ -42,6 +44,21 @@ export function QuestPanel({
   const found = snapshot.collectedShellIds.length;
   const total = snapshot.period.shellSet.shells.length;
   const checkedIn = snapshot.checkedInVenueIds.length;
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
+
+  const shareFullSet = async () => {
+    const outcome = await shareLink(
+      fullSetShareMessage(total, snapshot.todayPoints),
+    );
+
+    setShareStatus(
+      outcome === "copied"
+        ? "Link copied. Paste it into WhatsApp or anywhere."
+        : outcome === "failed"
+          ? "Sharing isn't available in this browser."
+          : null,
+    );
+  };
   const presenceLabel =
     sync.presenceCount === 1
       ? "1 explorer here now"
@@ -227,10 +244,26 @@ export function QuestPanel({
             })}
           </ul>
 
-          <p className="mt-2 text-[11px] leading-relaxed text-brand-deep/70">
-            Walk close to a glowing shell to collect it. Find the full set for a
-            50-point bonus.
-          </p>
+          {total > 0 && found >= total ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void shareFullSet()}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-4 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              >
+                <Share2 aria-hidden="true" className="size-3.5" />
+                Share your full set
+              </button>
+              <p role="status" className="text-[11px] text-brand-deep/70">
+                {shareStatus}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-2 text-[11px] leading-relaxed text-brand-deep/70">
+              Walk close to a glowing shell to collect it. Find the full set for
+              a 50-point bonus. Lime dots on the map show shells still to find.
+            </p>
+          )}
         </section>
 
         <section className="mt-5">

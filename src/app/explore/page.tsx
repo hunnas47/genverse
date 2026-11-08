@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { ExplorePageContent } from "@/components/explore/explore-page-content";
+import { EVENT_PLACE, pageMetadata } from "@/lib/site";
 import type { SearchParams } from "@/types/search";
 
-export const metadata: Metadata = {
-  title: "Genverse Explorer",
-  description:
-    "Walk around the GEN M venue map, open venue details, and see the official session programme.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Beach map",
+  description: `Walk the illustrated GEN M venue at ${EVENT_PLACE}, open any stage to see its sessions, and find today's shells in the Beach Quest.`,
+  path: "/explore",
+});
 
 function ExploreLoading() {
   return (

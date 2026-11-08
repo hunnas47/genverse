@@ -16,13 +16,14 @@ import {
   SESSIONS,
   SPEAKERS,
 } from "@/lib/programme";
+import { EVENT_DATES, pageMetadata } from "@/lib/site";
 import type { SearchParams } from "@/types/search";
 
-export const metadata: Metadata = {
-  title: "Programme | GEN M Explorer",
-  description:
-    "Browse the official GEN M session programme by day and venue, then locate each venue on the beach map.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Programme",
+  description: `All ${SESSIONS.length} GEN M sessions, ${EVENT_DATES}, by day and venue, with what's on now during the event. Tap any session to find its stage on the beach map.`,
+  path: "/sessions",
+});
 
 function SessionsLoading() {
   return (

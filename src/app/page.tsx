@@ -24,14 +24,22 @@ import {
   SESSIONS,
   SPEAKERS,
 } from "@/lib/programme";
+import {
+  EVENT_DATES,
+  EVENT_PLACE,
+  pageMetadata,
+  SITE_NAME,
+} from "@/lib/site";
 import { formatActiveDays } from "@/lib/venues";
 import type { Venue } from "@/types/venue";
 
-export const metadata: Metadata = {
-  title: "GENVerse | GEN M Explorer",
-  description:
-    "Explore the GEN M beach venue, find every stage, and browse the official session programme.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: `${SITE_NAME}: walk the GEN M beach before you get there`,
+  description: `An illustrated map of the GEN M venue at ${EVENT_PLACE}, ${EVENT_DATES}. Find every stage, browse ${SESSIONS.length} sessions, and hunt for shells in the Beach Quest.`,
+  path: "/",
+  // Already names the site; skip the layout's title template.
+  absoluteTitle: true,
+});
 
 const stageVenues = VENUES.filter((venue) => venue.category === "stage");
 const previewVenues = stageVenues.slice(0, 3);
