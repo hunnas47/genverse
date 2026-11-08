@@ -14,7 +14,9 @@ export interface CreateGameOptions {
   collectedShellIds?: readonly string[];
 }
 
-const MAX_RENDER_SCALE = 3;
+// 2x keeps the map sharp on phones; 3x drew ~2.25x the pixels every frame
+// for little visible gain and was the main GPU cost on mid-range Android.
+const MAX_RENDER_SCALE = 2;
 const MAX_RENDER_PIXELS = 12_000_000;
 
 /**

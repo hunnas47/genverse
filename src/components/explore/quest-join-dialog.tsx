@@ -108,7 +108,7 @@ export function QuestJoinDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-brand-deep/70 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 grid place-items-center bg-brand-deep/70 px-4 sm:backdrop-blur-sm"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onDismiss();

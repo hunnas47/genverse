@@ -826,7 +826,7 @@ export function GameCanvas({
           {walkingVenueId && !selectedVenue && (
             <div
               role="status"
-              className="pointer-events-auto flex max-w-[min(20rem,100%)] items-center gap-2 rounded-full border border-white/20 bg-brand-deep/90 py-1 pr-1 pl-3.5 text-white shadow-lift backdrop-blur-md"
+              className="pointer-events-auto flex max-w-[min(20rem,100%)] items-center gap-2 rounded-full border border-white/20 bg-brand-deep/90 py-1 pr-1 pl-3.5 text-white shadow-lift sm:backdrop-blur-md"
             >
               <Footprints
                 aria-hidden="true"
@@ -852,7 +852,7 @@ export function GameCanvas({
           {showJoinNudge && questSnapshot && (
             <section
               aria-label="Join the leaderboard"
-              className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-brand-deep/15 bg-cream/95 p-3 text-brand-deep shadow-lift backdrop-blur-md"
+              className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-brand-deep/15 bg-cream/95 p-3 text-brand-deep shadow-lift sm:backdrop-blur-md"
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-lime text-brand-deep">
                 <Shell aria-hidden="true" className="size-5" />
@@ -886,7 +886,7 @@ export function GameCanvas({
           {showShareCard && (
             <section
               aria-label="Share your full set"
-              className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-lime/30 bg-brand-deep/95 p-3 text-cream shadow-lift backdrop-blur-md"
+              className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-lime/30 bg-brand-deep/95 p-3 text-cream shadow-lift sm:backdrop-blur-md"
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-lime text-brand-deep">
                 <Sparkles aria-hidden="true" className="size-5" />
@@ -982,7 +982,7 @@ export function GameCanvas({
           <button
             type="button"
             onClick={cancelNavigation}
-            className="pointer-events-auto absolute bottom-6 left-1/2 z-30 hidden min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime lg:inline-flex"
+            className="pointer-events-auto absolute bottom-6 left-1/2 z-30 hidden min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift sm:backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime lg:inline-flex"
           >
             <X aria-hidden="true" className="size-3.5" />
             Stop walking
@@ -1050,7 +1050,7 @@ export function GameCanvas({
           aria-live="polite"
           className="pointer-events-none fixed inset-0 z-40 grid place-items-center px-6"
         >
-          <div className="quest-celebration-pop relative overflow-hidden rounded-[2rem] border border-lime/30 bg-brand-deep/95 px-7 py-5 text-center text-white shadow-lift backdrop-blur-md">
+          <div className="quest-celebration-pop relative overflow-hidden rounded-[2rem] border border-lime/30 bg-brand-deep/95 px-7 py-5 text-center text-white shadow-lift sm:backdrop-blur-md">
             <span
               aria-hidden="true"
               className="absolute -top-10 left-1/2 size-28 -translate-x-1/2 rounded-full bg-lime/20 blur-2xl"

@@ -11,6 +11,17 @@ import { VENUES, VENUES_BY_ID } from "@/data/venues";
 import { VENUE_MAP, getVenueAccent } from "@/data/venue-map";
 import type { GameEventBridge } from "@/game/event-bridge";
 import {
+  FX_BASE,
+  fxCircle,
+  fxEllipse,
+  pointerTexture,
+  sparkleTexture,
+  venueLabelTexture,
+  venueMarkerTexture,
+  type VenueLabelSpec,
+  type VenueMarkerSpec,
+} from "@/game/fx-textures";
+import {
   ensureShellTextures,
   SHELL_DISPLAY_SIZE,
   SHELL_GLOW_DISPLAY_SIZE,
@@ -39,6 +50,11 @@ const MOBILE_PLAYER_SPEED = 180;
 const MARKER_DEPTH = 5000;
 const PATH_DEPTH = -500;
 const PLAYER_POSITION_INTERVAL = 80;
+/**
+ * Each position event re-renders the React HUD. Phones have no always-on
+ * minimap, so a slower rate is enough there and saves main-thread time.
+ */
+const MOBILE_PLAYER_POSITION_INTERVAL = 250;
 const WAYPOINT_ARRIVAL_DISTANCE = 6;
 const GRID_CELL_SIZE = 20;
 const VENUE_TAP_RADIUS = 38;
@@ -104,16 +120,14 @@ export class BeachScene extends Phaser.Scene {
   private reducedMotion = false;
   private mobileLayout = false;
   private nearbyVenueId: string | null = null;
-  private readonly markerRings = new Map<string, Phaser.GameObjects.Arc>();
+  private readonly markerRings = new Map<string, Phaser.GameObjects.Image>();
   private readonly venueLabels = new Map<
     string,
     {
-      label: Phaser.GameObjects.Container;
-      text: Phaser.GameObjects.Text;
-      background: Phaser.GameObjects.Graphics;
-      parts: Array<Phaser.GameObjects.Graphics | Phaser.GameObjects.Text>;
-      accent: number;
-      isStage: boolean;
+      label: Phaser.GameObjects.Image;
+      marker: Phaser.GameObjects.Image;
+      markerSpec: Omit<VenueMarkerSpec, "fontFamily" | "version">;
+      labelSpec: Omit<VenueLabelSpec, "fontFamily" | "version">;
     }
   >();
   /** Brand sans for canvas text, read from the CSS variable next/font sets. */
@@ -127,7 +141,7 @@ export class BeachScene extends Phaser.Scene {
   private readonly proximityAlertBob = { offset: 0 };
   private readonly tapTargets = new Set<Phaser.GameObjects.Image>();
   private shellCompass?: Phaser.GameObjects.Container;
-  private shellCompassPointer?: Phaser.GameObjects.Triangle;
+  private shellCompassPointer?: Phaser.GameObjects.Image;
 
   private readonly shellMarkers = new Map<
     string,
@@ -145,7 +159,7 @@ export class BeachScene extends Phaser.Scene {
   private destination: MapPoint | null = null;
   private pendingVenueId: string | null = null;
   private pathGraphics?: Phaser.GameObjects.Graphics;
-  private targetMarker?: Phaser.GameObjects.Arc;
+  private targetMarker?: Phaser.GameObjects.Image;
   private targetTween?: Phaser.Tweens.Tween;
   private unsubscribeMove?: () => void;
   private unsubscribeNavigate?: () => void;
@@ -329,17 +343,20 @@ export class BeachScene extends Phaser.Scene {
       return;
     }
 
-    const disc = this.add
-      .circle(0, 0, 15, 0xedf2b5, 0.95)
-      .setStrokeStyle(2.5, 0x2c2d6f, 0.95);
+    const disc = fxCircle(this, 0, 0, {
+      radius: 15,
+      fill: { color: "#edf2b5", alpha: 0.95 },
+      stroke: { width: 2.5, color: "#2c2d6f", alpha: 0.95 },
+    });
     const spiral = this.add
       .image(0, 0, SHELL_TEXTURE)
       .setDisplaySize(20, 20);
 
     // Points along +x; rotated toward the shell each frame.
     const pointer = this.add
-      .triangle(22, 0, 0, -6, 0, 6, 9, 0, 0x2c2d6f, 1)
-      .setOrigin(0, 0.5);
+      .image(22, 0, pointerTexture(this))
+      .setOrigin(0, 0.5)
+      .setScale(FX_BASE);
 
     this.shellCompassPointer = pointer;
     this.shellCompass = this.add
@@ -546,84 +563,70 @@ export class BeachScene extends Phaser.Scene {
       // markers; facilities are small way-finding dots.
       const size = isStage ? 16 : isFacility ? 11 : 13;
 
-      this.add
-        .ellipse(x, y + size * 0.55, size * 2.1, size * 0.9, 0x1c1d3a, 0.28)
+      fxEllipse(this, x, y + size * 0.55, size * 2.1, size * 0.9, "#1c1d3a", 0.28)
         .setDepth(markerDepth - 1);
 
-      const ring = this.add
-        .circle(x, y, size + 9)
-        .setStrokeStyle(2, 0xffffff, 0.9)
-        .setFillStyle(accent.fill, 0.16)
+      const ring = fxCircle(this, x, y, {
+        radius: size + 9,
+        fill: { color: accent.css, alpha: 0.16 },
+        stroke: { width: 2, color: "#ffffff", alpha: 0.9 },
+      })
         .setDepth(markerDepth)
         .setAlpha(0.3);
 
-      // Shape encodes the kind of place: discs for stages and facilities,
-      // rounded squares for expo halls, diamonds for booths.
-      const shape = this.add.graphics({ x, y }).setDepth(markerDepth + 1);
-      shape.fillStyle(accent.fill, 1);
-      shape.lineStyle(isStage ? 3 : 2, 0xffffff, 0.95);
-
-      if (venue.category === "expo") {
-        shape.fillRoundedRect(-size, -size, size * 2, size * 2, 6);
-        shape.strokeRoundedRect(-size, -size, size * 2, size * 2, 6);
-      } else if (venue.category === "booth") {
-        const points = [
-          new Phaser.Math.Vector2(0, -size - 2),
-          new Phaser.Math.Vector2(size + 2, 0),
-          new Phaser.Math.Vector2(0, size + 2),
-          new Phaser.Math.Vector2(-size - 2, 0),
-        ];
-        shape.fillPoints(points, true);
-        shape.strokePoints(points, true);
-      } else {
-        shape.fillCircle(0, 0, size);
-        shape.strokeCircle(0, 0, size);
-      }
-
-      if (isStage) {
-        // A thin navy inner ring gives stages a badge-like finish.
-        shape.lineStyle(1.5, 0x2c2d6f, 0.35);
-        shape.strokeCircle(0, 0, size - 4);
-      }
-
-      const code = this.add
-        .text(x, y, venue.mapLabel, {
-          fontFamily: this.labelFontFamily,
-          fontSize: isStage ? "12px" : "10px",
-          fontStyle: "bold",
-          color: accent.text,
-        })
-        .setOrigin(0.5)
-        .setResolution(2)
-        .setDepth(markerDepth + 2);
+      const markerSpec = {
+        id: venue.id,
+        // Shape encodes the kind of place: discs for stages and facilities,
+        // rounded squares for expo halls, diamonds for booths.
+        shape:
+          venue.category === "expo"
+            ? ("square" as const)
+            : venue.category === "booth"
+              ? ("diamond" as const)
+              : ("disc" as const),
+        size,
+        isStage,
+        fill: accent.css,
+        textColor: accent.text,
+        code: venue.mapLabel,
+      };
+      const marker = this.add
+        .image(
+          x,
+          y,
+          venueMarkerTexture(this, {
+            ...markerSpec,
+            fontFamily: this.labelFontFamily,
+            version: 0,
+          }),
+        )
+        .setScale(FX_BASE)
+        .setDepth(markerDepth + 1);
 
       // A readable name under the code letter: "R" alone means nothing to a
       // first-time visitor. Pills match the HUD's rounded navy chips.
-      const label = this.add.container(x, y + size + 6).setDepth(
-        markerDepth + 2,
-      );
-      const labelText = this.add
-        .text(0, 0, venue.name, {
-          fontFamily: this.labelFontFamily,
-          fontSize: isStage ? "11px" : "10px",
-          fontStyle: "bold",
-          color: isStage ? "#edf2b5" : "#f7f3e8",
-          align: "center",
-          wordWrap: { width: 112 },
-        })
+      const labelSpec = {
+        id: venue.id,
+        name: venue.name,
+        isStage,
+        accent: accent.css,
+      };
+      const labelTexture = venueLabelTexture(this, {
+        ...labelSpec,
+        fontFamily: this.labelFontFamily,
+        version: 0,
+      });
+      const label = this.add
+        .image(x, y + size + 3, labelTexture.key)
         .setOrigin(0.5, 0)
-        .setResolution(2);
-      const labelBackground = this.add.graphics();
-      label.add([labelBackground, labelText]);
-      this.drawLabelPill(labelBackground, labelText, accent.fill, isStage);
+        .setScale(FX_BASE)
+        .setDepth(markerDepth + 2);
 
       this.venueLabels.set(venue.id, {
         label,
-        text: labelText,
-        background: labelBackground,
-        parts: [shape, code],
-        accent: accent.fill,
-        isStage,
+        marker,
+        markerSpec,
+        labelSpec,
       });
       this.markerRings.set(venue.id, ring);
     }
@@ -631,33 +634,9 @@ export class BeachScene extends Phaser.Scene {
     this.refreshLabelFont();
   }
 
-  private drawLabelPill(
-    background: Phaser.GameObjects.Graphics,
-    text: Phaser.GameObjects.Text,
-    accent: number,
-    isStage: boolean,
-  ): void {
-    const padX = 7;
-    const padY = 3;
-    const width = text.width + padX * 2;
-    const height = text.height + padY * 2;
-    const radius = Math.min(height / 2, 10);
-
-    background.clear();
-    background.fillStyle(0x1c1d3a, 0.25);
-    background.fillRoundedRect(-width / 2, -padY + 2, width, height, radius);
-    background.fillStyle(0x2c2d6f, 0.9);
-    background.fillRoundedRect(-width / 2, -padY, width, height, radius);
-
-    if (isStage) {
-      background.lineStyle(1.5, accent, 0.9);
-      background.strokeRoundedRect(-width / 2, -padY, width, height, radius);
-    }
-  }
-
   /**
-   * Phaser renders text once, so labels drawn before the brand font finishes
-   * loading keep the fallback. Re-render them when the font is ready.
+   * Canvas text uses whatever font is loaded when it is drawn, so markers and
+   * labels baked before the brand font arrives are redrawn once it does.
    */
   private refreshLabelFont(): void {
     if (typeof document === "undefined" || !("fonts" in document)) {
@@ -671,18 +650,30 @@ export class BeachScene extends Phaser.Scene {
       .then(() => {
         // Shutdown clears the map, so a late load after unmount is a no-op.
         for (const entry of this.venueLabels.values()) {
-          for (const part of entry.parts) {
-            if (part instanceof Phaser.GameObjects.Text) {
-              part.setFontFamily(family);
-            }
-          }
-          entry.text.setFontFamily(family);
-          this.drawLabelPill(
-            entry.background,
-            entry.text,
-            entry.accent,
-            entry.isStage,
+          const oldMarker = entry.marker.texture.key;
+          const oldLabel = entry.label.texture.key;
+
+          entry.marker.setTexture(
+            venueMarkerTexture(this, {
+              ...entry.markerSpec,
+              fontFamily: family,
+              version: 1,
+            }),
           );
+          entry.label.setTexture(
+            venueLabelTexture(this, {
+              ...entry.labelSpec,
+              fontFamily: family,
+              version: 1,
+            }).key,
+          );
+
+          if (oldMarker !== entry.marker.texture.key) {
+            this.textures.remove(oldMarker);
+          }
+          if (oldLabel !== entry.label.texture.key) {
+            this.textures.remove(oldLabel);
+          }
         }
       })
       .catch(() => undefined);
@@ -698,23 +689,20 @@ export class BeachScene extends Phaser.Scene {
     }
 
     const px = this.player.x;
-    const py = this.player.y - AVATAR_DISPLAY_HEIGHT / 2;
+    const top = this.player.y - AVATAR_DISPLAY_HEIGHT;
+    const bottom = this.player.y;
 
     for (const entry of this.venueLabels.values()) {
-      const halfWidth = entry.text.width / 2 + 14;
-      const top = entry.label.y - 8;
-      const bottom = entry.label.y + entry.text.height + 10;
+      const { label, marker } = entry;
       const overlapsLabel =
-        Math.abs(px - entry.label.x) < halfWidth + 10 &&
-        py + AVATAR_DISPLAY_HEIGHT / 2 > top &&
-        py - AVATAR_DISPLAY_HEIGHT / 2 < bottom;
+        Math.abs(px - label.x) < label.displayWidth / 2 + 24 &&
+        bottom > label.y - marker.displayHeight &&
+        top < label.y + label.displayHeight;
       const target = overlapsLabel ? 0.28 : 1;
 
-      if (entry.label.alpha !== target) {
-        entry.label.setAlpha(target);
-        for (const part of entry.parts) {
-          part.setAlpha(overlapsLabel ? 0.45 : 1);
-        }
+      if (label.alpha !== target) {
+        label.setAlpha(target);
+        marker.setAlpha(overlapsLabel ? 0.45 : 1);
       }
     }
   }
@@ -728,12 +716,13 @@ export class BeachScene extends Phaser.Scene {
       const container = this.add
         .container(shell.x, shell.y)
         .setDepth(shell.y + 6);
-      const shadow = this.add.ellipse(0, 12, 24, 8, 0x17343e, 0.25);
+      const shadow = fxEllipse(this, 0, 12, 24, 8, "#17343e", 0.25);
       // A lime sonar ring and soft halo make shells findable from a distance
       // without turning them into button-like discs.
-      const pulse = this.add
-        .circle(0, 0, 16)
-        .setStrokeStyle(3, 0xedf2b5, 0.9);
+      const pulse = fxCircle(this, 0, 0, {
+        radius: 16,
+        stroke: { width: 3, color: "#edf2b5", alpha: 0.9 },
+      });
       const glow = this.add
         .image(0, 0, SHELL_GLOW_TEXTURE)
         .setDisplaySize(SHELL_GLOW_DISPLAY_SIZE, SHELL_GLOW_DISPLAY_SIZE);
@@ -743,7 +732,8 @@ export class BeachScene extends Phaser.Scene {
         .setDisplaySize(SHELL_DISPLAY_SIZE, SHELL_DISPLAY_SIZE);
       // A small glint that sweeps across the shell now and then.
       const glint = this.add
-        .star(-4, -6, 4, 1.2, 5, 0xffffff, 1)
+        .image(-4, -6, sparkleTexture(this))
+        .setScale(0.4 * FX_BASE)
         .setAlpha(0);
 
       bob.add([sprite, glint]);
@@ -754,7 +744,7 @@ export class BeachScene extends Phaser.Scene {
         this.tweens.add({
           targets: glint,
           alpha: { from: 0, to: 1 },
-          scale: { from: 0.4, to: 1.2 },
+          scale: { from: 0.4 * FX_BASE, to: 1.2 * FX_BASE },
           angle: { from: 0, to: 90 },
           duration: 420,
           yoyo: true,
@@ -769,7 +759,7 @@ export class BeachScene extends Phaser.Scene {
         // A sonar ring makes shells findable at a glance from a distance.
         this.tweens.add({
           targets: pulse,
-          scale: { from: 1, to: 2.4 },
+          scale: { from: FX_BASE, to: 2.4 * FX_BASE },
           alpha: { from: 0.9, to: 0 },
           duration: 1600,
           delay,
@@ -786,7 +776,7 @@ export class BeachScene extends Phaser.Scene {
           ease: "Sine.easeInOut",
         });
       } else {
-        pulse.setScale(1.5).setAlpha(0.6);
+        pulse.setScale(1.5 * FX_BASE).setAlpha(0.6);
       }
     }
   }
@@ -886,14 +876,14 @@ export class BeachScene extends Phaser.Scene {
       .setDepth(MARKER_DEPTH + 20);
 
     if (!this.reducedMotion) {
-      const ring = this.add
-        .circle(x, y, 10)
-        .setStrokeStyle(2, 0xedf2b5, 0.9)
-        .setDepth(MARKER_DEPTH + 19);
+      const ring = fxCircle(this, x, y, {
+        radius: 10,
+        stroke: { width: 2, color: "#edf2b5", alpha: 0.9 },
+      }).setDepth(MARKER_DEPTH + 19);
 
       this.tweens.add({
         targets: ring,
-        scale: 3,
+        scale: 3 * FX_BASE,
         alpha: 0,
         duration: 520,
         ease: "Cubic.easeOut",
@@ -903,16 +893,17 @@ export class BeachScene extends Phaser.Scene {
       for (let index = 0; index < 8; index += 1) {
         const angle = (Math.PI * 2 * index) / 8 + Math.random() * 0.35;
         const distance = 26 + Math.random() * 18;
-        const spark = this.add
-          .circle(x, y, 2.5, index % 2 === 0 ? 0xedf2b5 : 0xf7f3e8, 0.95)
-          .setDepth(MARKER_DEPTH + 21);
+        const spark = fxCircle(this, x, y, {
+          radius: 2.5,
+          fill: { color: index % 2 === 0 ? "#edf2b5" : "#f7f3e8", alpha: 0.95 },
+        }).setDepth(MARKER_DEPTH + 21);
 
         this.tweens.add({
           targets: spark,
           x: x + Math.cos(angle) * distance,
           y: y + Math.sin(angle) * distance,
           alpha: 0,
-          scale: 0.2,
+          scale: 0.2 * FX_BASE,
           duration: 520 + Math.random() * 180,
           ease: "Cubic.easeOut",
           onComplete: () => spark.destroy(),
@@ -1023,7 +1014,7 @@ export class BeachScene extends Phaser.Scene {
 
     for (const [venueId, ring] of this.markerRings) {
       ring.setAlpha(venueId === this.nearbyVenueId ? 1 : 0.3);
-      ring.setScale(1);
+      ring.setScale(FX_BASE);
     }
 
     const nearbyRing = this.nearbyVenueId
@@ -1035,13 +1026,13 @@ export class BeachScene extends Phaser.Scene {
     }
 
     if (this.reducedMotion) {
-      nearbyRing.setScale(1.35);
+      nearbyRing.setScale(1.35 * FX_BASE);
       return;
     }
 
     this.nearbyTween = this.tweens.add({
       targets: nearbyRing,
-      scale: { from: 1.05, to: 1.4 },
+      scale: { from: 1.05 * FX_BASE, to: 1.4 * FX_BASE },
       alpha: { from: 1, to: 0.55 },
       duration: 900,
       yoyo: true,
@@ -1715,18 +1706,18 @@ export class BeachScene extends Phaser.Scene {
     this.targetTween?.stop();
     this.targetMarker?.destroy();
 
-    const marker = this.add
-      .circle(goal.x, goal.y, 16)
-      .setStrokeStyle(3, 0xedf2b5, 0.95)
-      .setFillStyle(0xedf2b5, 0.12)
-      .setDepth(MARKER_DEPTH + 2);
+    const marker = fxCircle(this, goal.x, goal.y, {
+      radius: 16,
+      fill: { color: "#edf2b5", alpha: 0.12 },
+      stroke: { width: 3, color: "#edf2b5", alpha: 0.95 },
+    }).setDepth(MARKER_DEPTH + 2);
 
     this.targetMarker = marker;
 
     if (!this.reducedMotion) {
       this.targetTween = this.tweens.add({
         targets: marker,
-        scale: { from: 0.85, to: 1.2 },
+        scale: { from: 0.85 * FX_BASE, to: 1.2 * FX_BASE },
         alpha: { from: 1, to: 0.45 },
         duration: 850,
         yoyo: true,
@@ -1767,7 +1758,10 @@ export class BeachScene extends Phaser.Scene {
 
     if (!force) {
       if (
-        time - this.lastPositionEmit < PLAYER_POSITION_INTERVAL &&
+        time - this.lastPositionEmit <
+          (this.mobileLayout
+            ? MOBILE_PLAYER_POSITION_INTERVAL
+            : PLAYER_POSITION_INTERVAL) &&
         moving === this.lastMoving
       ) {
         return;
@@ -1838,11 +1832,12 @@ export class BeachScene extends Phaser.Scene {
   private createPlayer(): void {
     const { x, y } = VENUE_MAP.spawn;
     const player = this.add.container(x, y).setDepth(y);
-    const halo = this.add
-      .circle(0, 0, 26)
-      .setStrokeStyle(2, 0xedf2b5, 0.7)
-      .setFillStyle(0xedf2b5, 0.08);
-    const shadow = this.add.ellipse(0, 20, 42, 16, 0x173b35, 0.2);
+    const halo = fxCircle(this, 0, 0, {
+      radius: 26,
+      fill: { color: "#edf2b5", alpha: 0.08 },
+      stroke: { width: 2, color: "#edf2b5", alpha: 0.7 },
+    });
+    const shadow = fxEllipse(this, 0, 20, 42, 16, "#173b35", 0.2);
     const character = this.add.container(0, 0);
     const hasAvatarTextures = Object.values(AVATAR_TEXTURES).every((key) =>
       this.textures.exists(key),

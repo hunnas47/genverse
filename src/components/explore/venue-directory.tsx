@@ -87,7 +87,7 @@ export function VenueDirectory({
 
   return (
     <div
-      className="absolute inset-0 z-40 flex items-end justify-center bg-brand-deep/65 p-3 backdrop-blur-sm sm:items-center sm:justify-end sm:p-5"
+      className="absolute inset-0 z-40 flex items-end justify-center bg-brand-deep/65 p-3 sm:backdrop-blur-sm sm:items-center sm:justify-end sm:p-5"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onClose();

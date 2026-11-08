@@ -66,7 +66,7 @@ export function MiniMap({
     <section
       data-tour="minimap"
       className={cn(
-        "pointer-events-auto w-[148px] rounded-2xl border border-white/20 bg-brand-deep/55 p-1.5 text-white shadow-soft ring-1 ring-black/5 backdrop-blur-xl backdrop-saturate-150 sm:w-[184px]",
+        "pointer-events-auto w-[148px] rounded-2xl border border-white/20 bg-brand-deep/55 p-1.5 text-white shadow-soft ring-1 ring-black/5 sm:backdrop-blur-xl sm:backdrop-saturate-150 sm:w-[184px]",
         className,
       )}
     >
@@ -168,7 +168,7 @@ export function MapButton({
       data-testid="map-button"
       data-tour="map"
       className={cn(
-        "pointer-events-auto grid size-11 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime",
+        "pointer-events-auto grid size-11 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift sm:backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime",
         className,
       )}
     >
@@ -254,7 +254,7 @@ export function MapDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-brand-deep/65 p-3 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-brand-deep/65 p-3 sm:backdrop-blur-sm sm:items-center"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onClose();

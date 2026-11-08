@@ -74,7 +74,7 @@ export function LeaderboardOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-brand-deep/80 p-0 backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-brand-deep/80 p-0 sm:backdrop-blur-md sm:items-center sm:p-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();

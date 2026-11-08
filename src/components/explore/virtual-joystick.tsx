@@ -230,7 +230,7 @@ export function VirtualJoystick({
         <span
           aria-hidden="true"
           className={cn(
-            "absolute inset-0 rounded-full border border-white/25 bg-brand-deep/80 shadow-lift backdrop-blur-md transition-opacity duration-300 motion-reduce:transition-none",
+            "absolute inset-0 rounded-full border border-white/25 bg-brand-deep/80 shadow-lift sm:backdrop-blur-md transition-opacity duration-300 motion-reduce:transition-none",
             isExpanded ? "opacity-100" : "opacity-0",
           )}
         />
@@ -260,7 +260,7 @@ export function VirtualJoystick({
         <span
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute top-1/2 left-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition-opacity duration-200 motion-reduce:transition-none",
+            "pointer-events-none absolute top-1/2 left-1/2 grid size-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-brand-deep/85 text-lime shadow-lift sm:backdrop-blur-md transition-opacity duration-200 motion-reduce:transition-none",
             isExpanded ? "opacity-0" : "opacity-100",
           )}
         >

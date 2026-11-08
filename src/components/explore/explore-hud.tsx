@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { QuestSnapshot, QuestSyncInfo } from "@/types/quest";
 
 const HUD_BUTTON =
-  "grid size-11 shrink-0 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime";
+  "grid size-11 shrink-0 place-items-center rounded-full border border-white/20 bg-brand-deep/85 text-lime shadow-lift sm:backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime";
 
 function ProfileButton({
   snapshot,
@@ -44,7 +44,7 @@ function ProfileButton({
       title={joined ? "Your profile" : "Join the Beach Quest"}
       data-testid="profile-button"
       data-tour="profile"
-      className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/25 bg-brand-deep/85 py-0.5 pr-3.5 pl-0.5 text-white shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+      className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/25 bg-brand-deep/85 py-0.5 pr-3.5 pl-0.5 text-white shadow-lift sm:backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
     >
       <span className="relative grid size-10 shrink-0 place-items-center">
         {offline && (
@@ -126,7 +126,7 @@ export function ExploreHud({
           >
             <Home aria-hidden="true" className="size-4" />
           </Link>
-          <div className="hidden min-w-0 items-center rounded-2xl border border-white/15 bg-brand-deep/85 p-2 pr-4 text-white shadow-lift backdrop-blur-md lg:flex">
+          <div className="hidden min-w-0 items-center rounded-2xl border border-white/15 bg-brand-deep/85 p-2 pr-4 text-white shadow-lift sm:backdrop-blur-md lg:flex">
             <div>
               <Image
                 src="/images/genm-logo.png"

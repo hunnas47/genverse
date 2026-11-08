@@ -240,7 +240,7 @@ export function ExploreTour({
 
       <section
         aria-label="Getting started"
-        className="pointer-events-auto w-full max-w-[22rem] rounded-2xl border border-brand-deep/15 bg-cream/95 p-2.5 text-brand-deep shadow-lift backdrop-blur-md sm:max-w-sm sm:rounded-3xl sm:p-3"
+        className="pointer-events-auto w-full max-w-[22rem] rounded-2xl border border-brand-deep/15 bg-cream/95 p-2.5 text-brand-deep shadow-lift sm:backdrop-blur-md sm:max-w-sm sm:rounded-3xl sm:p-3"
       >
         <div className="flex items-start gap-2.5 sm:gap-3">
           <span
