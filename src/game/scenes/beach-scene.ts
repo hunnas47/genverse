@@ -14,6 +14,8 @@ import {
   FX_BASE,
   fxCircle,
   fxEllipse,
+  lampGlowTexture,
+  whiteTexture,
   pointerTexture,
   sparkleTexture,
   venueLabelTexture,
@@ -39,6 +41,7 @@ import {
   findReachablePointNear,
   type NavigationGrid,
 } from "@/game/systems/pathfinding";
+import type { AtmospherePhase } from "@/lib/atmosphere";
 import type { MapPoint } from "@/types/map";
 import type { QuestShell } from "@/types/quest";
 import type { Venue } from "@/types/venue";
@@ -49,6 +52,39 @@ const MOBILE_BREAKPOINT = 640;
 const MOBILE_PLAYER_SPEED = 180;
 const MARKER_DEPTH = 5000;
 const PATH_DEPTH = -500;
+/** Above the map artwork (-1000/-999), below the route line and markers. */
+const LIGHTING_DEPTH = -600;
+const LAMP_DEPTH = -550;
+const LIGHTING_TRANSITION_MS = 1800;
+/** Venues that get a warm lamp glow after dark. */
+const LAMP_VENUE_IDS = new Set(["e", "r"]);
+const LAMP_SIZE = 170;
+
+/**
+ * Multiply tint and strength per phase. Everything players read or tap
+ * (markers, labels, shells, avatar, route) sits above the overlay and stays
+ * at full brightness.
+ */
+const LIGHTING: Record<
+  AtmospherePhase,
+  { tint: number; alpha: number; lamps: number }
+> = {
+  day: { tint: 0xffffff, alpha: 0, lamps: 0 },
+  golden: { tint: 0xffc48a, alpha: 0.32, lamps: 0 },
+  dusk: { tint: 0x9d88c8, alpha: 0.5, lamps: 0.5 },
+  night: { tint: 0x4a508f, alpha: 0.6, lamps: 0.9 },
+};
+
+function lerpColor(from: number, to: number, t: number): number {
+  const channel = (shift: number) => {
+    const a = (from >> shift) & 0xff;
+    const b = (to >> shift) & 0xff;
+
+    return Math.round(a + (b - a) * t) << shift;
+  };
+
+  return channel(16) | channel(8) | channel(0);
+}
 const PLAYER_POSITION_INTERVAL = 80;
 /**
  * Each position event re-renders the React HUD. Phones have no always-on
@@ -157,6 +193,11 @@ export class BeachScene extends Phaser.Scene {
   private readonly blockedShellIds = new Set<string>();
   private unsubscribeShellResult?: () => void;
   private unsubscribeQuestState?: () => void;
+  private unsubscribeAtmosphere?: () => void;
+  private lightingOverlay?: Phaser.GameObjects.Image;
+  private readonly lampGlows: Phaser.GameObjects.Image[] = [];
+  private lightingTween?: Phaser.Tweens.Tween;
+  private atmospherePhase: AtmospherePhase | null = null;
 
   private navigationGrid?: NavigationGrid;
   private path: MapPoint[] = [];
@@ -211,6 +252,7 @@ export class BeachScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor("#2c2d6f");
 
     this.createMapBackground();
+    this.createLighting();
     this.createVenueMarkers();
     ensureShellTextures(this);
     this.createShells();
@@ -551,6 +593,90 @@ export class BeachScene extends Phaser.Scene {
       )
       .setOrigin(0.5)
       .setDepth(1000);
+  }
+
+  /**
+   * One multiply-tinted overlay over the artwork for time-of-day lighting,
+   * plus additive lamp glows at stages and the entrance after dark. Two kinds
+   * of images in total, so it costs almost nothing per frame.
+   */
+  private createLighting(): void {
+    const { width, height } = VENUE_MAP.world;
+
+    this.lightingOverlay = this.add
+      .image(0, 0, whiteTexture(this))
+      .setOrigin(0)
+      .setDisplaySize(width, height)
+      .setBlendMode(Phaser.BlendModes.MULTIPLY)
+      .setDepth(LIGHTING_DEPTH)
+      .setAlpha(0);
+
+    for (const venue of VENUES) {
+      if (
+        !venue.mapPosition ||
+        (venue.category !== "stage" && !LAMP_VENUE_IDS.has(venue.id))
+      ) {
+        continue;
+      }
+
+      this.lampGlows.push(
+        this.add
+          .image(venue.mapPosition.x, venue.mapPosition.y, lampGlowTexture(this))
+          .setDisplaySize(LAMP_SIZE, LAMP_SIZE)
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setDepth(LAMP_DEPTH)
+          .setAlpha(0),
+      );
+    }
+
+    this.unsubscribeAtmosphere = this.bridge.on(
+      "world:atmosphere",
+      ({ phase }) => this.applyAtmosphere(phase),
+    );
+  }
+
+  private applyAtmosphere(phase: AtmospherePhase): void {
+    const overlay = this.lightingOverlay;
+
+    if (!overlay || phase === this.atmospherePhase) {
+      return;
+    }
+
+    const target = LIGHTING[phase];
+    const first = this.atmospherePhase === null;
+
+    this.atmospherePhase = phase;
+    this.lightingTween?.stop();
+
+    // The first phase on load appears as-is; later changes fade.
+    if (first || this.reducedMotion) {
+      overlay.setTint(target.tint).setAlpha(target.alpha);
+      for (const lamp of this.lampGlows) {
+        lamp.setAlpha(target.lamps);
+      }
+      return;
+    }
+
+    const fromTint = overlay.tintTopLeft;
+    const fromAlpha = overlay.alpha;
+    const fromLamps = this.lampGlows[0]?.alpha ?? 0;
+
+    this.lightingTween = this.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: LIGHTING_TRANSITION_MS,
+      ease: "Sine.easeInOut",
+      onUpdate: (tween) => {
+        const t = tween.getValue() ?? 1;
+
+        overlay
+          .setTint(lerpColor(fromTint, target.tint, t))
+          .setAlpha(fromAlpha + (target.alpha - fromAlpha) * t);
+        for (const lamp of this.lampGlows) {
+          lamp.setAlpha(fromLamps + (target.lamps - fromLamps) * t);
+        }
+      },
+    });
   }
 
   private createVenueMarkers(): void {
@@ -2132,6 +2258,13 @@ export class BeachScene extends Phaser.Scene {
     this.unsubscribeShellResult = undefined;
     this.unsubscribeQuestState?.();
     this.unsubscribeQuestState = undefined;
+    this.unsubscribeAtmosphere?.();
+    this.unsubscribeAtmosphere = undefined;
+    this.lightingTween?.stop();
+    this.lightingTween = undefined;
+    this.lightingOverlay = undefined;
+    this.lampGlows.length = 0;
+    this.atmospherePhase = null;
     this.clearNavigationState();
     this.destroyProximityAlert();
     this.destroyTapTargets();

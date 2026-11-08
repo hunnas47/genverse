@@ -146,6 +146,26 @@ export function sparkleTexture(scene: Phaser.Scene): string {
   });
 }
 
+/** A soft warm lamp glow for night lighting; drawn with additive blending. */
+export function lampGlowTexture(scene: Phaser.Scene): string {
+  return createCanvasTexture(scene, "fx-lamp-glow", 64, 64, (ctx) => {
+    const glow = ctx.createRadialGradient(32, 32, 2, 32, 32, 32);
+    glow.addColorStop(0, "rgba(255, 214, 150, 0.85)");
+    glow.addColorStop(0.35, "rgba(255, 190, 120, 0.4)");
+    glow.addColorStop(1, "rgba(255, 170, 100, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, 64, 64);
+  });
+}
+
+/** A plain white square, tinted and stretched for full-world overlays. */
+export function whiteTexture(scene: Phaser.Scene): string {
+  return createCanvasTexture(scene, "fx-white", 2, 2, (ctx) => {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 2, 2);
+  });
+}
+
 export type MarkerShape = "disc" | "square" | "diamond";
 
 export interface VenueMarkerSpec {

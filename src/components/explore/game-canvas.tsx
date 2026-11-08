@@ -25,9 +25,11 @@ import { VirtualJoystick } from "@/components/explore/virtual-joystick";
 import { VENUES_BY_ID } from "@/data/venues";
 import { VENUE_MAP } from "@/data/venue-map";
 import { GameEventBridge } from "@/game/event-bridge";
+import { getAtmospherePhase } from "@/lib/atmosphere";
 import { liveQuestStore } from "@/lib/quest/live-store";
 import { useQuest } from "@/lib/quest/use-quest";
 import { fullSetShareMessage, shareLink } from "@/lib/share";
+import { useEventClock } from "@/lib/use-event-clock";
 import type { MapPoint } from "@/types/map";
 import type { QuestNameResult } from "@/types/quest";
 import type { Venue } from "@/types/venue";
@@ -106,6 +108,10 @@ export function GameCanvas({
   const shellCounterRef = useRef<HTMLSpanElement>(null);
   const shellFlightIdRef = useRef(0);
   const [shellFlights, setShellFlights] = useState<ShellFlight[]>([]);
+  // Time-of-day lighting follows the event clock, so `?now=` previews work.
+  const eventNow = useEventClock();
+  const atmospherePhase =
+    eventNow === null ? null : getAtmospherePhase(eventNow);
   const [status, setStatus] = useState<GameStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loadProgress, setLoadProgress] = useState<number | null>(null);
@@ -413,6 +419,14 @@ export function GameCanvas({
   const retry = useCallback(() => {
     setAttempt((value) => value + 1);
   }, []);
+
+  // The scene subscribes before it reports ready, so send the phase once the
+  // game is ready and again whenever the clock crosses a boundary.
+  useEffect(() => {
+    if (status === "ready" && atmospherePhase) {
+      bridgeRef.current?.emit("world:atmosphere", { phase: atmospherePhase });
+    }
+  }, [atmospherePhase, status]);
 
   useEffect(() => {
     if (!navigationNotice) {

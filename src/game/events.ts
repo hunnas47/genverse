@@ -1,3 +1,5 @@
+import type { AtmospherePhase } from "@/lib/atmosphere";
+
 /**
  * Typed contract between the Phaser scene and the React overlay.
  *
@@ -80,6 +82,13 @@ export interface GameEventMap {
     screenX: number;
     screenY: number;
     combo: number;
+  };
+  /**
+   * Time-of-day lighting, from React's event clock (so `?now=` previews work).
+   * Purely visual.
+   */
+  "world:atmosphere": {
+    phase: AtmospherePhase;
   };
   /** Shared state changed; remove any shells that were already collected. */
   "quest:sync-state": {
