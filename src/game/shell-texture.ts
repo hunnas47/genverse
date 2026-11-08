@@ -86,6 +86,36 @@ function drawShell(ctx: CanvasRenderingContext2D): void {
   ctx.fill();
 }
 
+let shellDataUrl: string | null = null;
+
+/**
+ * The same shell as a PNG data URL for the React HUD, so the counter and the
+ * fly-to-counter effect match the map. Browser-only; null on the server.
+ */
+export function getShellDataUrl(): string | null {
+  if (shellDataUrl || typeof document === "undefined") {
+    return shellDataUrl;
+  }
+
+  const scale = 4;
+  const size = DRAWING_SIZE * scale;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) {
+    return null;
+  }
+
+  ctx.translate(size / 2, size / 2);
+  ctx.scale(scale * 0.9, scale * 0.9);
+  drawShell(ctx);
+  shellDataUrl = canvas.toDataURL("image/png");
+
+  return shellDataUrl;
+}
+
 /** Creates the shell and glow textures once per game. */
 export function ensureShellTextures(scene: Phaser.Scene): void {
   if (!scene.textures.exists(SHELL_TEXTURE)) {

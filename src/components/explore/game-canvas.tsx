@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Footprints, Share2, Shell, Sparkles, X } from "lucide-react";
+import { Footprints, Share2, Sparkles, X } from "lucide-react";
 import type Phaser from "phaser";
 
 import { ExploreHud } from "@/components/explore/explore-hud";
@@ -13,6 +13,11 @@ import {
 } from "@/components/explore/mini-map";
 import { QuestJoinDialog } from "@/components/explore/quest-join-dialog";
 import { QuestPanel } from "@/components/explore/quest-panel";
+import {
+  ShellFlights,
+  ShellIcon,
+  type ShellFlight,
+} from "@/components/explore/shell-flights";
 import { VenueDirectory } from "@/components/explore/venue-directory";
 import { VenuePanel } from "@/components/explore/venue-panel";
 import { VenuePrompt } from "@/components/explore/venue-prompt";
@@ -98,6 +103,9 @@ export function GameCanvas({
   const gameRef = useRef<Phaser.Game | null>(null);
   const bridgeRef = useRef<GameEventBridge | null>(null);
   const hasMovedRef = useRef(false);
+  const shellCounterRef = useRef<HTMLSpanElement>(null);
+  const shellFlightIdRef = useRef(0);
+  const [shellFlights, setShellFlights] = useState<ShellFlight[]>([]);
   const [status, setStatus] = useState<GameStatus>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loadProgress, setLoadProgress] = useState<number | null>(null);
@@ -217,6 +225,26 @@ export function GameCanvas({
         if (!cancelled) {
           setMapFallbackMessage(message);
         }
+      },
+    );
+    const unsubscribeShellFx = bridge.on(
+      "quest:shell-collected-fx",
+      ({ screenX, screenY }) => {
+        if (
+          cancelled ||
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) {
+          return;
+        }
+
+        const rect = container.getBoundingClientRect();
+        shellFlightIdRef.current += 1;
+        const id = shellFlightIdRef.current;
+
+        setShellFlights((flights) => [
+          ...flights,
+          { id, x: rect.left + screenX, y: rect.top + screenY },
+        ]);
       },
     );
     const unsubscribeNearby = bridge.on("venue:nearby", ({ venueId }) => {
@@ -371,6 +399,7 @@ export function GameCanvas({
       unsubscribePosition();
       unsubscribeNavigation();
       unsubscribeShellFound();
+      unsubscribeShellFx();
       bridge.clear();
       bridgeRef.current = null;
 
@@ -603,6 +632,10 @@ export function GameCanvas({
     setLeaderboardOpen(true);
   }, []);
 
+  const finishShellFlight = useCallback((id: number) => {
+    setShellFlights((flights) => flights.filter((flight) => flight.id !== id));
+  }, []);
+
   const closeLeaderboard = useCallback(() => {
     setLeaderboardOpen(false);
     hostRef.current?.focus();
@@ -781,6 +814,13 @@ export function GameCanvas({
         onOpenProfile={openProfile}
         onOpenLeaderboard={openLeaderboard}
         onCloseLeaderboard={closeLeaderboard}
+        shellCounterRef={shellCounterRef}
+      />
+
+      <ShellFlights
+        flights={shellFlights}
+        targetRef={shellCounterRef}
+        onDone={finishShellFlight}
       />
 
       {status === "ready" && mapFallbackMessage && (
@@ -855,7 +895,7 @@ export function GameCanvas({
               className="@container pointer-events-auto flex w-full max-w-sm flex-wrap items-center gap-x-3 gap-y-2 rounded-3xl border border-brand-deep/15 bg-cream/95 p-3 text-brand-deep shadow-lift sm:backdrop-blur-md"
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-lime text-brand-deep">
-                <Shell aria-hidden="true" className="size-5" />
+                <ShellIcon className="size-6" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-tight font-semibold">

@@ -1,10 +1,12 @@
 "use client";
 
-import { Home, Shell, Trophy } from "lucide-react";
+import { Home, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { RefObject } from "react";
 
 import { LeaderboardOverlay } from "@/components/explore/leaderboard-overlay";
+import { ShellIcon } from "@/components/explore/shell-flights";
 import { AVATAR_ASSETS } from "@/game/avatar";
 import { cn } from "@/lib/utils";
 import type { QuestSnapshot, QuestSyncInfo } from "@/types/quest";
@@ -16,10 +18,12 @@ function ProfileButton({
   snapshot,
   sync,
   onOpen,
+  shellCounterRef,
 }: {
   snapshot: QuestSnapshot | null;
   sync: QuestSyncInfo;
   onOpen: () => void;
+  shellCounterRef?: RefObject<HTMLSpanElement | null>;
 }) {
   // "local" means no backend is configured, which is not an outage.
   const offline = sync.status === "offline" || sync.status === "error";
@@ -83,7 +87,10 @@ function ProfileButton({
             found > 0 && "quest-chip-pop",
           )}
         >
-          <Shell className="size-3.5" />
+          {/* Collected shells fly into this icon. */}
+          <span ref={shellCounterRef} className="inline-grid">
+            <ShellIcon className="size-4" />
+          </span>
           {found}/{total}
         </span>
         <span
@@ -106,6 +113,7 @@ export function ExploreHud({
   onOpenProfile,
   onOpenLeaderboard,
   onCloseLeaderboard,
+  shellCounterRef,
 }: {
   snapshot: QuestSnapshot | null;
   sync: QuestSyncInfo;
@@ -113,6 +121,7 @@ export function ExploreHud({
   onOpenProfile: () => void;
   onOpenLeaderboard: () => void;
   onCloseLeaderboard: () => void;
+  shellCounterRef?: RefObject<HTMLSpanElement | null>;
 }) {
   return (
     <>
@@ -148,6 +157,7 @@ export function ExploreHud({
             snapshot={snapshot}
             sync={sync}
             onOpen={onOpenProfile}
+            shellCounterRef={shellCounterRef}
           />
 
           <button

@@ -59,6 +59,9 @@ const WAYPOINT_ARRIVAL_DISTANCE = 6;
 const GRID_CELL_SIZE = 20;
 const VENUE_TAP_RADIUS = 38;
 const SHELL_COLLECT_RADIUS = 44;
+/** Finds this close together count as a combo. Cosmetic only. */
+const SHELL_COMBO_WINDOW_MS = 12_000;
+const COMBO_LABELS = ["", "", "Double find!", "Triple find!"];
 const PROXIMITY_ALERT_TEXTURE = "icon-alert";
 const TAP_TARGET_TEXTURE = "icon-target";
 const PROXIMITY_ALERT_ASSET = "/images/ui/proximity-alert.webp";
@@ -134,6 +137,8 @@ export class BeachScene extends Phaser.Scene {
   private readonly labelFontFamily = readBrandFontFamily();
   /** The spawn alert waits until the player has taken a first step. */
   private hasLeftSpawn = false;
+  private lastShellCollectTime = Number.NEGATIVE_INFINITY;
+  private shellCombo = 0;
   private nearbyTween?: Phaser.Tweens.Tween;
   private proximityAlert?: Phaser.GameObjects.Image;
   private proximityAlertTween?: Phaser.Tweens.Tween;
@@ -837,6 +842,13 @@ export class BeachScene extends Phaser.Scene {
 
     if (accepted) {
       const marker = this.shellMarkers.get(shellId);
+      const now = this.time.now;
+
+      this.shellCombo =
+        now - this.lastShellCollectTime <= SHELL_COMBO_WINDOW_MS
+          ? this.shellCombo + 1
+          : 1;
+      this.lastShellCollectTime = now;
 
       if (marker) {
         this.showShellCollectionFeedback(
@@ -844,7 +856,19 @@ export class BeachScene extends Phaser.Scene {
           marker.y,
           points,
           bonusPoints,
+          this.shellCombo,
         );
+
+        // Hand the on-screen position to the HUD so it can fly the shell
+        // into the counter.
+        const camera = this.cameras.main;
+        const cssPerWorld = camera.zoom * this.scale.zoom;
+
+        this.bridge.emit("quest:shell-collected-fx", {
+          screenX: (marker.x - camera.worldView.x) * cssPerWorld,
+          screenY: (marker.y - camera.worldView.y) * cssPerWorld,
+          combo: this.shellCombo,
+        });
       }
 
       this.removeShell(shellId);
@@ -861,18 +885,57 @@ export class BeachScene extends Phaser.Scene {
     y: number,
     points: number,
     bonusPoints: number,
+    combo = 1,
   ): void {
     const total = points + bonusPoints;
+
+    if (combo >= 2) {
+      const comboLabel = this.add
+        .text(x, y - 44, COMBO_LABELS[combo] ?? `${combo}x streak!`, {
+          fontFamily: this.labelFontFamily,
+          fontSize: "13px",
+          fontStyle: "bold",
+          color: "#2c2d6f",
+          backgroundColor: "#edf2b5",
+          padding: { x: 7, y: 3 },
+        })
+        .setOrigin(0.5)
+        .setResolution(2)
+        .setDepth(MARKER_DEPTH + 22);
+
+      if (this.reducedMotion) {
+        this.time.delayedCall(1100, () => comboLabel.destroy());
+      } else {
+        comboLabel.setScale(0.4);
+        this.tweens.chain({
+          targets: comboLabel,
+          tweens: [
+            { scale: 1.12, duration: 220, ease: "Back.easeOut" },
+            { scale: 1, duration: 120 },
+            {
+              y: y - 70,
+              alpha: 0,
+              delay: 650,
+              duration: 420,
+              ease: "Cubic.easeIn",
+            },
+          ],
+          onComplete: () => comboLabel.destroy(),
+        });
+      }
+    }
+
     const label = this.add
       .text(x, y - 18, `+${total}`, {
-        fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
-        fontSize: "16px",
+        fontFamily: this.labelFontFamily,
+        fontSize: "18px",
         fontStyle: "bold",
         color: "#edf2b5",
         stroke: "#2c2d6f",
         strokeThickness: 3,
       })
       .setOrigin(0.5)
+      .setResolution(2)
       .setDepth(MARKER_DEPTH + 20);
 
     if (!this.reducedMotion) {
@@ -909,6 +972,16 @@ export class BeachScene extends Phaser.Scene {
           onComplete: () => spark.destroy(),
         });
       }
+    }
+
+    if (!this.reducedMotion) {
+      label.setScale(0.5);
+      this.tweens.add({
+        targets: label,
+        scale: 1,
+        duration: 260,
+        ease: "Back.easeOut",
+      });
     }
 
     this.tweens.add({

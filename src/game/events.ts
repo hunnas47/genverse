@@ -71,6 +71,16 @@ export interface GameEventMap {
     points?: number;
     bonusPoints?: number;
   };
+  /**
+   * Visual only: where an accepted shell was on screen (CSS px from the
+   * canvas's top-left) so the HUD can fly it to the shell counter. `combo`
+   * counts finds in quick succession; it never affects scoring.
+   */
+  "quest:shell-collected-fx": {
+    screenX: number;
+    screenY: number;
+    combo: number;
+  };
   /** Shared state changed; remove any shells that were already collected. */
   "quest:sync-state": {
     collectedShellIds: readonly string[];

@@ -104,6 +104,13 @@ export const VENUES: readonly Venue[] = [
     mapLabel: "A1",
     description: "Expo tent on the beach map.",
     category: "expo",
+    // Supplied by the event owner; the official GEN M expo booking page.
+    externalLink: {
+      url: "https://www.genm.in/expo",
+      title: "Expo booking",
+      description: "Book the Lost City Expo on the official GEN M site.",
+      label: "Book at genm.in",
+    },
     mapPosition: { x: 1241, y: 405, interactionRadius: 180 },
     verification: "supplied-map",
   },
