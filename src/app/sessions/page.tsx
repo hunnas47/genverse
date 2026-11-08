@@ -53,8 +53,10 @@ export default function SessionsPage({
     { value: mapMarkerCount, label: "map markers" },
   ];
 
+  // overflow-x-clip, not overflow-hidden: a scroll container would stop the
+  // sticky day chips from sticking.
   return (
-    <main className="min-h-dvh overflow-hidden bg-brand text-white">
+    <main className="min-h-dvh overflow-x-clip bg-brand text-white">
       <section className="relative overflow-hidden bg-brand-deep text-white">
         <div aria-hidden="true" className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(70%_100%_at_20%_0%,rgba(89,100,174,0.6)_0%,rgba(44,45,111,0.15)_55%,rgba(44,45,111,0.95)_100%)]" />
@@ -67,22 +69,22 @@ export default function SessionsPage({
 
         <SiteHeader />
 
-        <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-20">
+        <div className="relative mx-auto max-w-7xl px-4 pt-6 pb-6 sm:px-6 sm:pt-12 sm:pb-16 lg:px-8 lg:pt-16 lg:pb-20">
           <div className="max-w-3xl">
             <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
               Official schedule
             </p>
-            <h1 className="mt-3 text-[clamp(3.2rem,8vw,6.5rem)] leading-[0.94] font-medium tracking-[-0.02em] text-cream">
+            <h1 className="mt-2 text-[clamp(2.6rem,8vw,6.5rem)] leading-[0.94] font-medium tracking-[-0.02em] text-cream sm:mt-3">
               Programme
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
+            <p className="mt-5 hidden max-w-2xl text-base leading-relaxed text-white/65 sm:block sm:text-lg">
               Browse every official session by day or venue, then search titles,
               descriptions, and talks. Open a session for its overview, talks,
               and official source link, then locate its venue on the beach map.
             </p>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-5 flex flex-wrap gap-3 sm:mt-8">
             <ActionLink href="/explore">
               Open the map
               <ArrowRight aria-hidden="true" className="size-4" />
@@ -97,7 +99,7 @@ export default function SessionsPage({
             </ActionLink>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-2">
+          <div className="mt-8 hidden flex-wrap gap-2 sm:flex">
             {stats.map((stat) => (
               <span
                 key={stat.label}

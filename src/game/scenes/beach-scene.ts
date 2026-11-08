@@ -379,6 +379,23 @@ export class BeachScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setDepth(markerDepth + 2);
 
+      // A readable name under the code letter: "R" alone means nothing to a
+      // first-time visitor.
+      this.add
+        .text(x, y + 19, venue.name, {
+          fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
+          fontSize: "10px",
+          fontStyle: "bold",
+          color: "#f7f3e8",
+          backgroundColor: "rgba(44, 45, 111, 0.82)",
+          padding: { x: 5, y: 2 },
+          align: "center",
+          wordWrap: { width: 104 },
+        })
+        .setOrigin(0.5, 0)
+        .setResolution(2)
+        .setDepth(markerDepth + 2);
+
       this.markerRings.set(venue.id, ring);
     }
   }
@@ -392,47 +409,70 @@ export class BeachScene extends Phaser.Scene {
       const container = this.add
         .container(shell.x, shell.y)
         .setDepth(shell.y + 6);
-      const shadow = this.add.ellipse(0, 10, 24, 9, 0x17343e, 0.16);
+      const shadow = this.add.ellipse(0, 13, 26, 9, 0x17343e, 0.22);
+      // Lime with a dark outline reads against sand, paving, and grass, and
+      // does not look like the white umbrella and proximity icons.
+      const pulse = this.add
+        .circle(0, 0, 16)
+        .setStrokeStyle(3, 0xedf2b5, 0.9);
       const glow = this.add
-        .circle(0, 0, 24, 0xedf2b5, 0.2)
-        .setStrokeStyle(2, 0xf7f3e8, 0.7);
-      const halo = this.add
-        .circle(0, 0, 30)
-        .setStrokeStyle(1, 0xedf2b5, 0.35);
+        .circle(0, 0, 17, 0xedf2b5, 0.95)
+        .setStrokeStyle(2.5, 0x2c2d6f, 0.9);
+      const bob = this.add.container(0, 0);
       const shellGraphics = this.add.graphics();
 
-      shellGraphics.fillStyle(0xf7f3e8, 1);
-      shellGraphics.lineStyle(1.5, 0xb8865b, 0.95);
+      // A spiral shell, matching the Shell icon in the HUD. A fan-shaped
+      // scallop read as a beach umbrella on this map.
+      shellGraphics.fillStyle(0xffffff, 1);
+      shellGraphics.lineStyle(1.75, 0x2c2d6f, 1);
+      shellGraphics.fillCircle(0, 0, 11);
+      shellGraphics.strokeCircle(0, 0, 11);
+      shellGraphics.lineStyle(2, 0x2c2d6f, 1);
       shellGraphics.beginPath();
-      shellGraphics.arc(0, 0, 10, Math.PI * 1.1, Math.PI * 1.9, false);
-      shellGraphics.closePath();
-      shellGraphics.fillPath();
-      shellGraphics.strokePath();
 
-      for (let index = 0; index < 4; index += 1) {
-        const angle = Math.PI * 1.18 + (index / 3) * Math.PI * 0.64;
+      for (let index = 0; index <= 40; index += 1) {
+        const angle = (index / 40) * Math.PI * 3.6;
+        const radius = 1 + (index / 40) * 7.5;
+        const px = Math.cos(angle) * radius;
+        const py = Math.sin(angle) * radius;
 
-        shellGraphics.beginPath();
-        shellGraphics.moveTo(0, 3);
-        shellGraphics.lineTo(Math.cos(angle) * 10, Math.sin(angle) * 10);
-        shellGraphics.strokePath();
+        if (index === 0) {
+          shellGraphics.moveTo(px, py);
+        } else {
+          shellGraphics.lineTo(px, py);
+        }
       }
 
-      shellGraphics.fillStyle(0xc98b6b, 1);
-      shellGraphics.fillCircle(0, 4, 2.5);
+      shellGraphics.strokePath();
 
-      container.add([shadow, glow, halo, shellGraphics]);
+      bob.add([glow, shellGraphics]);
+      container.add([shadow, pulse, bob]);
       this.shellMarkers.set(shell.id, container);
 
       if (!this.reducedMotion) {
+        const delay = Math.random() * 900;
+
+        // A sonar ring makes shells findable at a glance from a distance.
         this.tweens.add({
-          targets: container,
-          scale: { from: 0.94, to: 1.06 },
-          duration: 1400,
+          targets: pulse,
+          scale: { from: 1, to: 2.4 },
+          alpha: { from: 0.9, to: 0 },
+          duration: 1600,
+          delay,
+          repeat: -1,
+          ease: "Cubic.easeOut",
+        });
+        this.tweens.add({
+          targets: bob,
+          y: { from: 0, to: -4 },
+          duration: 900,
+          delay,
           yoyo: true,
           repeat: -1,
           ease: "Sine.easeInOut",
         });
+      } else {
+        pulse.setScale(1.5).setAlpha(0.6);
       }
     }
   }
@@ -589,6 +629,9 @@ export class BeachScene extends Phaser.Scene {
 
     this.shellMarkers.delete(shellId);
     this.tweens.killTweensOf(marker);
+    for (const child of marker.list) {
+      this.tweens.killTweensOf(child);
+    }
     marker.destroy(true);
   }
 
@@ -837,9 +880,11 @@ export class BeachScene extends Phaser.Scene {
   }
 
   /**
-   * Moves the player to the nearest walkable point beside a deep-linked venue,
-   * centers the camera, and opens the venue panel. Venue anchors can sit on
-   * stage artwork, so the search avoids hardcoding a spawn point per venue.
+   * Walks the player to a deep-linked venue along the drawn route; the venue
+   * panel opens on arrival (see finishNavigation). The player is never
+   * teleported: venue stamps must be earned by walking, and the walk also
+   * shows where the venue is. Venues without a map position, or that cannot
+   * be reached, open their panel straight away.
    */
   private focusRequestedVenue(): void {
     if (!this.focusVenueId || !this.player) {
@@ -852,25 +897,20 @@ export class BeachScene extends Phaser.Scene {
       return;
     }
 
-    if (venue.mapPosition && this.navigationGrid) {
-      const point = findReachablePointNear({
-        grid: this.navigationGrid,
-        start: { x: this.player.x, y: this.player.y },
-        x: venue.mapPosition.x,
-        y: venue.mapPosition.y,
-        radius: VENUE_MAP.player.radius,
-        bounds: VENUE_MAP.playableBounds,
-        obstacles: VENUE_MAP.obstacles,
-        maxDistance: venue.mapPosition.interactionRadius,
-      });
+    if (venue.mapPosition) {
+      this.navigateTo({ kind: "venue", venueId: venue.id });
 
-      if (point) {
-        this.velocity.set(0, 0);
-        this.player.setPosition(point.x, point.y);
-        this.player.setDepth(point.y);
-        this.cameras.main.centerOn(point.x, point.y);
-        this.updateNearbyVenue();
-        this.emitPlayerPosition(0, false, true);
+      // navigateTo already opened the panel if the player is standing there.
+      if (
+        this.pendingVenueId === venue.id ||
+        Phaser.Math.Distance.Between(
+          this.player.x,
+          this.player.y,
+          venue.mapPosition.x,
+          venue.mapPosition.y,
+        ) <= venue.mapPosition.interactionRadius
+      ) {
+        return;
       }
     }
 

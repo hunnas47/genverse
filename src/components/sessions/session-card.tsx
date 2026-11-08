@@ -53,8 +53,9 @@ export function SessionCard({
 
   return (
     <article
+      id={`session-${session.id}`}
       aria-labelledby={titleId}
-      className="rounded-3xl border border-white/10 bg-cream p-4 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift sm:p-5"
+      className="scroll-mt-20 rounded-3xl border border-white/10 bg-cream p-4 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift sm:p-5"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">

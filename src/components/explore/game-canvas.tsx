@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { Footprints, Sparkles, X } from "lucide-react";
 import type Phaser from "phaser";
 
 import { ExploreHud } from "@/components/explore/explore-hud";
@@ -29,7 +29,8 @@ import type { Venue } from "@/types/venue";
 type GameStatus = "loading" | "ready" | "error";
 
 const BOOT_TIMEOUT_MS = 15000;
-const TOUR_STORAGE_KEY = "genm:explore:tour:v1";
+// v2: the learn-by-doing guide replaced the v1 modal tour.
+const TOUR_STORAGE_KEY = "genm:explore:tour:v2";
 const SPAWN_MOVE_THRESHOLD = 28;
 let tourSeenInMemory = false;
 
@@ -98,6 +99,8 @@ export function GameCanvas({
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [tourRun, setTourRun] = useState(0);
+  const [walkingVenueId, setWalkingVenueId] = useState<string | null>(null);
   const [questNotice, setQuestNotice] = useState<string | null>(null);
   const [questCelebration, setQuestCelebration] = useState<{
     points: number;
@@ -226,6 +229,7 @@ export function GameCanvas({
           ? { x: state.targetX, y: state.targetY }
           : null,
       );
+      setWalkingVenueId(state.active ? state.venueId : null);
 
       if (state.active) {
         setSelectedVenueId(null);
@@ -393,15 +397,14 @@ export function GameCanvas({
       !leaderboardOpen &&
       !mapDrawerOpen &&
       !questPanelOpen &&
-      !joinDialogOpen &&
-      !tourOpen
+      !joinDialogOpen
     ) {
       return;
     }
 
     bridgeRef.current?.emit("navigation:cancel", {});
     bridgeRef.current?.emit("input:move", { x: 0, y: 0 });
-  }, [joinDialogOpen, leaderboardOpen, mapDrawerOpen, questPanelOpen, tourOpen]);
+  }, [joinDialogOpen, leaderboardOpen, mapDrawerOpen, questPanelOpen]);
 
   const collectedShellKey =
     quest.snapshot?.collectedShellIds.join("|") ?? "";
@@ -490,7 +493,6 @@ export function GameCanvas({
     setDirectoryOpen(false);
     setQuestPanelOpen(false);
     setJoinDialogOpen(false);
-    setTourOpen(false);
     setMapDrawerOpen(true);
   }, []);
 
@@ -537,7 +539,6 @@ export function GameCanvas({
     setSelectedVenueId(null);
     setDirectoryOpen(false);
     setMapDrawerOpen(false);
-    setTourOpen(false);
     setQuestPanelOpen(true);
   }, []);
 
@@ -554,7 +555,9 @@ export function GameCanvas({
     setQuestPanelOpen(false);
     setJoinDialogOpen(false);
     setLeaderboardOpen(false);
+    setTourRun((value) => value + 1);
     setTourOpen(true);
+    hostRef.current?.focus();
   }, []);
 
   const openLeaderboard = useCallback(() => {
@@ -564,7 +567,6 @@ export function GameCanvas({
     setMapDrawerOpen(false);
     setQuestPanelOpen(false);
     setJoinDialogOpen(false);
-    setTourOpen(false);
     setLeaderboardOpen(true);
   }, []);
 
@@ -573,8 +575,27 @@ export function GameCanvas({
     hostRef.current?.focus();
   }, []);
 
+  // Stamps are earned by walking: only offer check-in when the avatar is
+  // inside the venue's interaction radius (the server's speed check uses the
+  // same radius).
+  const canCheckInSelected = Boolean(
+    selectedVenue?.mapPosition &&
+      playerPosition &&
+      Math.hypot(
+        playerPosition.x - selectedVenue.mapPosition.x,
+        playerPosition.y - selectedVenue.mapPosition.y,
+      ) <=
+        selectedVenue.mapPosition.interactionRadius + 4,
+  );
+
+  const walkToSelectedVenue = useCallback(() => {
+    if (selectedVenue) {
+      navigateToVenue(selectedVenue);
+    }
+  }, [navigateToVenue, selectedVenue]);
+
   const checkInSelectedVenue = useCallback(async () => {
-    if (!selectedVenueId || checkingInVenueId) {
+    if (!selectedVenueId || checkingInVenueId || !canCheckInSelected) {
       return;
     }
 
@@ -587,7 +608,7 @@ export function GameCanvas({
     } else if (result.reason === "already-checked-in") {
       setQuestNotice("Already stamped here today.");
     }
-  }, [selectedVenueId, checkingInVenueId]);
+  }, [selectedVenueId, checkingInVenueId, canCheckInSelected]);
 
   const showBottomControls =
     status === "ready" &&
@@ -651,17 +672,6 @@ export function GameCanvas({
         onCloseLeaderboard={closeLeaderboard}
       />
 
-      {status === "ready" &&
-        tourOpen &&
-        !joinDialogOpen &&
-        !selectedVenue &&
-        !directoryOpen &&
-        !mapDrawerOpen &&
-        !leaderboardOpen &&
-        !questPanelOpen && (
-          <ExploreTour onClose={finishTour} />
-        )}
-
       {status === "ready" && mapFallbackMessage && (
         <div className="pointer-events-none absolute inset-x-0 top-36 z-30 flex justify-center px-3 sm:top-32">
           <div className="pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-3 text-brand-deep shadow-lift">
@@ -680,12 +690,72 @@ export function GameCanvas({
         </div>
       )}
 
-      {status === "ready" && questNotice && (
-        <div
-          role="status"
-          className="pointer-events-none absolute top-36 left-3 z-30 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-2.5 text-xs leading-relaxed text-brand-deep shadow-lift sm:top-40 sm:left-5"
-        >
-          {questNotice}
+      {status === "ready" && (
+        // One column under the HUD so notices, the walking pill, and the
+        // guide stack instead of overlapping.
+        <div className="pointer-events-none absolute inset-x-0 top-[calc(max(0.75rem,env(safe-area-inset-top))+3.5rem)] z-30 flex flex-col items-center gap-2 px-3 sm:top-[calc(max(1.25rem,env(safe-area-inset-top))+4rem)]">
+          {navigationNotice && (
+            <div
+              role="status"
+              className="w-[min(20rem,100%)] rounded-2xl border border-brand-deep/15 bg-cream px-4 py-2.5 text-center text-xs leading-relaxed text-brand-deep shadow-lift"
+            >
+              {navigationNotice}
+            </div>
+          )}
+
+          {questNotice && (
+            <div
+              role="status"
+              className="max-w-[min(20rem,100%)] rounded-2xl border border-brand-deep/15 bg-cream px-3.5 py-2.5 text-center text-xs leading-relaxed text-brand-deep shadow-lift"
+            >
+              {questNotice}
+            </div>
+          )}
+
+          {walkingVenueId && !selectedVenue && (
+            <div
+              role="status"
+              className="pointer-events-auto flex max-w-[min(20rem,100%)] items-center gap-2 rounded-full border border-white/20 bg-brand-deep/90 py-1 pr-1 pl-3.5 text-white shadow-lift backdrop-blur-md"
+            >
+              <Footprints
+                aria-hidden="true"
+                className="size-4 shrink-0 text-lime"
+              />
+              <span className="min-w-0 truncate text-xs">
+                Walking to{" "}
+                <span className="font-semibold">
+                  {VENUES_BY_ID.get(walkingVenueId)?.name ?? "the venue"}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={cancelNavigation}
+                aria-label="Stop walking"
+                className="grid size-11 shrink-0 place-items-center rounded-full text-lime transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+              >
+                <X aria-hidden="true" className="size-4" />
+              </button>
+            </div>
+          )}
+
+          {tourOpen && (
+            <ExploreTour
+              key={tourRun}
+              visible={
+                !joinDialogOpen &&
+                !selectedVenue &&
+                !directoryOpen &&
+                !mapDrawerOpen &&
+                !leaderboardOpen &&
+                !questPanelOpen
+              }
+              playerPosition={playerPosition}
+              shellsFound={quest.snapshot?.collectedShellIds.length ?? 0}
+              shellsTotal={quest.snapshot?.period.shellSet.shells.length ?? 0}
+              checkIns={quest.snapshot?.checkedInVenueIds.length ?? 0}
+              onClose={finishTour}
+            />
+          )}
         </div>
       )}
 
@@ -693,7 +763,6 @@ export function GameCanvas({
         <>
           <VirtualJoystick
             onMove={handleJoystickMove}
-            paused={tourOpen}
             className="absolute bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-20 lg:hidden"
           />
           <MapButton
@@ -727,7 +796,7 @@ export function GameCanvas({
         !leaderboardOpen &&
         !questPanelOpen &&
         !joinDialogOpen &&
-        !tourOpen && (
+        !walkingVenueId && (
           <button
             type="button"
             onClick={cancelNavigation}
@@ -747,8 +816,7 @@ export function GameCanvas({
         !leaderboardOpen &&
         !navigationTarget &&
         !questPanelOpen &&
-        !joinDialogOpen &&
-        !tourOpen && (
+        !joinDialogOpen && (
           <VenuePrompt venue={nearbyVenue} onOpen={openNearbyVenue} />
         )}
 
@@ -761,7 +829,9 @@ export function GameCanvas({
             false
           }
           checkInPending={checkingInVenueId === selectedVenue.id}
+          canCheckIn={canCheckInSelected}
           onCheckIn={checkInSelectedVenue}
+          onWalkHere={walkToSelectedVenue}
         />
       )}
 
@@ -771,15 +841,6 @@ export function GameCanvas({
           onNavigate={navigateToVenue}
           onClose={closeDirectory}
         />
-      )}
-
-      {status === "ready" && navigationNotice && (
-        <div
-          role="status"
-          className="pointer-events-none absolute top-20 left-1/2 z-30 w-[min(20rem,calc(100vw-1.5rem))] -translate-x-1/2 rounded-2xl border border-brand-deep/15 bg-cream px-4 py-2.5 text-center text-xs leading-relaxed text-brand-deep shadow-lift sm:top-24"
-        >
-          {navigationNotice}
-        </div>
       )}
 
       {quest.snapshot && questPanelOpen && (

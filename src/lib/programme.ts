@@ -321,6 +321,50 @@ export function groupSessionsByDay(
   })).filter((group) => group.sessions.length > 0);
 }
 
+const kolkataDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Kolkata",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+export function getSessionStartMs(session: Session): number {
+  return eventDate(session.day, session.startTime).getTime();
+}
+
+export function getSessionEndMs(session: Session): number {
+  return eventDate(session.day, session.endTime).getTime();
+}
+
+/** The programme day that `nowMs` falls on in Asia/Kolkata, if any. */
+export function getProgrammeDayAt(nowMs: number): ProgrammeDay | undefined {
+  const date = kolkataDateFormatter.format(new Date(nowMs));
+
+  return PROGRAMME_DAYS.find((day) => day.date === date);
+}
+
+export interface ProgrammeNowNext {
+  /** Sessions running at `nowMs`. */
+  now: Session[];
+  /** The next sessions to start after `nowMs`, on any programme day. */
+  next: Session[];
+}
+
+/** Running and upcoming sessions at `nowMs`. Cancelled sessions are skipped. */
+export function getNowAndNext(nowMs: number, nextLimit = 2): ProgrammeNowNext {
+  const live = SESSIONS.filter((session) => session.status !== "cancelled");
+
+  return {
+    now: live.filter(
+      (session) =>
+        getSessionStartMs(session) <= nowMs && nowMs < getSessionEndMs(session),
+    ),
+    next: live
+      .filter((session) => getSessionStartMs(session) > nowMs)
+      .slice(0, nextLimit),
+  };
+}
+
 export function getSessionVenueLabel(session: Session): string {
   const venue = VENUES_BY_ID.get(session.venueId);
 

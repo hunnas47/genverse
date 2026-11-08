@@ -1,23 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { SessionCard } from "@/components/sessions/session-card";
+import { SessionsNowNext } from "@/components/sessions/sessions-now-next";
 import { VENUES, VENUES_BY_ID } from "@/data/venues";
 import {
   formatDayShort,
+  getProgrammeDayAt,
   groupSessionsByDay,
   PROGRAMME_DAYS,
   SESSIONS,
 } from "@/lib/programme";
+import { useEventClock } from "@/lib/use-event-clock";
 import { cn } from "@/lib/utils";
 
-function filterButtonClass(active: boolean): string {
+function dayChipClass(active: boolean): string {
   return cn(
-    "min-h-10 rounded-full border px-3.5 py-2 font-display text-[11px] font-bold tracking-[0.06em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep",
+    "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 font-display text-[11px] font-bold tracking-[0.06em] whitespace-nowrap uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime",
     active
-      ? "border-brand-deep bg-brand-deep text-lime"
-      : "border-brand-deep/15 bg-brand-deep/5 text-brand-deep/70 hover:border-brand-deep/30 hover:bg-brand-deep/10 hover:text-brand-deep",
+      ? "border-lime bg-lime text-brand-deep"
+      : "border-white/20 bg-white/5 text-white/85 hover:border-white/40 hover:bg-white/10 hover:text-white",
   );
 }
 
@@ -44,7 +47,15 @@ export function SessionBrowser({
       ? initialDayId
       : "all";
 
-  const [dayId, setDayId] = useState(initialDay);
+  const hasDeepLink = Boolean(initialDayId || initialVenueId || initialSessionId);
+  const now = useEventClock();
+  const today = now === null ? undefined : getProgrammeDayAt(now);
+  // null until the visitor picks a day. Without a deep link, event days open
+  // on today; the client clock is only known after hydration.
+  const [dayChoice, setDayChoice] = useState<string | null>(
+    hasDeepLink ? initialDay : null,
+  );
+  const dayId = dayChoice ?? today?.id ?? "all";
   const [venueId, setVenueId] = useState(initialVenue);
   const [query, setQuery] = useState("");
 
@@ -100,52 +111,86 @@ export function SessionBrowser({
     filteredSessions.length === 1 ? "session" : "sessions"
   }`;
 
+  useEffect(() => {
+    if (!initialSessionId) {
+      return;
+    }
+
+    // Wait a frame so the opened card is laid out before scrolling to it.
+    const frame = requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      document
+        .getElementById(`session-${initialSessionId}`)
+        ?.scrollIntoView({
+          block: "start",
+          behavior: reduceMotion ? "auto" : "smooth",
+        });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [initialSessionId]);
+
   function clearFilters() {
-    setDayId("all");
+    setDayChoice("all");
     setVenueId("all");
     setQuery("");
   }
 
   return (
     <div>
+      <SessionsNowNext now={now} />
+
+      {/* Day chips stay reachable while scrolling a long list. */}
+      <div className="sticky top-0 z-20 -mx-4 border-b border-white/10 bg-brand/95 px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div
+          role="group"
+          aria-label="Filter by day"
+          className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <button
+            type="button"
+            aria-pressed={dayId === "all"}
+            onClick={() => setDayChoice("all")}
+            className={dayChipClass(dayId === "all")}
+          >
+            All days
+          </button>
+
+          {PROGRAMME_DAYS.map((day) => (
+            <button
+              key={day.id}
+              type="button"
+              aria-pressed={dayId === day.id}
+              onClick={() => setDayChoice(day.id)}
+              className={dayChipClass(dayId === day.id)}
+            >
+              {formatDayShort(day)}
+              {today?.id === day.id && (
+                <span
+                  className={cn(
+                    "rounded-full px-1.5 py-0.5 text-[9px]",
+                    dayId === day.id
+                      ? "bg-brand-deep text-lime"
+                      : "bg-lime text-brand-deep",
+                  )}
+                >
+                  Today
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <section
         aria-label="Session filters"
-        className="rounded-[2rem] border border-brand-deep/10 bg-lime p-4 text-brand-deep shadow-lift sm:p-6"
+        className="mt-4 rounded-[2rem] border border-brand-deep/10 bg-lime p-4 text-brand-deep shadow-lift sm:p-6"
       >
-        <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
-          <div>
-            <p className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/75 uppercase">
-              Day
-            </p>
-            <div
-              role="group"
-              aria-label="Filter by day"
-              className="mt-2 flex flex-wrap gap-2"
-            >
-              <button
-                type="button"
-                aria-pressed={dayId === "all"}
-                onClick={() => setDayId("all")}
-                className={filterButtonClass(dayId === "all")}
-              >
-                All days
-              </button>
-
-              {PROGRAMME_DAYS.map((day) => (
-                <button
-                  key={day.id}
-                  type="button"
-                  aria-pressed={dayId === day.id}
-                  onClick={() => setDayId(day.id)}
-                  className={filterButtonClass(dayId === day.id)}
-                >
-                  {formatDayShort(day)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+        <div>
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label
                 htmlFor="session-venue-filter"

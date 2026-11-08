@@ -3,6 +3,7 @@
 import {
   ArrowUpRight,
   Check,
+  Footprints,
   LoaderCircle,
   Sparkles,
   Stamp,
@@ -29,13 +30,19 @@ export const VenuePanel = memo(function VenuePanel({
   onClose,
   checkedIn,
   checkInPending = false,
+  canCheckIn,
   onCheckIn,
+  onWalkHere,
 }: {
   venue: Venue;
   onClose: () => void;
   checkedIn: boolean;
   checkInPending?: boolean;
+  /** The avatar is close enough to stamp. Stamps are earned by walking. */
+  canCheckIn: boolean;
   onCheckIn: () => void;
+  /** Walks the avatar to the venue; the panel reopens on arrival. */
+  onWalkHere: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const stampTimerRef = useRef<number | null>(null);
@@ -244,40 +251,53 @@ export const VenuePanel = memo(function VenuePanel({
                     ? "Stamped today. You earned 25 points here."
                     : checkInPending
                       ? "Stamping your passport…"
-                      : "Check in for 25 quest points. One stamp per venue per day."}
+                      : canCheckIn
+                        ? "You're here! Check in for 25 quest points."
+                        : "Walk here to stamp your passport for 25 points."}
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={onCheckIn}
-                disabled={checkedIn || checkInPending}
-                aria-busy={checkInPending || undefined}
-                className={cn(
-                  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
-                  checkedIn
-                    ? "bg-brand-deep text-lime"
-                    : checkInPending
-                      ? "bg-brand-deep/80 text-lime"
-                      : "bg-brand-deep text-lime hover:bg-brand-deep/90",
-                )}
-              >
-                {checkInPending ? (
-                  <LoaderCircle
-                    aria-hidden="true"
-                    className="size-3.5 motion-safe:animate-spin"
-                  />
-                ) : checkedIn ? (
-                  <Check aria-hidden="true" className="size-3.5" />
-                ) : (
-                  <Stamp aria-hidden="true" className="size-3.5" />
-                )}
-                {checkInPending
-                  ? "Stamping…"
-                  : checkedIn
-                    ? "Stamped"
-                    : "Check in"}
-              </button>
+              {!checkedIn && !checkInPending && !canCheckIn ? (
+                <button
+                  type="button"
+                  onClick={onWalkHere}
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-brand-deep/25 bg-cream px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:border-brand-deep/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95"
+                >
+                  <Footprints aria-hidden="true" className="size-3.5" />
+                  Walk here
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onCheckIn}
+                  disabled={checkedIn || checkInPending}
+                  aria-busy={checkInPending || undefined}
+                  className={cn(
+                    "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
+                    checkedIn
+                      ? "bg-brand-deep text-lime"
+                      : checkInPending
+                        ? "bg-brand-deep/80 text-lime"
+                        : "bg-brand-deep text-lime hover:bg-brand-deep/90",
+                  )}
+                >
+                  {checkInPending ? (
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="size-3.5 motion-safe:animate-spin"
+                    />
+                  ) : checkedIn ? (
+                    <Check aria-hidden="true" className="size-3.5" />
+                  ) : (
+                    <Stamp aria-hidden="true" className="size-3.5" />
+                  )}
+                  {checkInPending
+                    ? "Stamping…"
+                    : checkedIn
+                      ? "Stamped"
+                      : "Check in"}
+                </button>
+              )}
             </div>
           </div>
         )}

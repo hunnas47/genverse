@@ -1,11 +1,12 @@
 "use client";
 
-import { Home, Trophy } from "lucide-react";
+import { Home, Shell, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { LeaderboardOverlay } from "@/components/explore/leaderboard-overlay";
 import { AVATAR_ASSETS } from "@/game/avatar";
+import { cn } from "@/lib/utils";
 import type { QuestSnapshot } from "@/types/quest";
 
 const HUD_BUTTON =
@@ -20,12 +21,13 @@ function ProfileButton({
 }) {
   const found = snapshot?.collectedShellIds.length ?? 0;
   const total = snapshot?.period.shellSet.shells.length ?? 0;
+  const points = snapshot?.todayPoints ?? 0;
   const progress = total > 0 ? Math.min(100, (found / total) * 100) : 0;
   const name = snapshot?.profile?.displayName;
   const joined = snapshot?.joined ?? false;
   const label = joined
-    ? `${name ?? "Explorer"} profile. ${snapshot?.todayPoints ?? 0} points today, ${found} of ${total} shells found. Open your Beach Quest profile.`
-    : "Open the explorer profile and join the Beach Quest.";
+    ? `${name ?? "Explorer"} profile. ${points} points today, ${found} of ${total} shells found. Open your Beach Quest profile.`
+    : `Beach Quest: ${found} of ${total} shells found today. Open the quest and choose a name to join the leaderboard.`;
 
   return (
     <button
@@ -35,39 +37,46 @@ function ProfileButton({
       title={joined ? "Your profile" : "Join the Beach Quest"}
       data-testid="profile-button"
       data-tour="profile"
-      className="relative grid size-11 shrink-0 place-items-center rounded-full border border-white/25 bg-brand-deep/85 shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+      className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-white/25 bg-brand-deep/85 py-0.5 pr-3.5 pl-0.5 text-white shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
     >
-      <span aria-hidden="true" className="absolute inset-0 rounded-full bg-white/15" />
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: `conic-gradient(var(--lime) ${progress}%, transparent 0)`,
-        }}
-      />
-      <span className="relative size-10 overflow-hidden rounded-full border border-brand-deep/30 bg-lavender">
-        <Image
-          src={AVATAR_ASSETS.down}
-          alt=""
-          fill
-          sizes="40px"
-          className="object-cover object-top"
+      <span className="relative grid size-10 shrink-0 place-items-center">
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full bg-white/15"
         />
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 rounded-full"
+          style={{
+            background: `conic-gradient(var(--lime) ${progress}%, transparent 0)`,
+          }}
+        />
+        <span className="relative size-9 overflow-hidden rounded-full border border-brand-deep/30 bg-lavender">
+          <Image
+            src={AVATAR_ASSETS.down}
+            alt=""
+            fill
+            sizes="36px"
+            className="object-cover object-top"
+          />
+        </span>
       </span>
 
-      {joined && found > 0 ? (
+      <span aria-hidden="true" className="flex flex-col items-start leading-none">
         <span
-          aria-hidden="true"
-          className="absolute -right-0.5 -bottom-0.5 grid h-5 min-w-5 place-items-center rounded-full border-2 border-brand-deep bg-lime px-1 font-display text-[9px] font-bold text-brand-deep"
+          key={found}
+          className={cn(
+            "flex items-center gap-1 font-display text-[13px] font-bold text-lime tabular-nums",
+            found > 0 && "quest-chip-pop",
+          )}
         >
-          {found}
+          <Shell className="size-3.5" />
+          {found}/{total}
         </span>
-      ) : !joined ? (
-        <span
-          aria-hidden="true"
-          className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-brand-deep bg-lime"
-        />
-      ) : null}
+        <span className="mt-1 font-display text-[9px] font-bold tracking-[0.14em] text-white/75 uppercase">
+          {joined ? `${points} pts` : "Join quest"}
+        </span>
+      </span>
     </button>
   );
 }
@@ -122,6 +131,7 @@ export function ExploreHud({
             onClick={onOpenLeaderboard}
             aria-label="Open the Beach Quest leaderboard"
             title="Leaderboard"
+            data-tour="leaderboard"
             className={HUD_BUTTON}
           >
             <Trophy aria-hidden="true" className="size-5" />
