@@ -72,7 +72,7 @@ export default function SessionsPage({
 
         <div className="relative mx-auto max-w-7xl px-4 pt-6 pb-6 sm:px-6 sm:pt-12 sm:pb-16 lg:px-8 lg:pt-16 lg:pb-20">
           <div className="max-w-3xl">
-            <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
               Official schedule
             </p>
             <h1 className="mt-2 text-[clamp(2.6rem,8vw,6.5rem)] leading-[0.94] font-medium tracking-[-0.02em] text-cream sm:mt-3">
@@ -127,7 +127,7 @@ export default function SessionsPage({
 
       <WaveDivider className="bg-brand-deep text-brand" />
 
-      <section className="bg-brand pt-2 pb-16 text-white sm:pb-20">
+      <section className="grain-surface bg-brand pt-2 pb-16 text-white sm:pb-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <Suspense fallback={<SessionsLoading />}>
             <SessionsPageContent searchParams={searchParams} />

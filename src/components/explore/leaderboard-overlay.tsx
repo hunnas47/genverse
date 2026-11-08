@@ -103,7 +103,7 @@ export function LeaderboardOverlay({
               <Trophy aria-hidden="true" className="size-5" />
             </span>
             <div className="min-w-0">
-              <p className="inline-flex items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.2em] text-lime uppercase">
+              <p className="inline-flex items-center gap-1.5 font-display text-[11px] font-bold tracking-[0.2em] text-lime uppercase">
                 <Sparkles aria-hidden="true" className="size-3" />
                 Beach Quest
               </p>
@@ -131,19 +131,19 @@ export function LeaderboardOverlay({
           <div className="mb-4 grid grid-cols-3 gap-2 text-center">
             <div className="rounded-2xl border border-white/10 bg-white/5 px-2 py-2.5">
               <p className="font-display text-lg font-black text-lime">10</p>
-              <p className="font-display text-[10px] font-bold tracking-[0.1em] text-white/55 uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.1em] text-white/55 uppercase">
                 shells
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 px-2 py-2.5">
               <p className="font-display text-lg font-black text-lime">+25</p>
-              <p className="font-display text-[10px] font-bold tracking-[0.1em] text-white/55 uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.1em] text-white/55 uppercase">
                 per stamp
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 px-2 py-2.5">
               <p className="font-display text-lg font-black text-lime">+50</p>
-              <p className="font-display text-[10px] font-bold tracking-[0.1em] text-white/55 uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.1em] text-white/55 uppercase">
                 full set
               </p>
             </div>

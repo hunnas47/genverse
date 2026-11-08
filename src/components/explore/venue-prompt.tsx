@@ -28,7 +28,7 @@ export function VenuePrompt({
         </span>
 
         <span className="min-w-0">
-          <span className="block font-display text-[10px] font-bold tracking-[0.16em] text-brand-deep/75 uppercase">
+          <span className="block font-display text-[11px] font-bold tracking-[0.16em] text-brand-deep/75 uppercase">
             {VENUE_CATEGORY_LABELS[venue.category]} · Nearby
           </span>
           <span className="block truncate text-sm font-semibold">
@@ -36,7 +36,7 @@ export function VenuePrompt({
           </span>
         </span>
 
-        <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-deep/10 px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/75 uppercase">
+        <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-brand-deep/10 px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep/75 uppercase">
           View
           <ArrowRight aria-hidden="true" className="size-3" />
         </span>

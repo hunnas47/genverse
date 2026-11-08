@@ -61,23 +61,23 @@ function ProgrammePreviewCard({
       style={
         accent ? ({ "--venue-accent": accent.css } as CSSProperties) : undefined
       }
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-cream p-5 pt-6 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime motion-safe:hover:-translate-y-1"
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-cream p-5 pt-6 text-brand-deep shadow-soft transition hover:border-lime/60 hover:shadow-lift focus-visible:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime motion-safe:hover:-translate-y-1"
     >
       <span
         aria-hidden="true"
         className="absolute inset-x-0 top-0 h-1.5 bg-[var(--venue-accent,var(--brand-soft))]"
       />
       <div className="flex items-center justify-between gap-3">
-        <span className="rounded-full bg-[var(--venue-accent,var(--brand-deep))] px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase ring-1 ring-brand-deep/10">
+        <span className="rounded-full bg-[var(--venue-accent,var(--brand-deep))] px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase ring-1 ring-brand-deep/10">
           {venue?.mapLabel ?? session.venueId}
         </span>
         {live ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-lime px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-lime px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase">
             <span className="size-1.5 rounded-full bg-brand-deep motion-safe:animate-pulse" />
             Now
           </span>
         ) : (
-          <span className="font-display text-[10px] font-semibold tracking-[0.12em] text-brand-deep/70 uppercase">
+          <span className="font-display text-[11px] font-semibold tracking-[0.12em] text-brand-deep/70 uppercase">
             {day ? formatDayShort(day) : session.day}
           </span>
         )}
@@ -131,7 +131,7 @@ function ProgrammePreviewCard({
         )
       )}
 
-      <span className="mt-auto inline-flex items-center gap-1.5 pt-5 font-display text-[10px] font-bold tracking-[0.14em] uppercase">
+      <span className="mt-auto inline-flex items-center gap-1.5 pt-5 font-display text-[11px] font-bold tracking-[0.14em] uppercase">
         View session
         <ArrowRight
           aria-hidden="true"

@@ -166,7 +166,7 @@ export function VenueDirectory({
                                 {venue.name}
                               </p>
                               {isNearby && (
-                                <span className="rounded-full bg-lime px-1.5 py-0.5 font-display text-[9px] font-bold tracking-[0.08em] text-brand-deep uppercase">
+                                <span className="rounded-full bg-lime px-1.5 py-0.5 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep uppercase">
                                   Nearby
                                 </span>
                               )}

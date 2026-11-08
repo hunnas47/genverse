@@ -27,7 +27,7 @@ function NowNextRow({
 
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-cream p-3 text-brand-deep">
-      <span className="shrink-0 rounded-full bg-brand-deep px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase">
+      <span className="shrink-0 rounded-full bg-brand-deep px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase">
         {venue?.mapLabel ?? session.venueId}
       </span>
 
@@ -39,7 +39,7 @@ function NowNextRow({
         >
           {session.title}
         </Link>
-        <p className="mt-0.5 font-display text-[10px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
+        <p className="mt-0.5 font-display text-[11px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
           {otherDay ? `${formatDayShort(otherDay)} · ` : ""}
           {formatSessionTimeRange(session)}
         </p>
@@ -105,7 +105,7 @@ export function SessionsNowNext({ now }: { now: number | null }) {
       {next.length > 0 ? (
         <>
           {running.length > 0 && (
-            <h3 className="mt-4 font-display text-[10px] font-bold tracking-[0.18em] text-white/75 uppercase">
+            <h3 className="mt-4 font-display text-[11px] font-bold tracking-[0.18em] text-white/75 uppercase">
               Up next
             </h3>
           )}

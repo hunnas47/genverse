@@ -868,7 +868,7 @@ export function GameCanvas({
               <button
                 type="button"
                 onClick={openJoinDialog}
-                className="order-last inline-flex min-h-11 w-full shrink-0 items-center justify-center @[20rem]:order-none @[20rem]:w-auto rounded-full bg-brand-deep px-3.5 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                className="order-last inline-flex min-h-11 w-full shrink-0 items-center justify-center @[20rem]:order-none @[20rem]:w-auto rounded-full bg-brand-deep px-3.5 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 Pick a name
               </button>
@@ -902,7 +902,7 @@ export function GameCanvas({
               <button
                 type="button"
                 onClick={() => void shareFullSet()}
-                className="order-last inline-flex min-h-11 w-full shrink-0 items-center justify-center @[20rem]:order-none @[20rem]:w-auto gap-1.5 rounded-full bg-lime px-3.5 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+                className="order-last inline-flex min-h-11 w-full shrink-0 items-center justify-center @[20rem]:order-none @[20rem]:w-auto gap-1.5 rounded-full bg-lime px-3.5 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
               >
                 <Share2 aria-hidden="true" className="size-3.5" />
                 Share
@@ -982,7 +982,7 @@ export function GameCanvas({
           <button
             type="button"
             onClick={cancelNavigation}
-            className="pointer-events-auto absolute bottom-6 left-1/2 z-30 hidden min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime lg:inline-flex"
+            className="pointer-events-auto absolute bottom-6 left-1/2 z-30 hidden min-h-11 -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-brand-deep/90 px-3 py-2 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase shadow-lift backdrop-blur-md transition hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime lg:inline-flex"
           >
             <X aria-hidden="true" className="size-3.5" />
             Stop walking

@@ -10,6 +10,13 @@ import {
 import { VENUES, VENUES_BY_ID } from "@/data/venues";
 import { VENUE_MAP, getVenueAccent } from "@/data/venue-map";
 import type { GameEventBridge } from "@/game/event-bridge";
+import {
+  ensureShellTextures,
+  SHELL_DISPLAY_SIZE,
+  SHELL_GLOW_DISPLAY_SIZE,
+  SHELL_GLOW_TEXTURE,
+  SHELL_TEXTURE,
+} from "@/game/shell-texture";
 import type { NavigationTarget } from "@/game/events";
 import {
   canOccupyPosition,
@@ -186,6 +193,7 @@ export class BeachScene extends Phaser.Scene {
 
     this.createMapBackground();
     this.createVenueMarkers();
+    ensureShellTextures(this);
     this.createShells();
     this.createShellCompass();
     this.createPlayer();
@@ -324,23 +332,9 @@ export class BeachScene extends Phaser.Scene {
     const disc = this.add
       .circle(0, 0, 15, 0xedf2b5, 0.95)
       .setStrokeStyle(2.5, 0x2c2d6f, 0.95);
-    const spiral = this.add.graphics();
-
-    spiral.lineStyle(1.75, 0x2c2d6f, 1);
-    spiral.beginPath();
-    for (let index = 0; index <= 24; index += 1) {
-      const angle = (index / 24) * Math.PI * 3.2;
-      const radius = 0.8 + (index / 24) * 5.5;
-      const px = Math.cos(angle) * radius;
-      const py = Math.sin(angle) * radius;
-
-      if (index === 0) {
-        spiral.moveTo(px, py);
-      } else {
-        spiral.lineTo(px, py);
-      }
-    }
-    spiral.strokePath();
+    const spiral = this.add
+      .image(0, 0, SHELL_TEXTURE)
+      .setDisplaySize(20, 20);
 
     // Points along +x; rotated toward the shell each frame.
     const pointer = this.add
@@ -734,47 +728,42 @@ export class BeachScene extends Phaser.Scene {
       const container = this.add
         .container(shell.x, shell.y)
         .setDepth(shell.y + 6);
-      const shadow = this.add.ellipse(0, 13, 26, 9, 0x17343e, 0.22);
-      // Lime with a dark outline reads against sand, paving, and grass, and
-      // does not look like the white umbrella and proximity icons.
+      const shadow = this.add.ellipse(0, 12, 24, 8, 0x17343e, 0.25);
+      // A lime sonar ring and soft halo make shells findable from a distance
+      // without turning them into button-like discs.
       const pulse = this.add
         .circle(0, 0, 16)
         .setStrokeStyle(3, 0xedf2b5, 0.9);
       const glow = this.add
-        .circle(0, 0, 17, 0xedf2b5, 0.95)
-        .setStrokeStyle(2.5, 0x2c2d6f, 0.9);
+        .image(0, 0, SHELL_GLOW_TEXTURE)
+        .setDisplaySize(SHELL_GLOW_DISPLAY_SIZE, SHELL_GLOW_DISPLAY_SIZE);
       const bob = this.add.container(0, 0);
-      const shellGraphics = this.add.graphics();
+      const sprite = this.add
+        .image(0, 0, SHELL_TEXTURE)
+        .setDisplaySize(SHELL_DISPLAY_SIZE, SHELL_DISPLAY_SIZE);
+      // A small glint that sweeps across the shell now and then.
+      const glint = this.add
+        .star(-4, -6, 4, 1.2, 5, 0xffffff, 1)
+        .setAlpha(0);
 
-      // A spiral shell, matching the Shell icon in the HUD. A fan-shaped
-      // scallop read as a beach umbrella on this map.
-      shellGraphics.fillStyle(0xffffff, 1);
-      shellGraphics.lineStyle(1.75, 0x2c2d6f, 1);
-      shellGraphics.fillCircle(0, 0, 11);
-      shellGraphics.strokeCircle(0, 0, 11);
-      shellGraphics.lineStyle(2, 0x2c2d6f, 1);
-      shellGraphics.beginPath();
-
-      for (let index = 0; index <= 40; index += 1) {
-        const angle = (index / 40) * Math.PI * 3.6;
-        const radius = 1 + (index / 40) * 7.5;
-        const px = Math.cos(angle) * radius;
-        const py = Math.sin(angle) * radius;
-
-        if (index === 0) {
-          shellGraphics.moveTo(px, py);
-        } else {
-          shellGraphics.lineTo(px, py);
-        }
-      }
-
-      shellGraphics.strokePath();
-
-      bob.add([glow, shellGraphics]);
-      container.add([shadow, pulse, bob]);
+      bob.add([sprite, glint]);
+      container.add([shadow, glow, pulse, bob]);
       this.shellMarkers.set(shell.id, container);
 
       if (!this.reducedMotion) {
+        this.tweens.add({
+          targets: glint,
+          alpha: { from: 0, to: 1 },
+          scale: { from: 0.4, to: 1.2 },
+          angle: { from: 0, to: 90 },
+          duration: 420,
+          yoyo: true,
+          repeat: -1,
+          repeatDelay: 2200 + Math.random() * 1600,
+          delay: Math.random() * 2400,
+          ease: "Sine.easeInOut",
+        });
+
         const delay = Math.random() * 900;
 
         // A sonar ring makes shells findable at a glance from a distance.
@@ -956,6 +945,13 @@ export class BeachScene extends Phaser.Scene {
     this.tweens.killTweensOf(marker);
     for (const child of marker.list) {
       this.tweens.killTweensOf(child);
+
+      // The bobbing group holds the sprite and its glint.
+      if (child instanceof Phaser.GameObjects.Container) {
+        for (const grandchild of child.list) {
+          this.tweens.killTweensOf(grandchild);
+        }
+      }
     }
     marker.destroy(true);
   }

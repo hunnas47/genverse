@@ -87,7 +87,7 @@ function FooterColumn({
 
 export function SiteFooter() {
   return (
-    <footer className="bg-brand-deep text-white">
+    <footer className="grain-surface bg-brand-deep text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1.05fr_1.6fr] lg:gap-16">
           <div>
@@ -141,7 +141,7 @@ export function SiteFooter() {
               className="text-white/60"
               linkClassName="text-lime hover:text-white"
             />
-            <p className="shrink-0 font-display text-[10px] font-semibold tracking-[0.18em] text-white/55 uppercase">
+            <p className="shrink-0 font-display text-[11px] font-semibold tracking-[0.18em] text-white/55 uppercase">
               Genverse Explorer
             </p>
           </div>

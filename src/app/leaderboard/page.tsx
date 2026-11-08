@@ -36,7 +36,7 @@ export default function LeaderboardPage() {
 
         <div className="relative mx-auto max-w-5xl px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-20">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-lime/25 bg-lime/10 px-3 py-1.5 font-display text-[9px] font-bold tracking-[0.18em] text-lime uppercase">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-lime/25 bg-lime/10 px-3 py-1.5 font-display text-[11px] font-bold tracking-[0.18em] text-lime uppercase">
               <Sparkles aria-hidden="true" className="size-3" />
               Beach Quest
             </span>

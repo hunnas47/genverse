@@ -199,7 +199,7 @@ export function SessionBrowser({
                 {today?.id === day.id && (
                   <span
                     className={cn(
-                      "rounded-full px-1.5 py-0.5 text-[9px]",
+                      "rounded-full px-1.5 py-0.5 text-[11px]",
                       dayId === day.id
                         ? "bg-brand-deep text-lime"
                         : "bg-lime text-brand-deep",
@@ -277,7 +277,7 @@ export function SessionBrowser({
           <button
             type="button"
             onClick={clearFilters}
-            className="min-h-10 rounded-full px-2 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase underline decoration-lime/30 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            className="min-h-10 rounded-full px-2 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase underline decoration-lime/30 underline-offset-4 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             Clear filters
           </button>

@@ -136,13 +136,13 @@ export const VenuePanel = memo(function VenuePanel({
             />
             <div className="quest-stamp-slam relative grid size-36 place-items-center rounded-full border-[3px] border-brand-deep bg-lime text-brand-deep shadow-[0_20px_60px_rgba(28,29,58,0.45)] sm:size-44">
               <span className="absolute inset-2 rounded-full border border-brand-deep/35" />
-              <span className="font-display text-[10px] font-bold tracking-[0.3em] uppercase">
+              <span className="font-display text-[11px] font-bold tracking-[0.3em] uppercase">
                 GEN M
               </span>
               <span className="mt-0.5 font-display text-2xl font-black tracking-[0.06em] uppercase sm:text-3xl">
                 Stamped
               </span>
-              <span className="mt-0.5 inline-flex items-center gap-1 font-display text-[10px] font-bold tracking-[0.14em] uppercase">
+              <span className="mt-0.5 inline-flex items-center gap-1 font-display text-[11px] font-bold tracking-[0.14em] uppercase">
                 <Check aria-hidden="true" className="size-3" />
                 {venue.mapLabel} · +25 pts
               </span>
@@ -160,10 +160,10 @@ export const VenuePanel = memo(function VenuePanel({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-brand-deep px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-lime uppercase">
+              <span className="rounded-full bg-brand-deep px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] text-lime uppercase">
                 {VENUE_CATEGORY_LABELS[venue.category]}
               </span>
-              <span className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
+              <span className="font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
                 {venue.mapLabel}
               </span>
             </div>
@@ -195,7 +195,7 @@ export const VenuePanel = memo(function VenuePanel({
 
         {venue.registrationUrl && (
           <div className="mt-4 rounded-2xl border border-brand-deep/15 bg-brand-deep p-4 text-cream shadow-soft">
-            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-lime uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.2em] text-lime uppercase">
               GEN M registration
             </p>
             <p className="mt-1.5 text-sm leading-relaxed text-cream/80">
@@ -206,7 +206,7 @@ export const VenuePanel = memo(function VenuePanel({
               href={venue.registrationUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-lime px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-lime px-4 py-2 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
             >
               Register at genm.in
               <ArrowUpRight aria-hidden="true" className="size-3.5" />
@@ -216,7 +216,7 @@ export const VenuePanel = memo(function VenuePanel({
 
         {venue.externalLink && (
           <div className="mt-4 rounded-2xl border border-brand/20 bg-brand/5 p-4">
-            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/70 uppercase">
               {venue.externalLink.title}
             </p>
             {venue.externalLink.description && (
@@ -228,7 +228,7 @@ export const VenuePanel = memo(function VenuePanel({
               href={venue.externalLink.url}
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
               {venue.externalLink.label}
               <ArrowUpRight aria-hidden="true" className="size-3.5" />
@@ -245,7 +245,7 @@ export const VenuePanel = memo(function VenuePanel({
           >
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
+                <p className="flex items-center gap-1.5 font-display text-[11px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
                   <Sparkles aria-hidden="true" className="size-3" />
                   Beach Quest
                 </p>
@@ -267,7 +267,7 @@ export const VenuePanel = memo(function VenuePanel({
                 <button
                   type="button"
                   onClick={onWalkHere}
-                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-brand-deep/25 bg-cream px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:border-brand-deep/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95"
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-brand-deep/25 bg-cream px-3.5 py-2 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:border-brand-deep/45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95"
                 >
                   <Footprints aria-hidden="true" className="size-3.5" />
                   Walk here
@@ -279,7 +279,7 @@ export const VenuePanel = memo(function VenuePanel({
                   disabled={checkedIn || checkInPending}
                   aria-busy={checkInPending || undefined}
                   className={cn(
-                    "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[10px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
+                    "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 font-display text-[11px] font-bold tracking-[0.08em] uppercase transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep active:scale-95 disabled:cursor-default disabled:active:scale-100",
                     checkedIn
                       ? "bg-brand-deep text-lime"
                       : checkInPending
@@ -313,7 +313,7 @@ export const VenuePanel = memo(function VenuePanel({
             href={`/sessions?session=${liveSession.session.id}`}
             className="mt-4 block rounded-2xl border border-brand-deep/15 bg-brand-deep p-3.5 text-cream transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
-            <span className="flex items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.18em] text-lime uppercase">
+            <span className="flex items-center gap-1.5 font-display text-[11px] font-bold tracking-[0.18em] text-lime uppercase">
               {liveSession.kind === "now" && (
                 <span
                   aria-hidden="true"
@@ -336,7 +336,7 @@ export const VenuePanel = memo(function VenuePanel({
 
         {activeDays && (
           <div className="mt-4">
-            <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
               Programme days
             </p>
             <p className="mt-1 text-sm text-brand-deep/80">{activeDays}</p>
@@ -352,10 +352,10 @@ export const VenuePanel = memo(function VenuePanel({
         {sessions.length > 0 && (
           <div className="mt-5 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.04] p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="font-display text-[10px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.22em] text-brand-deep/70 uppercase">
                 Sessions
               </p>
-              <span className="font-display text-[10px] font-bold text-brand-deep/70">
+              <span className="font-display text-[11px] font-bold text-brand-deep/70">
                 {sessions.length}
               </span>
             </div>
@@ -363,7 +363,7 @@ export const VenuePanel = memo(function VenuePanel({
             <div className="mt-2 space-y-4">
               {sessionGroups.map((group) => (
                 <div key={group.day.id}>
-                  <p className="font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
+                  <p className="font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
                     {group.day.displayDate}
                   </p>
                   <ul className="mt-1 space-y-1">
@@ -381,7 +381,7 @@ export const VenuePanel = memo(function VenuePanel({
                             href={`/sessions?session=${session.id}`}
                             className="group -mx-2 block rounded-xl px-2 py-1.5 transition hover:bg-brand-deep/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
                           >
-                            <span className="block font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
+                            <span className="block font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep/70 uppercase">
                               {formatSessionTimeRange(session)}
                             </span>
                             <span
@@ -408,7 +408,7 @@ export const VenuePanel = memo(function VenuePanel({
 
               <Link
                 href={`/sessions?venue=${venue.id}`}
-                className="inline-flex min-h-11 items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                className="inline-flex min-h-11 items-center gap-1.5 font-display text-[11px] font-bold tracking-[0.1em] text-brand-deep uppercase underline decoration-brand-deep/20 underline-offset-4 transition hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 View full programme
                 <ArrowUpRight aria-hidden="true" className="size-3.5" />
@@ -422,7 +422,7 @@ export const VenuePanel = memo(function VenuePanel({
             href={venue.officialUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand-deep px-4 py-2 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
           >
             Official venue page
             <ArrowUpRight aria-hidden="true" className="size-3.5" />

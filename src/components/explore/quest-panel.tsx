@@ -118,7 +118,7 @@ export function QuestPanel({
           <div className="min-w-0">
             <span
               id={titleId}
-              className="inline-flex items-center gap-1.5 rounded-full bg-brand-deep px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.14em] text-lime uppercase"
+              className="inline-flex items-center gap-1.5 rounded-full bg-brand-deep px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.14em] text-lime uppercase"
             >
               <Sparkles aria-hidden="true" className="size-3" />
               Explorer profile
@@ -156,13 +156,13 @@ export function QuestPanel({
             </span>
 
             <div className="min-w-0 flex-1">
-              <p className="font-display text-[10px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.18em] text-brand-deep/70 uppercase">
                 Explorer
               </p>
               <p className="truncate text-sm font-semibold">
                 {snapshot.profile?.displayName || "Guest explorer"}
               </p>
-              <p className="mt-0.5 text-[10px] text-brand-deep/70">
+              <p className="mt-0.5 text-[11px] text-brand-deep/70">
                 {snapshot.joined
                   ? `${snapshot.todayPoints} points today · ${found}/${total} shells`
                   : "Join to save your shells and stamps"}
@@ -173,7 +173,7 @@ export function QuestPanel({
           <button
             type="button"
             onClick={onJoinRequest}
-            className="min-h-10 w-full shrink-0 rounded-full border border-brand-deep/15 bg-white px-3 py-1.5 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:border-brand-deep/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep sm:w-auto"
+            className="min-h-10 w-full shrink-0 rounded-full border border-brand-deep/15 bg-white px-3 py-1.5 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep uppercase transition hover:border-brand-deep/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep sm:w-auto"
           >
             {snapshot.joined ? "Change name" : "Set name"}
           </button>
@@ -184,7 +184,7 @@ export function QuestPanel({
             <p className="font-display text-lg font-bold text-brand-deep">
               {snapshot.todayPoints}
             </p>
-            <p className="text-[10px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
               Today
             </p>
           </div>
@@ -193,7 +193,7 @@ export function QuestPanel({
               <Trophy aria-hidden="true" className="size-4 text-brand" />
               {snapshot.totalPoints}
             </p>
-            <p className="text-[10px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
               Total
             </p>
           </div>
@@ -202,7 +202,7 @@ export function QuestPanel({
               <Flame aria-hidden="true" className="size-4 text-coral" />
               {snapshot.streak}
             </p>
-            <p className="text-[10px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-brand-deep/70 uppercase">
               Streak
             </p>
           </div>
@@ -210,7 +210,7 @@ export function QuestPanel({
 
         <section className="mt-5">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
               Today&apos;s shells
             </p>
             <span className="font-display text-[11px] font-bold text-brand-deep/75">
@@ -235,7 +235,7 @@ export function QuestPanel({
                   {isFound ? (
                     <Check aria-hidden="true" className="size-4" />
                   ) : (
-                    <span className="font-display text-[10px] font-bold">
+                    <span className="font-display text-[11px] font-bold">
                       {index + 1}
                     </span>
                   )}
@@ -249,7 +249,7 @@ export function QuestPanel({
               <button
                 type="button"
                 onClick={() => void shareFullSet()}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-4 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-4 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               >
                 <Share2 aria-hidden="true" className="size-3.5" />
                 Share your full set
@@ -268,7 +268,7 @@ export function QuestPanel({
 
         <section className="mt-5">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/75 uppercase">
               Venue passport
             </p>
             <span className="font-display text-[11px] font-bold text-brand-deep/75">
@@ -302,7 +302,7 @@ export function QuestPanel({
                     <span className="block truncate text-xs font-medium">
                       {venue.name}
                     </span>
-                    <span className="block text-[10px] text-brand-deep/70 uppercase">
+                    <span className="block text-[11px] text-brand-deep/70 uppercase">
                       {venue.mapLabel} · {VENUE_CATEGORY_LABELS[venue.category]}
                     </span>
                   </span>
@@ -318,7 +318,7 @@ export function QuestPanel({
         </section>
 
         <details className="group mt-5 rounded-2xl border border-brand-deep/10 bg-brand-deep/[0.035]">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-2.5 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-2.5 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase [&::-webkit-details-marker]:hidden">
             <span className="flex items-center gap-2">
               <CircleHelp aria-hidden="true" className="size-4 text-brand" />
               Controls &amp; help
@@ -344,7 +344,7 @@ export function QuestPanel({
             <button
               type="button"
               onClick={onReplayTour}
-              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-brand-deep/15 bg-white px-3 py-2 font-display text-[10px] font-bold tracking-[0.1em] text-brand-deep uppercase transition hover:border-brand-deep/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-brand-deep/15 bg-white px-3 py-2 font-display text-[11px] font-bold tracking-[0.1em] text-brand-deep uppercase transition hover:border-brand-deep/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
               <RotateCcw aria-hidden="true" className="size-3.5" />
               Replay walkthrough

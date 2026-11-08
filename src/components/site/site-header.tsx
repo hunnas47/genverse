@@ -29,7 +29,7 @@ export function SiteHeader() {
   return (
     <header className="relative z-20 border-b border-white/10">
       <div className="border-b border-white/10 bg-brand-deep/55">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 font-display text-[10px] font-semibold tracking-[0.18em] text-white/55 uppercase sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 font-display text-[11px] font-semibold tracking-[0.18em] text-white/55 uppercase sm:px-6 lg:px-8">
           <p>13–15 November 2026 · Kozhikode Beach</p>
           <p className="hidden sm:block">
             Official programme · Verified {formatProgrammeVerifiedDate()}

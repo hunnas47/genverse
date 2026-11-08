@@ -22,7 +22,7 @@ export default function ErrorPage({
   return (
     <main className="grid min-h-dvh place-items-center bg-brand-deep px-5 py-16 text-white">
       <div className="w-full max-w-md rounded-[2rem] border border-white/15 bg-white/5 p-7 text-center shadow-lift">
-        <p className="font-display text-[10px] font-bold tracking-[0.24em] text-lime uppercase">
+        <p className="font-display text-[11px] font-bold tracking-[0.24em] text-lime uppercase">
           GEN M Explorer
         </p>
         <h1 className="mt-3 text-balance text-2xl leading-tight font-medium sm:text-3xl">
@@ -37,19 +37,19 @@ export default function ErrorPage({
           <button
             type="button"
             onClick={reset}
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-lime px-5 py-2.5 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-lime px-5 py-2.5 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase transition hover:bg-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             Try again
           </button>
           <Link
             href="/sessions"
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 px-5 py-2.5 font-display text-[10px] font-bold tracking-[0.12em] text-white uppercase transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 px-5 py-2.5 font-display text-[11px] font-bold tracking-[0.12em] text-white uppercase transition hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             Programme
           </Link>
           <Link
             href="/"
-            className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 font-display text-[10px] font-bold tracking-[0.12em] text-white/75 uppercase transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+            className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2.5 font-display text-[11px] font-bold tracking-[0.12em] text-white/75 uppercase transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
           >
             Home
           </Link>

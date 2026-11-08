@@ -19,7 +19,7 @@ function ExploreLoading() {
           aria-hidden="true"
           className="size-8 rounded-full border-2 border-lime/25 border-t-lime motion-safe:animate-spin"
         />
-        <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+        <p className="font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
           Preparing the beach
         </p>
       </div>

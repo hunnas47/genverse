@@ -85,7 +85,7 @@ function VenuePreviewCard({ venue }: { venue: Venue }) {
   return (
     <Link
       href={`/explore?venue=${venue.id}`}
-      className="group flex flex-col overflow-hidden rounded-3xl border border-white/15 bg-brand-deep/40 text-white shadow-soft transition hover:border-lime/45 hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime motion-safe:hover:-translate-y-1"
+      className="group flex flex-col overflow-hidden rounded-3xl border border-white/15 bg-brand-deep/40 text-white shadow-soft transition hover:border-lime/45 hover:shadow-lift focus-visible:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime motion-safe:hover:-translate-y-1"
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <div
@@ -100,12 +100,12 @@ function VenuePreviewCard({ venue }: { venue: Venue }) {
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(44,45,111,0.55)_0%,rgba(44,45,111,0)_32%,rgba(44,45,111,0.08)_55%,rgba(44,45,111,0.86)_100%)]" />
         <span
-          className="absolute top-3 left-3 rounded-full border border-white/40 px-2.5 py-1 font-display text-[10px] font-bold tracking-[0.12em] text-brand-deep uppercase shadow-lg"
+          className="absolute top-3 left-3 rounded-full border border-white/40 px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase shadow-lg"
           style={{ backgroundColor: getVenueAccent(venue).css }}
         >
           {venue.mapLabel}
         </span>
-        <span className="absolute right-3 bottom-3 rounded-full bg-lime px-2.5 py-1 font-display text-[9px] font-bold tracking-[0.12em] text-brand-deep uppercase">
+        <span className="absolute right-3 bottom-3 rounded-full bg-lime px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep uppercase">
           Stage
         </span>
       </div>
@@ -117,13 +117,13 @@ function VenuePreviewCard({ venue }: { venue: Venue }) {
         </p>
 
         {activeDays && (
-          <p className="mt-4 inline-flex items-center gap-1.5 font-display text-[10px] font-semibold tracking-[0.08em] text-lime uppercase">
+          <p className="mt-4 inline-flex items-center gap-1.5 font-display text-[11px] font-semibold tracking-[0.08em] text-lime uppercase">
             <CalendarDays aria-hidden="true" className="size-3.5" />
             {activeDays}
           </p>
         )}
 
-        <span className="mt-auto inline-flex items-center gap-1.5 pt-5 font-display text-[10px] font-bold tracking-[0.14em] text-lime uppercase">
+        <span className="mt-auto inline-flex items-center gap-1.5 pt-5 font-display text-[11px] font-bold tracking-[0.14em] text-lime uppercase">
           View on map
           <ArrowUpRight
             aria-hidden="true"
@@ -166,7 +166,7 @@ export default function Home() {
 
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pt-8 pb-14 sm:gap-12 sm:px-6 sm:pt-12 sm:pb-20 lg:grid-cols-[1fr_1fr] lg:items-center lg:px-8 lg:pt-16 lg:pb-28">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-display text-[10px] font-semibold tracking-[0.18em] text-lime uppercase">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 font-display text-[11px] font-semibold tracking-[0.18em] text-lime uppercase">
               <MapPin aria-hidden="true" className="size-3.5" />
               13–15 November 2026 · Kozhikode Beach
             </p>
@@ -225,7 +225,7 @@ export default function Home() {
                     <span
                       key={venue.id}
                       className={cn(
-                        "absolute -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/30 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[10px] font-bold tracking-[0.12em] text-cream uppercase shadow-lg backdrop-blur",
+                        "absolute -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/30 bg-brand-deep/85 px-2.5 py-1.5 font-display text-[11px] font-bold tracking-[0.12em] text-cream uppercase shadow-lg backdrop-blur",
                         index < 2 ? "inline-flex" : "hidden sm:inline-flex",
                       )}
                       style={mapPointStyle(venue.mapPosition)}
@@ -239,7 +239,7 @@ export default function Home() {
                   ))}
 
                   <span
-                    className="absolute inline-flex -translate-x-1/2 -translate-y-[230%] items-center gap-2 rounded-full bg-lime px-2.5 py-1.5 font-display text-[9px] font-bold tracking-[0.1em] text-brand-deep uppercase shadow-lg"
+                    className="absolute inline-flex -translate-x-1/2 -translate-y-[230%] items-center gap-2 rounded-full bg-lime px-2.5 py-1.5 font-display text-[11px] font-bold tracking-[0.1em] text-brand-deep uppercase shadow-lg"
                     style={mapPointStyle(VENUE_MAP.spawn)}
                   >
                     <span className="relative flex size-2">
@@ -254,10 +254,10 @@ export default function Home() {
 
                 <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/15 bg-brand-deep/85 p-4 backdrop-blur-md sm:inset-x-4 sm:bottom-4">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-display text-[9px] font-bold tracking-[0.2em] text-lime uppercase">
+                    <p className="font-display text-[11px] font-bold tracking-[0.2em] text-lime uppercase">
                       Beach explorer
                     </p>
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-semibold text-white/90">
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/90">
                       Live map
                     </span>
                   </div>
@@ -266,7 +266,7 @@ export default function Home() {
                   </p>
                   <Link
                     href="/explore"
-                    className="mt-3 inline-flex items-center gap-1.5 font-display text-[10px] font-bold tracking-[0.14em] text-lime uppercase transition hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
+                    className="mt-3 inline-flex items-center gap-1.5 font-display text-[11px] font-bold tracking-[0.14em] text-lime uppercase transition hover:text-cream focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime"
                   >
                     Open full map
                     <ArrowRight aria-hidden="true" className="size-3.5" />
@@ -276,7 +276,7 @@ export default function Home() {
             </div>
 
             <div className="absolute -top-6 -left-4 hidden w-44 rounded-2xl border border-lime/30 bg-lime p-4 text-brand-deep shadow-lift sm:block">
-              <p className="font-display text-[9px] font-bold tracking-[0.18em] uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.18em] uppercase">
                 Official programme
               </p>
               <p className="mt-1 font-display text-3xl font-black leading-none">
@@ -290,7 +290,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="border-y border-white/10 bg-brand">
+      <div className="grain-surface border-y border-white/10 bg-brand">
         <div className="flex overflow-hidden py-3">
           <div className="marquee-track flex w-max">
             {[0, 1].map((copy) => (
@@ -316,12 +316,12 @@ export default function Home() {
 
       <section
         id="programme"
-        className="relative overflow-hidden bg-brand-deep py-12 text-white sm:py-16 lg:py-24"
+        className="grain-surface overflow-hidden bg-brand-deep py-12 text-white sm:py-16 lg:py-24"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
                 Official schedule
               </p>
               <h2 className="mt-3 text-[clamp(2.8rem,6vw,4.8rem)] leading-none font-medium text-cream">
@@ -366,12 +366,12 @@ export default function Home() {
 
       <section
         id="venues"
-        className="relative overflow-hidden bg-brand py-12 text-white sm:py-16 lg:py-24"
+        className="grain-surface overflow-hidden bg-brand py-12 text-white sm:py-16 lg:py-24"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="font-display text-[10px] font-bold tracking-[0.22em] text-lime uppercase">
+              <p className="font-display text-[11px] font-bold tracking-[0.22em] text-lime uppercase">
                 Conference stages
               </p>
               <h2 className="mt-3 text-[clamp(2.8rem,6vw,4.8rem)] leading-none font-medium text-cream">
@@ -395,7 +395,7 @@ export default function Home() {
           </div>
 
           <div id="expo" className="mt-8 scroll-mt-6">
-            <p className="font-display text-[10px] font-bold tracking-[0.18em] text-lime uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.18em] text-lime uppercase">
               Also on the map
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -410,7 +410,7 @@ export default function Home() {
                   </span>
                   {venue.name}
                   {venue.category === "expo" && (
-                    <span className="rounded-full bg-lime/15 px-2 py-0.5 font-display text-[9px] font-bold tracking-[0.1em] text-lime uppercase">
+                    <span className="rounded-full bg-lime/15 px-2 py-0.5 font-display text-[11px] font-bold tracking-[0.1em] text-lime uppercase">
                       Expo
                     </span>
                   )}

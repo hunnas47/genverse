@@ -108,7 +108,7 @@ function Podium({ rows }: { rows: LeaderboardRow[] }) {
 
   return (
     <div className="mt-5 rounded-[1.5rem] border border-brand-deep/10 bg-brand-deep/5 p-3">
-      <p className="text-center font-display text-[9px] font-bold tracking-[0.2em] text-brand-deep/55 uppercase">
+      <p className="text-center font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/55 uppercase">
         Top explorers
       </p>
       <ol className="mt-3 grid grid-cols-3 items-end gap-2">
@@ -138,11 +138,11 @@ function Podium({ rows }: { rows: LeaderboardRow[] }) {
                   <span className="mt-1.5 w-full truncate text-center text-[11px] font-semibold">
                     {row.displayName}
                   </span>
-                  <span className="text-[10px] font-bold text-brand-deep/55">
+                  <span className="text-[11px] font-bold text-brand-deep/55">
                     {row.points} pts
                   </span>
                   <span
-                    className={`mt-2 flex w-full items-start justify-center rounded-t-xl border ${ring} ${block} ${height} pt-2 font-display text-[9px] font-bold tracking-[0.12em] text-brand-deep/70 uppercase`}
+                    className={`mt-2 flex w-full items-start justify-center rounded-t-xl border ${ring} ${block} ${height} pt-2 font-display text-[11px] font-bold tracking-[0.12em] text-brand-deep/70 uppercase`}
                   >
                     {label}
                   </span>
@@ -324,11 +324,11 @@ export function LeaderboardBoard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <p className="font-display text-[10px] font-bold tracking-[0.2em] text-brand-deep/60 uppercase">
+            <p className="font-display text-[11px] font-bold tracking-[0.2em] text-brand-deep/60 uppercase">
               {scope === "daily" ? "Today's explorers" : "All-time explorers"}
             </p>
             {scope === "daily" && now !== null && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-brand-deep px-2 py-0.5 font-display text-[9px] font-bold tracking-[0.08em] text-lime uppercase">
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-deep px-2 py-0.5 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase">
                 <Timer aria-hidden="true" className="size-3" />
                 Resets in {formatTimeToReset(now)}
               </span>
@@ -358,8 +358,8 @@ export function LeaderboardBoard({
               onClick={() => selectScope(value)}
               className={
                 scope === value
-                  ? "min-h-11 rounded-full bg-brand-deep px-3.5 py-1.5 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase shadow-soft"
-                  : "min-h-11 rounded-full px-3.5 py-1.5 font-display text-[10px] font-bold tracking-[0.08em] text-brand-deep/60 uppercase transition hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+                  ? "min-h-11 rounded-full bg-brand-deep px-3.5 py-1.5 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase shadow-soft"
+                  : "min-h-11 rounded-full px-3.5 py-1.5 font-display text-[11px] font-bold tracking-[0.08em] text-brand-deep/60 uppercase transition hover:text-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
               }
             >
               {label}
@@ -368,7 +368,7 @@ export function LeaderboardBoard({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-brand-deep/10 pt-3 text-[10px] text-brand-deep/60">
+      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-brand-deep/10 pt-3 text-[11px] text-brand-deep/60">
         {/* Presence only means something when the board is live. */}
         {!error && presence > 0 && (
           <span className="inline-flex items-center gap-1.5">
@@ -382,7 +382,7 @@ export function LeaderboardBoard({
         <button
           type="button"
           onClick={refresh}
-          className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-full px-2.5 py-1 font-display text-[9px] font-bold tracking-[0.08em] uppercase transition hover:bg-brand-deep/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+          className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-full px-2.5 py-1 font-display text-[11px] font-bold tracking-[0.08em] uppercase transition hover:bg-brand-deep/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
         >
           <RefreshCw aria-hidden="true" className="size-3.5" />
           Refresh
@@ -418,7 +418,7 @@ export function LeaderboardBoard({
             <button
               type="button"
               onClick={refresh}
-              className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-4 py-2 font-display text-[9px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-4 py-2 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
               <RefreshCw aria-hidden="true" className="size-3.5" />
               Try again
@@ -438,7 +438,7 @@ export function LeaderboardBoard({
             </p>
             <Link
               href="/explore"
-              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-5 py-2.5 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-brand-deep px-5 py-2.5 font-display text-[11px] font-bold tracking-[0.08em] text-lime uppercase transition hover:bg-brand-deep/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-deep"
             >
               Open the beach map
               <ArrowUpRight aria-hidden="true" className="size-3.5" />
@@ -495,12 +495,12 @@ export function LeaderboardBoard({
                         {row.displayName}
                       </span>
                       {row.isYou && (
-                        <span className="rounded-full bg-brand-deep px-1.5 py-0.5 font-display text-[8px] font-bold tracking-[0.08em] text-lime uppercase">
+                        <span className="rounded-full bg-brand-deep px-1.5 py-0.5 font-display text-[10px] font-bold tracking-[0.08em] text-lime uppercase">
                           You
                         </span>
                       )}
                     </span>
-                    <span className="mt-0.5 block text-[10px] text-brand-deep/60">
+                    <span className="mt-0.5 block text-[11px] text-brand-deep/60">
                       {row.shells} {row.shells === 1 ? "shell" : "shells"} ·{" "}
                       {row.checkins}{" "}
                       {row.checkins === 1 ? "venue stamp" : "venue stamps"}
@@ -516,7 +516,7 @@ export function LeaderboardBoard({
                     >
                       {row.points}
                     </span>
-                    <span className="block text-[9px] font-semibold tracking-[0.08em] text-brand-deep/50 uppercase">
+                    <span className="block text-[11px] font-semibold tracking-[0.08em] text-brand-deep/50 uppercase">
                       points
                     </span>
                   </span>
@@ -527,7 +527,7 @@ export function LeaderboardBoard({
         )}
       </div>
 
-      <p className="mt-5 border-t border-brand-deep/10 pt-3 text-[10px] leading-relaxed text-brand-deep/55">
+      <p className="mt-5 border-t border-brand-deep/10 pt-3 text-[11px] leading-relaxed text-brand-deep/55">
         Each shell and each venue stamp counts once a day: {SHELL_POINTS} points
         per shell, {VENUE_CHECKIN_POINTS} per stamp, and +{SHELL_SET_BONUS} for
         the full set. The board updates every 30 seconds. Fair play: unusual
