@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+import { Credit } from "@/components/site/credit";
 import { VENUES } from "@/data/venues";
 import { VENUE_CATEGORY_LABELS } from "@/lib/venues";
 import { cn } from "@/lib/utils";
@@ -204,6 +205,10 @@ export function VenueDirectory({
             );
           })}
 
+          <Credit
+            className="mt-2 border-t border-brand-deep/10 pt-3 text-center text-brand-deep/60"
+            linkClassName="text-brand-deep hover:text-brand"
+          />
         </div>
       </section>
     </div>

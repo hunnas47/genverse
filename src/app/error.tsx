@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect } from "react";
 
+import { Credit } from "@/components/site/credit";
+
 /**
  * Route-level error boundary. The game canvas has its own retry flow; this
  * catches failures in the surrounding pages so visitors always have a way
@@ -54,6 +56,11 @@ export default function ErrorPage({
             Home
           </Link>
         </div>
+
+        <Credit
+          className="mt-6 border-t border-white/10 pt-4 text-white/60"
+          linkClassName="text-lime hover:text-white"
+        />
       </div>
     </main>
   );

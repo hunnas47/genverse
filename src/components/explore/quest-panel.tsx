@@ -17,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { Credit } from "@/components/site/credit";
 import { VENUES } from "@/data/venues";
 import { AVATAR_ASSETS } from "@/game/avatar";
 import { VENUE_CATEGORY_LABELS } from "@/lib/venues";
@@ -383,6 +384,11 @@ export function QuestPanel({
                 {sync.error}
               </p>
             )}
+
+          <Credit
+            className="mt-3 border-t border-brand-deep/10 pt-3 text-center text-brand-deep/60"
+            linkClassName="text-brand-deep hover:text-brand"
+          />
         </div>
       </div>
     </aside>

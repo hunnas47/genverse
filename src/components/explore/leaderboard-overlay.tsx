@@ -4,6 +4,7 @@ import { Sparkles, Trophy, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { LeaderboardBoard } from "@/components/leaderboard/leaderboard-board";
+import { Credit } from "@/components/site/credit";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -150,6 +151,11 @@ export function LeaderboardOverlay({
           </div>
 
           <LeaderboardBoard showPodium />
+
+          <Credit
+            className="mt-5 text-center text-white/60"
+            linkClassName="text-lime hover:text-white"
+          />
         </div>
       </section>
     </div>
